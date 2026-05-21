@@ -135,34 +135,60 @@ function resetGachaScreen(){
   $('gacha-stage1').style.display = 'flex';
   $('gacha-stage2').style.display = 'none';
   const pack = $('opening-pack');
-  pack.classList.remove('opening', 'burst');
+  // 기존 + 새 상태 클래스 모두 리셋
+  pack.classList.remove('opening', 'burst', 'is-pressed', 'is-charging', 'is-opening');
   $('card-reveal').className = 'card-reveal';
   $('reveal-info').classList.remove('show');
   $('gacha-instruction').textContent = '탭해서 팩을 열어!';
+  // gacha-stage2의 rarity 클래스 리셋
+  const stage2 = $('gacha-stage2');
+  stage2.className = stage2.className.replace(/\brarity-\d+\b/g, '').trim();
 }
 
 function openPack(){
   const pack = $('opening-pack');
-  pack.classList.add('opening');
   $('gacha-instruction').textContent = '두근두근...';
 
-  setTimeout(() => pack.classList.add('burst'), 1800);
+  // ===== 디자이너 핸드오프 단계 =====
+  // 1) Tap/Press (220ms) → 2) Charge (600ms) → 3) Open/Tear (720ms) → 4) Reveal
+  pack.classList.add('is-pressed');
+
   setTimeout(() => {
+    pack.classList.remove('is-pressed');
+    pack.classList.add('is-charging');
+  }, 220);
+
+  setTimeout(() => {
+    pack.classList.remove('is-charging');
+    pack.classList.add('is-opening');
+  }, 820);
+
+  setTimeout(() => {
+    // 결과 계산은 기존 그대로
     const result = pullCard();
     showReveal(result);
-  }, 2400);
+  }, 1500);
 }
 
 function showReveal({ card, isNew }){
   $('gacha-stage1').style.display = 'none';
   $('gacha-stage2').style.display = 'flex';
 
+  // gacha-stage2에 rarity-N 클래스 → CSS의 burst 글로우 효과 발동
+  const stage2 = $('gacha-stage2');
+  stage2.className = stage2.className.replace(/\brarity-\d+\b/g, '').trim();
+  stage2.classList.add('rarity-' + card.stars);
+
   const reveal = $('card-reveal');
+  reveal.className = 'card-reveal'; // 리셋
   $('reveal-content').innerHTML = makeArt(card);
   $('reveal-stars').textContent = '★'.repeat(card.stars);
-  reveal.classList.add('s' + card.stars);
 
-  setTimeout(() => reveal.classList.add('show'), 100);
+  // 카드 등장 + rarity glow (디자이너 핸드오프: is-revealing + rarity-N)
+  setTimeout(() => {
+    reveal.classList.add('show', 'is-revealing', 'rarity-' + card.stars, 's' + card.stars);
+  }, 100);
+
   setTimeout(() => {
     $('reveal-info').innerHTML = `${card.name} (${card.stars}★)` +
       (isNew ? '<span class="new-tag">NEW!</span>'
