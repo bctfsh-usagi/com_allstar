@@ -29,10 +29,33 @@ function makeConceptArt(card){
   </div>`;
 }
 
-// 이미지 로드 실패 → 컨셉카드로 교체
+// 이미지 로드 실패 → 확장자 자동 변경 시도 → 모두 실패시 컨셉카드로
 function handleImageError(imgEl, cardId){
   const card = getCard(cardId);
   if(!card) return;
+  if(!card.image) { fallbackToConcept(imgEl, card); return; }
+
+  // 원본 확장자 (이미 실패함)
+  const m = card.image.match(/\.([^.]+)$/);
+  const originalExt = m ? '.' + m[1] : '';
+  const base = card.image.replace(/\.[^.]+$/, '');
+
+  // 다른 확장자 변형들 자동 시도
+  // (대소문자 구분 + 흔한 확장자들)
+  const variants = ['.jpg', '.JPG', '.png', '.PNG', '.jpeg', '.JPEG', '.webp', '.WEBP']
+    .filter(e => e !== originalExt);
+
+  const tryIdx = parseInt(imgEl.dataset.tryIdx || '0', 10);
+  if(tryIdx >= variants.length) {
+    fallbackToConcept(imgEl, card);
+    return;
+  }
+
+  imgEl.dataset.tryIdx = String(tryIdx + 1);
+  imgEl.src = base + variants[tryIdx];
+}
+
+function fallbackToConcept(imgEl, card){
   const wrap = imgEl.closest('.card-art');
   if(wrap) wrap.outerHTML = makeConceptArt(card);
 }
