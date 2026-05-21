@@ -4279,3 +4279,246 @@ body {
 #collection-screen .back-btn {
   top: max(96px, calc(env(safe-area-inset-top) + 78px)) !important;
 }
+/* ===================================================================
+   AD COLLECTION SAFARI SAFE RESET v2.2
+   목적:
+   - 컬렉션 카드 겹침 완전 차단
+   - iPhone Safari에서 aspect-ratio 계산 꼬임 방지
+   - 2열 고정형 컬렉션
+   - 닫기 버튼 타이틀 충돌 완화
+   =================================================================== */
+
+/* 컬렉션 화면 기본 */
+#collection-screen {
+  padding: 0 18px max(28px, env(safe-area-inset-bottom)) !important;
+  overflow: hidden !important;
+}
+
+/* 헤더 영역을 조금 더 안정적으로 */
+#collection-screen .collection-header {
+  position: relative !important;
+  z-index: 5 !important;
+  padding-top: max(72px, calc(env(safe-area-inset-top) + 54px)) !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: 10px !important;
+  text-align: center !important;
+}
+
+/* 타이틀이 좌우로 잘리지 않게 */
+#collection-screen .collection-header .title {
+  font-size: clamp(28px, 7.6vw, 38px) !important;
+  line-height: 1 !important;
+  letter-spacing: .5px !important;
+  white-space: nowrap !important;
+  transform: none !important;
+}
+
+/* 닫기 버튼은 타이틀 아래/좌측에 안정 배치 */
+#collection-screen .back-btn {
+  position: absolute !important;
+  top: max(128px, calc(env(safe-area-inset-top) + 108px)) !important;
+  left: 22px !important;
+  width: 40px !important;
+  height: 40px !important;
+  z-index: 30 !important;
+}
+
+/* 통계/필터가 너무 커지지 않게 */
+#collection-screen .col-stats {
+  margin-top: 10px !important;
+  gap: 8px !important;
+}
+
+#collection-screen .col-filter {
+  padding: 8px 0 14px !important;
+  gap: 8px !important;
+}
+
+/* 핵심: 2열 그리드 + 명시적 카드 높이 */
+#collection-screen .collection-grid {
+  position: relative !important;
+  z-index: 2 !important;
+
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 18px 16px !important;
+  align-items: start !important;
+
+  padding: 4px 0 36px !important;
+  margin: 0 !important;
+
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+
+  scrollbar-width: none !important;
+}
+
+#collection-screen .collection-grid::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* 카드 슬롯: aspect-ratio 대신 height 명시 */
+#collection-screen .col-card {
+  position: relative !important;
+  display: block !important;
+
+  width: 100% !important;
+  height: clamp(220px, 64vw, 270px) !important;
+  min-height: clamp(220px, 64vw, 270px) !important;
+  max-height: clamp(220px, 64vw, 270px) !important;
+
+  aspect-ratio: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  transform: none !important;
+
+  contain: none !important;
+  box-sizing: border-box !important;
+}
+
+/* 이전 pseudo 장식 충돌 전부 제거 */
+#collection-screen .col-card::before,
+#collection-screen .col-card::after,
+#collection-screen .col-card.empty::before,
+#collection-screen .col-card.empty::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* 빈 카드 슬롯 */
+#collection-screen .col-card.empty {
+  background:
+    radial-gradient(ellipse at 50% 34%, rgba(255, 220, 115, .10), transparent 42%),
+    linear-gradient(180deg, rgba(20, 39, 90, .78), rgba(7, 17, 48, .92)) !important;
+  border: 1.5px solid rgba(255, 220, 115, .24) !important;
+  box-shadow:
+    0 14px 28px rgba(0,0,0,.30),
+    inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+
+/* 잠금 아이콘은 중앙 하나만 */
+#collection-screen .col-card.empty .lock {
+  position: absolute !important;
+  left: 50% !important;
+  top: 48% !important;
+  transform: translate(-50%, -50%) !important;
+
+  display: block !important;
+  width: 40px !important;
+  height: 40px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: transparent !important;
+
+  border-radius: 50% !important;
+  background:
+    linear-gradient(180deg, #fff1b8 0%, #f5c85d 45%, #b17320 100%) !important;
+  box-shadow:
+    0 10px 20px rgba(0,0,0,.34),
+    0 0 22px rgba(255, 220, 115, .20),
+    inset 0 1px 0 rgba(255,255,255,.55) !important;
+  z-index: 5 !important;
+}
+
+/* 잠금 고리 */
+#collection-screen .col-card.empty .lock::before {
+  content: '' !important;
+  display: block !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: -17px !important;
+  width: 24px !important;
+  height: 22px !important;
+  transform: translateX(-50%) !important;
+  border: 4px solid rgba(230, 234, 226, .96) !important;
+  border-bottom: 0 !important;
+  border-radius: 16px 16px 0 0 !important;
+  background: transparent !important;
+}
+
+/* 별 힌트 */
+#collection-screen .col-card.empty .hint {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 16px !important;
+  top: auto !important;
+
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+
+  text-align: center !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  letter-spacing: 1px !important;
+  color: rgba(255, 220, 115, .34) !important;
+  font-weight: 900 !important;
+  z-index: 4 !important;
+}
+
+/* 보유 카드도 같은 높이 */
+#collection-screen .col-card:not(.empty) {
+  border-radius: 18px !important;
+  border-width: 2px !important;
+  background: rgba(4, 10, 27, .85) !important;
+}
+
+/* 카드 이미지/아트는 슬롯 안에만 */
+#collection-screen .col-card .card-art,
+#collection-screen .col-card .concept-art,
+#collection-screen .col-card .card-art img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+
+#collection-screen .col-card .card-art img {
+  object-fit: cover !important;
+}
+
+/* 배지 안정화 */
+#collection-screen .col-card .count-badge,
+#collection-screen .col-card .attr-badge,
+#collection-screen .col-card .stars-mini {
+  position: absolute !important;
+  z-index: 10 !important;
+}
+
+/* 아주 좁은 아이폰 */
+@media (max-width: 390px) {
+  #collection-screen {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  #collection-screen .collection-header .title {
+    font-size: clamp(26px, 7.2vw, 34px) !important;
+  }
+
+  #collection-screen .collection-grid {
+    gap: 16px 14px !important;
+  }
+
+  #collection-screen .col-card {
+    height: clamp(205px, 62vw, 250px) !important;
+    min-height: clamp(205px, 62vw, 250px) !important;
+    max-height: clamp(205px, 62vw, 250px) !important;
+    border-radius: 16px !important;
+  }
+
+  #collection-screen .back-btn {
+    top: max(124px, calc(env(safe-area-inset-top) + 104px)) !important;
+    left: 20px !important;
+  }
+}
