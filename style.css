@@ -3223,3 +3223,22 @@ body {
   background-size: 103% 103% !important;
   clip-path: inset(3px round 16px) !important;
 }
+/* ===================================================================
+   AD GACHA TEXT POLISH
+   팩 오픈 화면 하단 안내문 톤 정리
+   =================================================================== */
+
+#gacha-screen .gacha-instruction {
+  margin-top: 14px !important;
+  font-family: var(--ad-font-display) !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  font-weight: 800 !important;
+  letter-spacing: 3px !important;
+  color: #ffe3a0 !important;
+  text-transform: uppercase !important;
+  text-shadow:
+    0 2px 8px rgba(0,0,0,.35),
+    0 0 12px rgba(255, 218, 120, .28) !important;
+  opacity: .95 !important;
+}
