@@ -2049,3 +2049,251 @@ body::before {
 button {
   touch-action: manipulation;
 }
+
+
+/* ===================================================================
+   AD DIRECTOR POLISH v2.1
+   목적: 시안과의 싱크 업 강화 (배경 / 타이틀 타이포 / 받침대 중심)
+   기능/HTML 구조 변경 없음
+   =================================================================== */
+
+/* 허브 배경을 더 밝고 깊이감 있게 */
+#hub-screen {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,.06) 14%, transparent 24%),
+    linear-gradient(180deg, rgba(7,16,39,.02) 0%, rgba(7,16,39,.18) 52%, rgba(2,7,20,.64) 100%),
+    url('assets/ui/bg_premium_stage_9x16.png') center top/cover no-repeat,
+    radial-gradient(ellipse at 50% 18%, #d7e7ff 0%, #7da1d7 24%, #395d97 48%, #152f62 70%, #071127 88%, #030817 100%);
+}
+
+#hub-screen::before {
+  background:
+    radial-gradient(ellipse at 50% 15%, rgba(255,255,255,.60) 0%, rgba(255,255,255,.20) 28%, transparent 55%),
+    radial-gradient(ellipse at 50% 38%, rgba(255,233,170,.28) 0%, rgba(255,233,170,.08) 22%, transparent 50%),
+    radial-gradient(ellipse at 10% 28%, rgba(113, 170, 255, .20) 0%, transparent 34%),
+    radial-gradient(ellipse at 90% 32%, rgba(255, 178, 94, .18) 0%, transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,.08), transparent 22%, rgba(0,0,0,.18) 100%);
+  mix-blend-mode: screen;
+  opacity: 1;
+}
+
+#hub-screen::after {
+  top: 60%;
+  width: min(84vw, 420px);
+  height: 66px;
+  background:
+    radial-gradient(ellipse at center, rgba(255, 245, 212, .92) 0%, rgba(255, 191, 72, .42) 34%, rgba(80, 137, 255, .18) 58%, transparent 78%);
+  filter: blur(7px);
+  opacity: .92;
+}
+
+/* 정보바 광택 강화 */
+#hub-screen .top-bar {
+  background:
+    linear-gradient(180deg, rgba(26, 47, 102, .78), rgba(5, 13, 32, .88)),
+    radial-gradient(ellipse at 14% 0%, rgba(255,255,255,.20), transparent 40%);
+  border-color: rgba(255, 226, 137, .72);
+  box-shadow:
+    0 22px 50px rgba(0, 0, 0, .32),
+    inset 0 1px 0 rgba(255, 255, 255, .20),
+    inset 0 -1px 0 rgba(255, 182, 52, .14),
+    0 0 0 1px rgba(255,255,255,.04);
+}
+
+/* 타이틀을 처음 시안처럼 더 고급스럽게 */
+#hub-screen .hub-body {
+  gap: clamp(12px, 2vh, 24px);
+}
+
+#hub-screen .hub-title {
+  margin: 0 0 4px;
+  font-size: clamp(48px, 12.2vw, 72px);
+  line-height: .88;
+  letter-spacing: clamp(2px, 1vw, 5px);
+  background: linear-gradient(180deg, #fffef9 0%, #fff3cb 20%, #ffd677 50%, #f0a32a 74%, #8a4200 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter:
+    drop-shadow(0 2px 0 rgba(101, 54, 5, .24))
+    drop-shadow(0 5px 0 rgba(110, 58, 0, .16))
+    drop-shadow(0 12px 16px rgba(255, 186, 62, .22));
+}
+
+#hub-screen .hub-title::before {
+  content: '✦  ·  ★  ·  ✦';
+  margin: 0 0 12px;
+  font-size: 15px;
+  letter-spacing: 11px;
+  color: var(--ad-gold-450);
+  -webkit-text-fill-color: var(--ad-gold-450);
+  text-shadow: 0 0 18px rgba(255, 220, 115, .72);
+}
+
+#hub-screen .hub-title::after {
+  margin-top: 16px;
+  font-size: 14px;
+  letter-spacing: 8px;
+  color: #5f7199;
+  -webkit-text-fill-color: #5f7199;
+}
+
+/* 받침대(페데스탈) 존재감 강화 */
+#hub-screen .gacha-pack-wrap {
+  width: min(80vw, 380px);
+  padding: 10px 0 116px;
+  margin-top: 2px;
+  perspective: 1200px;
+}
+
+#hub-screen .gacha-pack-wrap::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  width: min(96vw, 470px);
+  height: 158px;
+  transform: translateX(-50%);
+  border-radius: 50% / 34% 34% 58% 58%;
+  background:
+    radial-gradient(ellipse at 50% 17%, rgba(255,255,255,.98) 0%, rgba(255,250,236,.92) 10%, rgba(255,234,169,.90) 18%, rgba(214,171,103,.82) 21%, rgba(22, 42, 88, .96) 22%, rgba(15, 31, 69, .98) 52%, rgba(6, 15, 39, 1) 86%, rgba(2, 8, 23, 1) 100%);
+  box-shadow:
+    0 26px 42px rgba(0,0,0,.36),
+    inset 0 1px 0 rgba(255,255,255,.56),
+    inset 0 -18px 28px rgba(0,0,0,.20),
+    0 0 28px rgba(255, 203, 106, .18);
+  z-index: 0;
+}
+
+#hub-screen .gacha-pack-wrap::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 113px;
+  width: min(84vw, 390px);
+  height: 26px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at center, rgba(255,255,255,.98) 0%, rgba(255,239,191,.88) 18%, rgba(255,194,73,.62) 32%, rgba(255,194,73,.16) 55%, transparent 72%);
+  box-shadow:
+    0 0 18px rgba(255, 220, 115, .45),
+    0 0 40px rgba(85, 142, 255, .18);
+  filter: blur(.5px);
+  z-index: 1;
+}
+
+#hub-screen .gacha-pack {
+  width: min(58vw, 270px);
+  box-shadow:
+    0 24px 56px rgba(0,0,0,.46),
+    0 0 38px rgba(255, 198, 78, .30),
+    0 0 110px rgba(255, 117, 20, .18);
+  z-index: 2;
+}
+
+#hub-screen .cooldown-display {
+  position: relative;
+  z-index: 2;
+  margin-top: -34px;
+}
+
+#hub-screen .cooldown-status {
+  font-size: clamp(16px, 4.7vw, 22px);
+  letter-spacing: clamp(4px, 1.3vw, 8px);
+  color: var(--ad-cyan-400);
+}
+
+#hub-screen .cooldown-status.ready {
+  color: var(--ad-cyan-400);
+  text-shadow: 0 0 16px rgba(87,245,255,.78), 0 0 28px rgba(87,245,255,.26);
+}
+
+#hub-screen .cooldown-time {
+  font-size: clamp(58px, 15vw, 88px);
+  line-height: .88;
+  letter-spacing: 2px;
+  color: #fdfdfd;
+  text-shadow:
+    0 4px 18px rgba(0,0,0,.52),
+    0 0 20px rgba(255,255,255,.26);
+}
+
+/* 가챠 화면도 시안 톤에 맞춰 살짝 보정 */
+#gacha-screen {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.10), transparent 14%),
+    linear-gradient(180deg, rgba(7,16,39,.10), rgba(2,7,20,.76)),
+    url('assets/ui/bg_premium_stage_9x16.png') center top/cover no-repeat,
+    radial-gradient(ellipse at 50% 18%, #b7d0ff 0%, #5f81bb 24%, #1f3b75 52%, #071127 86%, #030817 100%);
+}
+
+#gacha-screen .hub-title {
+  font-size: clamp(34px, 9vw, 50px);
+  line-height: .92;
+  background: linear-gradient(180deg, #fffef9 0%, #fff3cb 20%, #ffd677 50%, #f0a32a 74%, #8a4200 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+#gacha-screen .hub-title::after {
+  color: #5f7199;
+  -webkit-text-fill-color: #5f7199;
+}
+
+#gacha-screen #gacha-stage1 {
+  position: relative;
+  padding-bottom: 54px;
+}
+
+#gacha-screen #gacha-stage1::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 40px;
+  width: min(88vw, 390px);
+  height: 34px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at center, rgba(255,255,255,.95) 0%, rgba(255,239,191,.84) 20%, rgba(255,194,73,.48) 38%, transparent 72%);
+  box-shadow: 0 0 18px rgba(255, 220, 115, .40);
+  z-index: 0;
+}
+
+#gacha-screen .opening-pack {
+  width: min(60vw, 274px);
+  z-index: 1;
+}
+
+#gacha-screen .gacha-instruction {
+  position: relative;
+  z-index: 1;
+  font-family: var(--ad-font-ui);
+  font-size: 16px;
+  letter-spacing: 6px;
+  color: var(--ad-cyan-400);
+  text-shadow: 0 0 16px rgba(87,245,255,.58);
+}
+
+@media (max-height: 740px) {
+  #hub-screen .hub-title {
+    font-size: clamp(38px, 10vw, 52px);
+  }
+  #hub-screen .gacha-pack-wrap {
+    padding-bottom: 94px;
+  }
+  #hub-screen .gacha-pack-wrap::before {
+    height: 134px;
+  }
+  #hub-screen .gacha-pack-wrap::after {
+    bottom: 91px;
+  }
+  #hub-screen .cooldown-display {
+    margin-top: -28px;
+  }
+  #hub-screen .cooldown-time {
+    font-size: clamp(46px, 12vw, 64px);
+  }
+}
