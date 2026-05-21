@@ -3220,13 +3220,6 @@ body {
 
 #hub-screen .gacha-pack,
 #gacha-screen .opening-pack {
-  overflow: hidden !important;
-  border-radius: 16px !important;
-
-  /* 이미지를 아주 살짝 확대해서 흰 가장자리 숨김 */
-  background-size: 102.4% 102.4% !important;
-  background-position: center center !important;
-
-  /* 가장자리 미세 크롭 */
-  clip-path: inset(2px round 16px) !important;
+  background-size: 103% 103% !important;
+  clip-path: inset(3px round 16px) !important;
 }
