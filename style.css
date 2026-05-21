@@ -594,3 +594,493 @@ body::before {
   width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
   cursor: pointer; font-size: 16px; z-index: 10;
 }
+
+/* ===================================================================
+   PREMIUM SKIN v1 (디자이너 핸드오프)
+   - hub-screen, gacha-screen 우선 적용
+   - 기존 스타일을 오버라이드
+   =================================================================== */
+
+:root {
+  --ui-navy-950: #061027;
+  --ui-navy-900: #0b1735;
+  --ui-navy-800: #12265a;
+  --ui-blue-500: #4c8dff;
+  --ui-cyan-400: #54f4ff;
+  --ui-gold-500: #ffd36a;
+  --ui-gold-600: #f5a623;
+  --ui-orange-500: #ff6a00;
+  --ui-purple-400: #c87cff;
+  --ui-white: #ffffff;
+  --radius-pill: 999px;
+  --shadow-soft: 0 20px 60px rgba(0, 0, 0, .35);
+  --shadow-gold: 0 0 32px rgba(255, 190, 78, .38);
+  --font-display: 'Cinzel', 'Noto Sans KR', serif;
+}
+
+/* === 프리미엄 배경 (spotlight + bokeh) === */
+body {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(76, 141, 255, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, var(--ui-navy-800) 0%, var(--ui-navy-900) 40%, var(--ui-navy-950) 100%);
+}
+body::before {
+  background-image:
+    radial-gradient(2px 2px at 15% 30%, rgba(255, 215, 130, 0.8), transparent),
+    radial-gradient(3px 3px at 80% 20%, rgba(84, 244, 255, 0.5), transparent),
+    radial-gradient(2px 2px at 60% 70%, rgba(255, 215, 130, 0.6), transparent),
+    radial-gradient(4px 4px at 20% 60%, rgba(255, 230, 130, 0.4), transparent),
+    radial-gradient(2px 2px at 90% 80%, rgba(84, 244, 255, 0.6), transparent),
+    radial-gradient(3px 3px at 70% 40%, rgba(255, 215, 130, 0.5), transparent);
+  background-size: 400px 400px;
+  opacity: 0.55;
+}
+
+/* === 상단 status bar: glass pill === */
+.top-bar {
+  background: linear-gradient(180deg, rgba(11, 23, 53, 0.85), rgba(6, 16, 39, 0.85));
+  border: 1px solid rgba(255, 215, 106, 0.35);
+  border-radius: var(--radius-pill);
+  padding: 14px 24px;
+  margin: 12px;
+  margin-top: max(12px, calc(env(safe-area-inset-top) + 6px));
+  box-shadow: var(--shadow-soft), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.stat-block .lbl {
+  font-size: 10px; letter-spacing: 3px;
+  color: #8ba0c8; font-weight: 600;
+  text-transform: uppercase;
+}
+.stat-block .val {
+  font-family: var(--font-display);
+  font-weight: 800; font-size: 22px;
+  color: #ffe49a;
+}
+#hub-collection::before {
+  content: '🃏';
+  font-size: 18px; margin-right: 6px;
+  vertical-align: -2px;
+}
+.stat-block .val.streak {
+  color: var(--ui-orange-500);
+  text-shadow: 0 0 12px rgba(255, 106, 0, 0.6);
+}
+
+/* === 허브 본문 === */
+.hub-body {
+  gap: 22px;
+  padding: 12px 24px;
+}
+
+/* === ALLSTAR PACK 타이틀 === */
+.hub-title {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  background: linear-gradient(180deg, #fff5d0 0%, var(--ui-gold-500) 50%, var(--ui-gold-600) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 12px rgba(255, 175, 60, 0.5));
+  text-align: center;
+  position: relative;
+  line-height: 1.1;
+  margin-top: 8px;
+}
+.hub-title::before {
+  content: '✦  ★  ✦';
+  display: block;
+  font-size: 12px;
+  color: var(--ui-gold-500);
+  margin-bottom: 8px;
+  letter-spacing: 14px;
+  -webkit-text-fill-color: var(--ui-gold-500);
+  filter: none;
+}
+.hub-title::after {
+  content: 'COM2US ALLSTAR';
+  display: block;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 11px;
+  letter-spacing: 8px;
+  color: #8ba8d6;
+  margin-top: 8px;
+  font-weight: 500;
+  -webkit-text-fill-color: #8ba8d6;
+  background: none;
+  filter: none;
+}
+
+/* === 가챠 팩: 히어로 === */
+.gacha-pack-wrap {
+  position: relative;
+  padding: 24px 20px 40px;
+}
+.gacha-pack-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  width: 240px; height: 28px;
+  background:
+    radial-gradient(ellipse at center, rgba(255, 215, 106, 0.7) 0%, transparent 65%);
+  filter: blur(3px);
+  z-index: 0;
+}
+
+.gacha-pack {
+  width: 220px; height: 300px;
+  background:
+    linear-gradient(135deg, rgba(255, 230, 130, 0.35) 0%, transparent 45%),
+    linear-gradient(180deg, #ff9a3d 0%, #ff6a00 50%, #c93a00 100%);
+  border-radius: 14px;
+  border: 3px solid var(--ui-gold-500);
+  box-shadow:
+    var(--shadow-soft),
+    var(--shadow-gold),
+    inset 0 2px 8px rgba(255, 255, 255, 0.4),
+    inset 0 -10px 20px rgba(106, 30, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+.gacha-pack .pack-logo {
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 5px;
+  color: #fff5d0;
+  margin-top: 28px;
+  text-shadow: 0 1px 2px rgba(106, 30, 0, 0.6);
+}
+.gacha-pack .pack-icon {
+  font-family: serif;
+  font-size: 110px;
+  color: var(--ui-gold-500);
+  text-shadow:
+    0 4px 0 #5a2e00,
+    0 0 30px rgba(255, 215, 106, 0.8),
+    0 0 60px rgba(255, 175, 60, 0.5);
+  margin: 8px 0;
+  transform: rotate(0);
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.4));
+}
+.gacha-pack .pack-tag {
+  background: rgba(11, 23, 53, 0.92);
+  color: #ffe49a;
+  padding: 8px 26px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid rgba(255, 215, 106, 0.6);
+  font-family: var(--font-display);
+  letter-spacing: 4px;
+  font-size: 13px;
+  font-weight: 800;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* === CTA 텍스트 === */
+.cooldown-display { gap: 2px; }
+.cooldown-status {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  letter-spacing: 7px;
+  color: var(--ui-cyan-400);
+  text-shadow: 0 0 14px rgba(84, 244, 255, 0.6);
+  font-weight: 700;
+}
+.cooldown-status.ready {
+  color: var(--ui-cyan-400);
+  animation: ready-blink 1.2s infinite;
+}
+.cooldown-time {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 900;
+  color: var(--ui-white);
+  letter-spacing: 4px;
+  text-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.6),
+    0 0 20px rgba(255, 255, 255, 0.25);
+  margin-top: 2px;
+}
+
+/* === 확률 chip === */
+.probability-info {
+  gap: 10px;
+  margin-top: 4px;
+}
+.probability-info span {
+  background: linear-gradient(180deg, rgba(11, 23, 53, 0.9), rgba(6, 16, 39, 0.9));
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  border: 1.5px solid;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.probability-info .p5 {
+  border-color: var(--ui-gold-500);
+  color: var(--ui-gold-500);
+  box-shadow: 0 0 14px rgba(255, 215, 106, 0.4);
+}
+.probability-info .p4 {
+  border-color: var(--ui-purple-400);
+  color: var(--ui-purple-400);
+  box-shadow: 0 0 12px rgba(200, 124, 255, 0.3);
+}
+.probability-info .p3 {
+  border-color: var(--ui-blue-500);
+  color: #94b8ff;
+}
+
+/* === 쿨타임 스킵 === */
+.btn-secondary {
+  background: rgba(11, 23, 53, 0.55);
+  border: 1.5px solid rgba(255, 215, 106, 0.5);
+  color: #ffe49a;
+  padding: 10px 24px;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 13px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* === 하단 nav: 2분할 CTA === */
+.bottom-nav {
+  padding: 0 14px;
+  padding-bottom: max(20px, calc(env(safe-area-inset-bottom) + 14px));
+  gap: 0;
+  background: linear-gradient(0deg, rgba(6, 16, 39, 0.95) 0%, rgba(6, 16, 39, 0.6) 70%, transparent);
+}
+.nav-btn {
+  flex: 1;
+  padding: 18px 8px;
+  border: 2px solid;
+  font-family: var(--font-display);
+  font-size: 17px;
+  letter-spacing: 4px;
+  font-weight: 800;
+  flex-direction: row;
+  gap: 10px;
+  position: relative;
+  border-radius: 0;
+}
+.nav-btn .icon { font-size: 22px; }
+.nav-btn:first-child {
+  background: linear-gradient(180deg, #1e3a8a 0%, var(--ui-navy-900) 100%);
+  border-color: var(--ui-blue-500);
+  color: #cce0ff;
+  border-radius: 16px 0 0 16px;
+  border-right: 1px solid var(--ui-gold-500);
+}
+.nav-btn.battle {
+  background: linear-gradient(180deg, var(--ui-orange-500) 0%, #b83400 100%);
+  border-color: var(--ui-gold-500);
+  color: var(--ui-white);
+  border-radius: 0 16px 16px 0;
+  border-left: 1px solid var(--ui-gold-500);
+  box-shadow: var(--shadow-soft), 0 0 24px rgba(255, 106, 0, 0.5);
+}
+.bottom-nav::after {
+  content: '◆';
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--ui-gold-500);
+  font-size: 14px;
+  z-index: 3;
+  text-shadow: 0 0 10px rgba(255, 215, 106, 0.9);
+  background: var(--ui-navy-900);
+  width: 26px; height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--ui-gold-500);
+}
+
+#hub-screen {
+  padding-bottom: calc(110px + env(safe-area-inset-bottom));
+}
+
+/* ===================================================================
+   가챠 화면: 팩 오프닝 연출
+   =================================================================== */
+#gacha-screen {
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(76, 141, 255, 0.35) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, var(--ui-navy-800) 0%, var(--ui-navy-900) 50%, var(--ui-navy-950) 100%);
+}
+#gacha-screen .hub-title { font-size: 30px; }
+#gacha-screen .hub-title::before { content: '✦  PACK  ✦'; }
+#gacha-screen .hub-title::after { content: 'CARD OPENING'; }
+
+.opening-pack {
+  width: 220px; height: 300px;
+  background:
+    linear-gradient(135deg, rgba(255, 230, 130, 0.35) 0%, transparent 45%),
+    linear-gradient(180deg, #ff9a3d 0%, #ff6a00 50%, #c93a00 100%);
+  border-radius: 14px;
+  border: 3px solid var(--ui-gold-500);
+  box-shadow:
+    var(--shadow-soft),
+    var(--shadow-gold),
+    inset 0 2px 8px rgba(255, 255, 255, 0.4),
+    inset 0 -10px 20px rgba(106, 30, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  will-change: transform, filter;
+  cursor: pointer;
+  animation: packFloatPremium 2.8s ease-in-out infinite;
+}
+.opening-pack .pack-icon {
+  font-family: serif;
+  font-size: 130px;
+  color: var(--ui-gold-500);
+  text-shadow: 0 4px 0 #5a2e00, 0 0 30px rgba(255, 215, 106, 0.8);
+  transform: rotate(0);
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.4));
+}
+
+/* 상태 클래스 */
+.opening-pack.is-pressed {
+  animation: packPressPremium 0.22s ease-out forwards;
+}
+.opening-pack.is-charging {
+  animation: packCharge 0.6s ease-in forwards;
+}
+.opening-pack.is-opening {
+  animation: packTearPremium 0.72s cubic-bezier(0.17, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes packFloatPremium {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50% { transform: translateY(-10px) rotate(1.5deg); }
+}
+@keyframes packPressPremium {
+  0% { transform: scale(1) rotate(0); }
+  45% { transform: scale(0.96) rotate(-2deg); }
+  100% { transform: scale(1.04) rotate(1deg); }
+}
+@keyframes packCharge {
+  0% { transform: scale(1.04); filter: brightness(1) drop-shadow(0 0 10px rgba(255, 200, 80, 0.5)); }
+  100% { transform: scale(1.08); filter: brightness(1.35) drop-shadow(0 0 60px var(--ui-gold-500)); }
+}
+@keyframes packTearPremium {
+  0% { transform: scale(1.08); filter: brightness(1.35); }
+  40% { transform: scale(1.12) rotate(-2deg); filter: brightness(2) drop-shadow(0 0 80px #fff); }
+  55% { transform: scale(1.16) rotate(2deg); filter: brightness(2.8) drop-shadow(0 0 100px #fff); }
+  100% { transform: scale(0.92) translateY(22px); opacity: 0.1; filter: brightness(3) blur(4px); }
+}
+
+/* white flash */
+#gacha-screen .opening-pack.is-opening::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: white;
+  opacity: 0;
+  animation: whiteFlash 0.72s ease-in-out;
+  z-index: 10;
+}
+@keyframes whiteFlash {
+  0%, 100% { opacity: 0; }
+  40%, 55% { opacity: 0.85; }
+}
+
+/* === 카드 공개 + rarity burst === */
+.card-reveal {
+  width: 260px;
+  border-radius: 14px;
+  border: 3px solid var(--ui-gold-500);
+  box-shadow: var(--shadow-soft), var(--shadow-gold);
+}
+.card-reveal.is-revealing {
+  animation: cardRevealPremium 0.7s cubic-bezier(0.17, 0.84, 0.44, 1) both;
+}
+@keyframes cardRevealPremium {
+  0% { transform: translateY(80px) scale(0.72) rotateY(72deg); opacity: 0; filter: blur(12px) brightness(2); }
+  60% { transform: translateY(-16px) scale(1.06) rotateY(0); opacity: 1; filter: blur(0) brightness(1.25); }
+  100% { transform: translateY(0) scale(1) rotateY(0); opacity: 1; filter: none; }
+}
+
+.card-reveal.rarity-3 {
+  border-color: #5fa8ff;
+  box-shadow: 0 0 40px rgba(95, 168, 255, 0.7), 0 0 80px rgba(95, 168, 255, 0.4);
+}
+.card-reveal.rarity-4 {
+  border-color: var(--ui-purple-400);
+  box-shadow: 0 0 50px rgba(200, 124, 255, 0.8), 0 0 100px rgba(200, 124, 255, 0.5);
+}
+.card-reveal.rarity-5 {
+  border-color: var(--ui-gold-500);
+  box-shadow: 0 0 60px rgba(255, 215, 106, 1), 0 0 120px rgba(255, 175, 60, 0.7);
+}
+.card-reveal.rarity-5.is-revealing {
+  animation:
+    cardRevealPremium 0.7s cubic-bezier(0.17, 0.84, 0.44, 1) both,
+    goldPulse 1.6s ease-in-out infinite 0.7s;
+}
+@keyframes goldPulse {
+  0%, 100% { box-shadow: 0 0 60px rgba(255, 215, 106, 1), 0 0 120px rgba(255, 175, 60, 0.7); }
+  50% { box-shadow: 0 0 90px rgba(255, 215, 106, 1), 0 0 180px rgba(255, 175, 60, 1); }
+}
+
+/* === Rarity burst (배경 글로우 확장) === */
+#gacha-stage2 { position: relative; }
+#gacha-stage2.rarity-3::before,
+#gacha-stage2.rarity-4::before,
+#gacha-stage2.rarity-5::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  animation: burstExpand 1.4s ease-out forwards;
+}
+#gacha-stage2.rarity-3::before {
+  background: radial-gradient(circle, rgba(95, 168, 255, 0.4) 0%, transparent 65%);
+}
+#gacha-stage2.rarity-4::before {
+  background: radial-gradient(circle, rgba(200, 124, 255, 0.5) 0%, transparent 65%);
+}
+#gacha-stage2.rarity-5::before {
+  background: radial-gradient(circle, rgba(255, 215, 106, 0.6) 0%, transparent 65%);
+}
+@keyframes burstExpand {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+}
+
+.gacha-instruction {
+  color: var(--ui-cyan-400);
+  font-size: 13px;
+  letter-spacing: 6px;
+  text-shadow: 0 0 12px rgba(84, 244, 255, 0.5);
+}
+.reveal-info {
+  font-family: var(--font-display);
+  font-size: 22px;
+  color: var(--ui-gold-500);
+  letter-spacing: 2px;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+}
+.reveal-stars {
+  background: rgba(11, 23, 53, 0.95);
+  border: 1.5px solid var(--ui-gold-500);
+  color: var(--ui-gold-500);
+  font-family: var(--font-display);
+  letter-spacing: 2px;
+  font-size: 14px;
+}
