@@ -1084,3 +1084,968 @@ body::before {
   letter-spacing: 2px;
   font-size: 14px;
 }
+
+
+/* ===================================================================
+   AD DIRECTOR PATCH v2.0
+   목적: 기존 기능/HTML 구조 유지 + 허브/가챠 핵심 화면을 이미지 에셋 기반 프리미엄 스킨으로 재정리
+   적용 대상: #hub-screen, #gacha-screen, 공통 상단바/버튼/하단 네비
+   =================================================================== */
+
+:root {
+  --ad-navy-980: #030817;
+  --ad-navy-960: #071127;
+  --ad-navy-920: #0b1938;
+  --ad-navy-860: #132b62;
+  --ad-blue-500: #4f8eff;
+  --ad-cyan-400: #57f5ff;
+  --ad-gold-300: #fff2bf;
+  --ad-gold-450: #ffdc73;
+  --ad-gold-600: #f8ad2e;
+  --ad-orange-450: #ff8a24;
+  --ad-orange-650: #e04000;
+  --ad-purple-420: #cb7cff;
+  --ad-text-muted: #9fb4df;
+  --ad-glass: rgba(7, 17, 39, .72);
+  --ad-line: rgba(255, 220, 115, .52);
+  --ad-shadow-deep: 0 22px 70px rgba(0, 0, 0, .48);
+  --ad-shadow-gold: 0 0 34px rgba(255, 192, 70, .34), 0 0 80px rgba(255, 124, 28, .16);
+  --ad-radius-lg: 24px;
+  --ad-radius-xl: 34px;
+  --ad-font-display: 'Cinzel', 'Noto Sans KR', serif;
+  --ad-font-ui: 'Noto Sans KR', system-ui, sans-serif;
+}
+
+/* 전체 배경은 너무 어둡지 않게, 화면별 배경이 주도하도록 */
+body {
+  background: var(--ad-navy-980);
+}
+
+/* 기존 별 패턴은 살짝만 보이게 */
+body::before {
+  opacity: .22;
+  filter: blur(.1px);
+}
+
+/* 앱 프레임 */
+#app {
+  background: var(--ad-navy-980);
+  isolation: isolate;
+}
+
+/* -------------------------------------------------------------------
+   HUB: 팩 뽑기 메인
+   ------------------------------------------------------------------- */
+
+#hub-screen {
+  position: absolute;
+  padding: 0 0 calc(118px + env(safe-area-inset-bottom));
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.08), transparent 18%),
+    linear-gradient(180deg, rgba(4, 9, 22, .08), rgba(3, 8, 23, .70)),
+    url('assets/ui/bg_premium_stage_9x16.png') center/cover no-repeat,
+    radial-gradient(ellipse at 50% 34%, #375f9c 0%, #102454 52%, #030817 100%);
+  overflow: hidden;
+}
+
+#hub-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(255, 237, 173, .26) 0%, rgba(255, 237, 173, .09) 24%, transparent 50%),
+    radial-gradient(ellipse at 8% 36%, rgba(91, 149, 255, .22) 0%, transparent 32%),
+    radial-gradient(ellipse at 92% 46%, rgba(255, 126, 42, .17) 0%, transparent 30%),
+    linear-gradient(180deg, rgba(255,255,255,.12), transparent 22%, rgba(0,0,0,.18) 100%);
+  mix-blend-mode: screen;
+}
+
+#hub-screen::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 62%;
+  width: min(78vw, 360px);
+  height: 52px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at center, rgba(255, 237, 173, .88) 0%, rgba(255, 183, 58, .45) 33%, rgba(80, 137, 255, .22) 56%, transparent 74%);
+  filter: blur(5px);
+  opacity: .82;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 상단 정보바 */
+#hub-screen .top-bar,
+#select-screen .top-bar,
+#battle-screen .top-bar {
+  position: relative;
+  z-index: 4;
+  min-height: 84px;
+  margin: max(14px, calc(env(safe-area-inset-top) + 8px)) 20px 0;
+  padding: 16px 24px;
+  border-radius: 30px;
+  border: 1.5px solid rgba(255, 226, 137, .62);
+  background:
+    linear-gradient(180deg, rgba(24, 43, 91, .82), rgba(5, 13, 32, .86)),
+    radial-gradient(ellipse at 10% 0%, rgba(255, 255, 255, .18), transparent 42%);
+  box-shadow:
+    0 20px 46px rgba(0, 0, 0, .36),
+    inset 0 1px 0 rgba(255, 255, 255, .18),
+    inset 0 -1px 0 rgba(255, 182, 52, .12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+#hub-screen .top-bar::after,
+#select-screen .top-bar::after,
+#battle-screen .top-bar::after {
+  content: '';
+  position: absolute;
+  top: 18px;
+  bottom: 18px;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,.24), transparent);
+  opacity: .9;
+}
+
+.stat-block {
+  gap: 3px;
+}
+
+.stat-block .lbl {
+  font-family: var(--ad-font-ui);
+  font-size: 11px;
+  letter-spacing: 4px;
+  line-height: 1;
+  color: rgba(218, 230, 255, .76);
+  font-weight: 800;
+}
+
+.stat-block .val {
+  font-family: var(--ad-font-display);
+  font-size: 31px;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 3px 10px rgba(0,0,0,.45);
+}
+
+#hub-collection {
+  color: var(--ad-gold-450);
+}
+
+#hub-collection::before {
+  content: '▰';
+  display: inline-block;
+  margin-right: 10px;
+  font-size: 21px;
+  color: #fff;
+  transform: rotate(-7deg) translateY(-1px);
+  text-shadow:
+    -7px 4px 0 rgba(255, 220, 115, .72),
+    7px 5px 0 rgba(96, 157, 255, .72),
+    0 0 14px rgba(255,255,255,.45);
+}
+
+.stat-block .val.streak {
+  color: var(--ad-orange-450);
+  text-shadow: 0 0 18px rgba(255, 106, 0, .72), 0 3px 10px rgba(0,0,0,.4);
+}
+
+/* 허브 본문 레이아웃 */
+#hub-screen .hub-body {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  justify-content: center;
+  gap: clamp(10px, 1.8vh, 22px);
+  padding: clamp(12px, 2vh, 22px) 22px 4px;
+  transform: translateY(-4px);
+}
+
+/* ALLSTAR PACK 타이틀 */
+#hub-screen .hub-title {
+  margin: 0 0 2px;
+  font-family: var(--ad-font-display);
+  font-size: clamp(37px, 10vw, 58px);
+  line-height: .95;
+  font-weight: 900;
+  letter-spacing: clamp(2px, 1vw, 5px);
+  text-align: center;
+  background: linear-gradient(180deg, #fff9e5 5%, #ffe5a0 33%, #f4a51b 72%, #9b4b00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter:
+    drop-shadow(0 3px 0 rgba(84, 35, 0, .36))
+    drop-shadow(0 9px 12px rgba(255, 176, 42, .25));
+}
+
+#hub-screen .hub-title::before {
+  content: '✦  ·  ★  ·  ✦';
+  display: block;
+  margin: 0 0 10px;
+  font-size: 14px;
+  letter-spacing: 12px;
+  color: var(--ad-gold-450);
+  -webkit-text-fill-color: var(--ad-gold-450);
+  text-shadow: 0 0 16px rgba(255, 220, 115, .7);
+}
+
+#hub-screen .hub-title::after {
+  content: 'COM2US ALLSTAR';
+  display: block;
+  margin-top: 13px;
+  font-family: var(--ad-font-ui);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: clamp(5px, 1.8vw, 9px);
+  color: #4f6289;
+  -webkit-text-fill-color: #4f6289;
+  text-shadow: none;
+  opacity: .95;
+}
+
+/* 중앙 팩 */
+#hub-screen .gacha-pack-wrap {
+  position: relative;
+  margin-top: clamp(4px, 1vh, 10px);
+  padding: 4px 0 24px;
+  width: min(68vw, 300px);
+  display: flex;
+  justify-content: center;
+  perspective: 900px;
+}
+
+#hub-screen .gacha-pack-wrap::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 148%;
+  height: 82%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at center, rgba(255, 226, 137, .30) 0%, rgba(255, 138, 36, .18) 28%, rgba(79, 142, 255, .12) 54%, transparent 72%);
+  filter: blur(10px);
+  animation: adAuraBreath 2.6s ease-in-out infinite;
+  opacity: .95;
+  z-index: 0;
+}
+
+#hub-screen .gacha-pack-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 7px;
+  left: 50%;
+  width: 110%;
+  height: 33px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at center, rgba(255, 242, 191, .9) 0%, rgba(255, 176, 42, .52) 32%, rgba(73, 135, 255, .22) 56%, transparent 72%);
+  filter: blur(4px);
+  opacity: .9;
+  z-index: 0;
+}
+
+@keyframes adAuraBreath {
+  0%, 100% { transform: translate(-50%, -50%) scale(.96); opacity: .72; }
+  50% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+}
+
+#hub-screen .gacha-pack,
+#gacha-screen .opening-pack {
+  width: min(54vw, 250px);
+  aspect-ratio: 432 / 696;
+  height: auto;
+  min-height: unset;
+  border: 0;
+  border-radius: 18px;
+  background:
+    url('assets/ui/pack_allstar_static_rect.png') center/100% 100% no-repeat;
+  box-shadow:
+    0 24px 52px rgba(0,0,0,.44),
+    0 0 38px rgba(255, 192, 70, .32),
+    0 0 100px rgba(255, 115, 20, .20);
+  overflow: visible;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: adPackFloat 3.1s ease-in-out infinite;
+  will-change: transform, filter;
+  cursor: pointer;
+}
+
+#hub-screen .gacha-pack::before,
+#gacha-screen .opening-pack::before {
+  content: '';
+  position: absolute;
+  inset: 3.5% 3%;
+  border-radius: 14px;
+  background:
+    linear-gradient(118deg, transparent 0%, transparent 38%, rgba(255,255,255,.72) 46%, rgba(255,255,255,.18) 53%, transparent 64%, transparent 100%);
+  transform: translateX(-96%) skewX(-8deg);
+  mix-blend-mode: screen;
+  opacity: .75;
+  pointer-events: none;
+  animation: adPackShine 3.4s ease-in-out infinite;
+}
+
+#hub-screen .gacha-pack::after,
+#gacha-screen .opening-pack::after {
+  content: '';
+  position: absolute;
+  inset: -16%;
+  border-radius: 24px;
+  background:
+    radial-gradient(ellipse at center, rgba(255, 241, 185, .32) 0%, transparent 58%);
+  opacity: 0;
+  filter: blur(8px);
+  animation: adPackHalo 2.8s ease-in-out infinite;
+  z-index: -1;
+}
+
+#hub-screen .gacha-pack .pack-logo,
+#hub-screen .gacha-pack .pack-icon,
+#hub-screen .gacha-pack .pack-tag,
+#gacha-screen .opening-pack .pack-icon {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+@keyframes adPackFloat {
+  0%, 100% { transform: translateY(0) rotateZ(-1.4deg) rotateY(-4deg); }
+  50% { transform: translateY(-11px) rotateZ(1.2deg) rotateY(4deg); }
+}
+
+@keyframes adPackShine {
+  0%, 38% { transform: translateX(-110%) skewX(-8deg); opacity: 0; }
+  50% { opacity: .78; }
+  68%, 100% { transform: translateX(120%) skewX(-8deg); opacity: 0; }
+}
+
+@keyframes adPackHalo {
+  0%, 100% { transform: scale(.95); opacity: .2; }
+  50% { transform: scale(1.04); opacity: .62; }
+}
+
+#hub-screen .gacha-pack:active {
+  transform: scale(.98) translateY(4px);
+}
+
+#hub-screen .gacha-pack.disabled {
+  filter: grayscale(.18) brightness(.70);
+  opacity: .72;
+  cursor: not-allowed;
+}
+
+#hub-screen .gacha-pack.disabled::before {
+  animation: none;
+  opacity: .12;
+}
+
+/* CTA 영역 */
+#hub-screen .cooldown-display {
+  min-height: auto;
+  gap: 1px;
+  margin-top: -6px;
+}
+
+#hub-screen .cooldown-status {
+  font-family: var(--ad-font-ui);
+  font-size: clamp(14px, 4.2vw, 19px);
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: clamp(4px, 1.2vw, 7px);
+  color: var(--ad-cyan-400);
+  text-shadow:
+    0 0 14px rgba(87,245,255,.65),
+    0 0 28px rgba(61, 255, 148, .18);
+}
+
+#hub-screen .cooldown-status.ready {
+  color: #69ff97;
+  animation: adReadyGlow 1.2s ease-in-out infinite;
+}
+
+@keyframes adReadyGlow {
+  0%, 100% { opacity: .92; filter: brightness(1); }
+  50% { opacity: 1; filter: brightness(1.35); }
+}
+
+#hub-screen .cooldown-time {
+  font-family: var(--ad-font-display);
+  font-size: clamp(42px, 12vw, 64px);
+  line-height: .95;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: #fff;
+  text-shadow:
+    0 4px 16px rgba(0,0,0,.54),
+    0 0 20px rgba(255,255,255,.28);
+}
+
+/* 확률 칩 */
+#hub-screen .probability-info {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 2px;
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+#hub-screen .probability-info span {
+  min-width: 86px;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-family: var(--ad-font-ui);
+  font-size: 14px;
+  line-height: 1;
+  font-weight: 900;
+  letter-spacing: .2px;
+  background:
+    linear-gradient(180deg, rgba(16, 33, 74, .83), rgba(5, 12, 31, .88));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.11),
+    0 8px 18px rgba(0,0,0,.22);
+}
+
+#hub-screen .probability-info .p5 { color: var(--ad-gold-450); border-color: rgba(255, 220, 115, .78); }
+#hub-screen .probability-info .p4 { color: var(--ad-purple-420); border-color: rgba(203, 124, 255, .78); }
+#hub-screen .probability-info .p3 { color: #9ec6ff; border-color: rgba(91, 158, 255, .76); }
+
+/* 스킵 버튼 */
+#hub-screen .btn-secondary,
+#gacha-screen .btn-secondary,
+#result-screen .btn-secondary {
+  position: relative;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 220, 115, .66);
+  background:
+    linear-gradient(180deg, rgba(16, 33, 74, .78), rgba(5, 12, 31, .82));
+  color: #ffe8a7;
+  font-family: var(--ad-font-ui);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .2px;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    0 14px 30px rgba(0,0,0,.26);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+#hub-screen .btn-secondary:active,
+#gacha-screen .btn-secondary:active {
+  transform: translateY(2px) scale(.99);
+}
+
+/* 하단 네비 */
+#hub-screen .bottom-nav {
+  z-index: 5;
+  left: 18px;
+  right: 18px;
+  bottom: max(16px, calc(env(safe-area-inset-bottom) + 12px));
+  padding: 0;
+  height: 86px;
+  gap: 0;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(35, 59, 121, .62), rgba(5, 12, 31, .74));
+  box-shadow:
+    0 22px 52px rgba(0,0,0,.40),
+    inset 0 1px 0 rgba(255,255,255,.16);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+#hub-screen .bottom-nav::before {
+  content: '';
+  position: absolute;
+  inset: -26px -18px -22px;
+  border-radius: 38px;
+  background: linear-gradient(0deg, rgba(3, 8, 23, .90), rgba(3, 8, 23, .45), transparent);
+  z-index: -1;
+}
+
+#hub-screen .bottom-nav::after {
+  content: '✦';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 38px;
+  height: 38px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border-radius: 10px;
+  border: 1.5px solid rgba(255, 220, 115, .85);
+  background:
+    linear-gradient(180deg, #172a5c, #071127);
+  color: var(--ad-gold-450);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  text-shadow: 0 0 14px rgba(255, 220, 115, .8);
+  box-shadow: 0 0 18px rgba(255, 190, 70, .28);
+  z-index: 4;
+}
+
+#hub-screen .bottom-nav::after {
+  line-height: 38px;
+}
+
+#hub-screen .nav-btn {
+  height: 100%;
+  flex: 1;
+  padding: 0 14px;
+  border: 2px solid;
+  border-radius: 0;
+  font-family: var(--ad-font-display);
+  font-size: clamp(17px, 4.6vw, 23px);
+  letter-spacing: 2px;
+  font-weight: 900;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  text-shadow: 0 3px 9px rgba(0,0,0,.38);
+}
+
+#hub-screen .nav-btn:first-child {
+  border-radius: 28px 0 0 28px;
+  background:
+    linear-gradient(180deg, rgba(45, 84, 171, .90), rgba(10, 22, 61, .94));
+  border-color: rgba(111, 159, 255, .85);
+  color: #e4eeff;
+}
+
+#hub-screen .nav-btn.battle {
+  border-radius: 0 28px 28px 0;
+  background:
+    radial-gradient(ellipse at 80% 0%, rgba(255, 242, 191, .34), transparent 36%),
+    linear-gradient(180deg, #ff8d22 0%, #f45b00 46%, #bd2600 100%);
+  border-color: rgba(255, 226, 137, .94);
+  color: white;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.22),
+    0 0 34px rgba(255, 106, 0, .48);
+}
+
+#hub-screen .nav-btn .icon {
+  font-size: 25px;
+  line-height: 1;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,.36));
+}
+
+/* -------------------------------------------------------------------
+   GACHA: 팩 오픈 연출
+   ------------------------------------------------------------------- */
+
+#gacha-screen {
+  position: absolute;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.08), transparent 22%),
+    linear-gradient(180deg, rgba(4, 9, 22, .08), rgba(3, 8, 23, .72)),
+    url('assets/ui/bg_premium_stage_9x16.png') center/cover no-repeat,
+    radial-gradient(ellipse at 50% 38%, #456da8 0%, #132a61 50%, #030817 100%);
+}
+
+#gacha-screen::before {
+  content: '';
+  position: absolute;
+  inset: -10%;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(255, 230, 141, .38) 0%, rgba(255, 230, 141, .12) 25%, transparent 48%),
+    radial-gradient(ellipse at 50% 58%, rgba(87, 245, 255, .16) 0%, transparent 46%);
+  transition: opacity .25s ease, transform .25s ease, filter .25s ease;
+}
+
+#gacha-screen.is-pack-charging::before {
+  opacity: 1;
+  transform: scale(1.08);
+  filter: brightness(1.2);
+}
+
+#gacha-screen.is-pack-opening::before {
+  animation: adScreenOpenFlash 1s ease-out both;
+}
+
+@keyframes adScreenOpenFlash {
+  0% { opacity: .5; filter: brightness(1); }
+  35% { opacity: 1; filter: brightness(2.6); }
+  52% { opacity: 1; filter: brightness(4); }
+  100% { opacity: .55; filter: brightness(1); }
+}
+
+#gacha-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: white;
+  z-index: 20;
+  opacity: 0;
+}
+
+#gacha-screen.is-pack-opening::after {
+  animation: adWhiteFlash .84s ease-out both;
+}
+
+@keyframes adWhiteFlash {
+  0%, 25% { opacity: 0; }
+  42% { opacity: .75; }
+  55% { opacity: .18; }
+  100% { opacity: 0; }
+}
+
+#gacha-stage1,
+#gacha-stage2 {
+  position: relative;
+  z-index: 2;
+}
+
+#gacha-screen .back-btn {
+  z-index: 30;
+}
+
+#gacha-screen .hub-title {
+  font-size: clamp(34px, 9vw, 46px);
+  margin-bottom: 14px;
+}
+
+#gacha-screen .hub-title::before {
+  content: '✦  PACK  ✦';
+}
+
+#gacha-screen .hub-title::after {
+  content: 'CARD OPENING';
+}
+
+/* 오프닝 팩: 허브보다 조금 크게 */
+#gacha-screen .opening-pack {
+  width: min(60vw, 270px);
+  box-shadow:
+    0 28px 60px rgba(0,0,0,.46),
+    0 0 44px rgba(255, 192, 70, .42),
+    0 0 120px rgba(255, 115, 20, .24);
+}
+
+#gacha-screen .opening-pack.is-pressed {
+  animation: adPackPress .22s ease-out forwards;
+}
+
+#gacha-screen .opening-pack.is-charging {
+  animation: adPackCharge .60s ease-in forwards;
+}
+
+#gacha-screen .opening-pack.is-opening {
+  animation: adPackOpen .78s cubic-bezier(.2,.95,.2,1) forwards;
+}
+
+#gacha-screen .opening-pack.is-opening::before {
+  animation: adTearRay .78s ease-out both;
+}
+
+@keyframes adPackPress {
+  0% { transform: translateY(0) scale(1) rotateZ(0); }
+  45% { transform: translateY(8px) scale(.96, .985) rotateZ(-2deg); }
+  100% { transform: translateY(-4px) scale(1.035) rotateZ(1.4deg); }
+}
+
+@keyframes adPackCharge {
+  0% {
+    transform: translateY(-4px) scale(1.035) rotateZ(1deg);
+    filter: brightness(1);
+  }
+  60% {
+    transform: translateY(-10px) scale(1.075) rotateZ(-1.2deg);
+    filter: brightness(1.22) drop-shadow(0 0 38px rgba(255, 220, 115, .72));
+  }
+  100% {
+    transform: translateY(-12px) scale(1.09) rotateZ(.5deg);
+    filter: brightness(1.42) drop-shadow(0 0 70px rgba(255, 220, 115, .96));
+  }
+}
+
+@keyframes adPackOpen {
+  0% {
+    transform: translateY(-12px) scale(1.09) rotateZ(.5deg);
+    filter: brightness(1.42);
+    opacity: 1;
+  }
+  22% {
+    transform: translateY(-16px) scale(1.12) rotateZ(-2deg);
+    filter: brightness(2.1) drop-shadow(0 0 80px white);
+  }
+  40% {
+    transform: translateY(-20px) scale(1.18) rotateZ(2.5deg);
+    filter: brightness(3.1) drop-shadow(0 0 120px white);
+  }
+  72% {
+    transform: translateY(8px) scale(.96) rotateZ(-1deg);
+    filter: brightness(2.3) blur(1px);
+    opacity: .55;
+  }
+  100% {
+    transform: translateY(44px) scale(.78);
+    filter: brightness(2.8) blur(7px);
+    opacity: 0;
+  }
+}
+
+@keyframes adTearRay {
+  0% {
+    opacity: 0;
+    transform: translateX(-90%) skewX(-8deg);
+  }
+  26% {
+    opacity: .4;
+  }
+  46% {
+    opacity: 1;
+    transform: translateX(10%) skewX(-8deg) scaleX(1.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(110%) skewX(-8deg) scaleX(2.3);
+  }
+}
+
+#gacha-screen .gacha-instruction {
+  margin-top: 12px;
+  font-family: var(--ad-font-ui);
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 5px;
+  color: var(--ad-cyan-400);
+  text-shadow: 0 0 14px rgba(87,245,255,.62);
+}
+
+/* 카드 공개 스테이지 */
+#gacha-stage2 {
+  min-width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+#gacha-stage2::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  width: 280px;
+  height: 280px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 220, 115, .28) 0%, rgba(87,245,255,.15) 34%, transparent 68%);
+  filter: blur(4px);
+  opacity: .95;
+  z-index: -1;
+}
+
+#gacha-stage2.rarity-3::before {
+  background: radial-gradient(circle, rgba(98, 168, 255, .42) 0%, rgba(98, 168, 255, .18) 35%, transparent 68%);
+  animation: adBurstBlue 1.2s ease-out both;
+}
+
+#gacha-stage2.rarity-4::before {
+  background: radial-gradient(circle, rgba(203, 124, 255, .52) 0%, rgba(98, 168, 255, .18) 35%, transparent 68%);
+  animation: adBurstPurple 1.3s ease-out both;
+}
+
+#gacha-stage2.rarity-5::before {
+  background:
+    url('assets/ui/fx_gold_burst_overlay.png') center/contain no-repeat,
+    radial-gradient(circle, rgba(255, 232, 167, .82) 0%, rgba(255, 176, 42, .44) 32%, transparent 72%);
+  width: 420px;
+  height: 420px;
+  animation: adBurstGold 1.65s ease-out both;
+}
+
+@keyframes adBurstBlue {
+  0% { transform: translate(-50%, -50%) scale(.3); opacity: 0; }
+  35% { opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1.8); opacity: .35; }
+}
+
+@keyframes adBurstPurple {
+  0% { transform: translate(-50%, -50%) scale(.25) rotate(0deg); opacity: 0; }
+  35% { opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(2.05) rotate(18deg); opacity: .42; }
+}
+
+@keyframes adBurstGold {
+  0% { transform: translate(-50%, -50%) scale(.22) rotate(0deg); opacity: 0; filter: brightness(1); }
+  26% { opacity: 1; filter: brightness(1.6); }
+  100% { transform: translate(-50%, -50%) scale(1.65) rotate(24deg); opacity: .65; filter: brightness(1); }
+}
+
+.card-reveal {
+  width: min(62vw, 276px);
+  border-radius: 20px;
+  border: 3px solid rgba(255, 220, 115, .88);
+  box-shadow:
+    0 28px 70px rgba(0,0,0,.48),
+    0 0 38px rgba(255, 220, 115, .42);
+  background: rgba(3,8,23,.55);
+  overflow: hidden;
+}
+
+.card-reveal.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.card-reveal.is-revealing {
+  animation: adCardRise .72s cubic-bezier(.18,.95,.22,1.08) both;
+}
+
+@keyframes adCardRise {
+  0% { transform: translateY(96px) scale(.72) rotateY(70deg); opacity: 0; filter: blur(10px) brightness(2); }
+  46% { transform: translateY(-14px) scale(1.05) rotateY(-8deg); opacity: 1; filter: blur(0) brightness(1.35); }
+  100% { transform: translateY(0) scale(1) rotateY(0); opacity: 1; filter: blur(0) brightness(1); }
+}
+
+.card-reveal.rarity-3,
+.card-reveal.s3 {
+  border-color: rgba(135, 184, 255, .95);
+  box-shadow: 0 24px 70px rgba(0,0,0,.46), 0 0 42px rgba(98, 168, 255, .54);
+}
+
+.card-reveal.rarity-4,
+.card-reveal.s4 {
+  border-color: rgba(211, 144, 255, .95);
+  box-shadow: 0 24px 70px rgba(0,0,0,.46), 0 0 54px rgba(203, 124, 255, .68);
+}
+
+.card-reveal.rarity-5,
+.card-reveal.s5 {
+  border-color: rgba(255, 226, 137, 1);
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.46),
+    0 0 70px rgba(255, 220, 115, .88),
+    0 0 130px rgba(255, 115, 20, .50);
+}
+
+.card-reveal.rarity-5.is-revealing {
+  animation:
+    adCardRise .72s cubic-bezier(.18,.95,.22,1.08) both,
+    adGoldPulse 1.7s ease-in-out infinite .72s;
+}
+
+@keyframes adGoldPulse {
+  0%, 100% {
+    box-shadow:
+      0 24px 70px rgba(0,0,0,.46),
+      0 0 70px rgba(255, 220, 115, .78),
+      0 0 130px rgba(255, 115, 20, .44);
+  }
+  50% {
+    box-shadow:
+      0 24px 70px rgba(0,0,0,.46),
+      0 0 94px rgba(255, 237, 173, 1),
+      0 0 184px rgba(255, 115, 20, .78);
+  }
+}
+
+.reveal-info {
+  max-width: 86%;
+  font-family: var(--ad-font-display);
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--ad-gold-450);
+  letter-spacing: 1px;
+  text-shadow: 0 4px 14px rgba(0,0,0,.7);
+}
+
+.reveal-stars {
+  bottom: 12px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 220, 115, .74);
+  background: rgba(7,17,39,.90);
+  font-family: var(--ad-font-display);
+  font-size: 15px;
+  color: var(--ad-gold-450);
+  box-shadow: 0 10px 24px rgba(0,0,0,.32);
+}
+
+/* -------------------------------------------------------------------
+   작은 화면 보정
+   ------------------------------------------------------------------- */
+
+@media (max-height: 740px) {
+  #hub-screen .top-bar {
+    min-height: 72px;
+    padding: 12px 20px;
+  }
+  .stat-block .val {
+    font-size: 26px;
+  }
+  #hub-screen .hub-body {
+    gap: 9px;
+    padding-top: 8px;
+    transform: translateY(-8px);
+  }
+  #hub-screen .hub-title {
+    font-size: clamp(32px, 9vw, 42px);
+  }
+  #hub-screen .hub-title::before {
+    margin-bottom: 6px;
+  }
+  #hub-screen .hub-title::after {
+    margin-top: 8px;
+  }
+  #hub-screen .gacha-pack {
+    width: min(47vw, 210px);
+  }
+  #hub-screen .cooldown-time {
+    font-size: clamp(36px, 10vw, 48px);
+  }
+  #hub-screen .bottom-nav {
+    height: 78px;
+  }
+  #hub-screen .nav-btn {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  #hub-screen .top-bar {
+    margin-left: 14px;
+    margin-right: 14px;
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  #hub-screen .probability-info {
+    gap: 6px;
+  }
+  #hub-screen .probability-info span {
+    min-width: 76px;
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 12px;
+  }
+  #hub-screen .bottom-nav {
+    left: 12px;
+    right: 12px;
+  }
+}
+
+/* 터치 디바이스에서 hover 잔상 방지 */
+button {
+  touch-action: manipulation;
+}
