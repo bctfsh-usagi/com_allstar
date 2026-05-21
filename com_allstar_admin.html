@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>COM 올스타 · 운영자 도구</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Bagel+Fat+One&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-0: #0a0d18;
+    --bg-1: #121627;
+    --bg-2: #1a1f33;
+    --bg-3: #252b45;
+    --line: rgba(255,255,255,0.08);
+    --line-strong: rgba(255,255,255,0.15);
+    --text: #f4f5fb;
+    --text-dim: #aab0d0;
+    --text-mute: #6a719a;
+
+    --t-sci: #ff4d6d;
+    --t-rok: #9aa3b8;
+    --t-pap: #ffd166;
+    --t-sci-bg: #2a0d18;
+    --t-rok-bg: #1a1d28;
+    --t-pap-bg: #2a230a;
+
+    --r-c: #b9c0d6;
+    --r-r: #62d2ff;
+    --r-sr: #c084fc;
+    --r-ssr: #ffd166;
+
+    --accent: #00d4aa;       /* 운영툴 강조색: 청록 (게임의 보라핑크와 구분) */
+    --accent-2: #62d2ff;
+    --warn: #fbbf24;
+    --bad:  #ef4444;
+    --good: #4ade80;
+
+    --radius-card: 12px;
+    --radius-lg: 16px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Gowun Dodum', system-ui, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(1400px 600px at 50% -200px, rgba(0,212,170,0.08) 0%, transparent 60%),
+      var(--bg-0);
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  /* ============ 상단 헤더 ============ */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(10, 13, 24, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Bagel Fat One', sans-serif;
+  }
+  .brand-tool {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #002a22;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    transform: skewX(-6deg);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+  }
+  .brand-name {
+    font-family: 'Jua', sans-serif;
+    font-size: 16px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+  .brand-name b {
+    color: var(--text);
+    background: linear-gradient(180deg, #fff, #c4b5fd);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .h-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .h-chip .l { color: var(--text-mute); font-size: 11px; }
+  .h-chip .v { font-weight: 600; font-family: 'Jua', sans-serif; }
+  .h-chip[data-t="sci"] .v { color: var(--t-sci); }
+  .h-chip[data-t="rok"] .v { color: var(--t-rok); }
+  .h-chip[data-t="pap"] .v { color: var(--t-pap); }
+  .h-chip[data-t="total"] { background: linear-gradient(135deg, rgba(0,212,170,0.15), rgba(98,210,255,0.1)); border-color: rgba(0,212,170,0.3); }
+  .h-chip[data-t="total"] .v { color: var(--accent); font-size: 14px; }
+
+  /* ============ 메인 영역 ============ */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  /* 툴바 */
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .toolbar .grow { flex: 1; min-width: 200px; }
+
+  .btn {
+    appearance: none;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.04);
+    color: var(--text);
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-family: 'Jua', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .btn:hover { background: rgba(255,255,255,0.08); border-color: var(--line-strong); }
+  .btn:active { transform: scale(0.97); }
+  .btn.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border: none;
+    color: #002a22;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(0,212,170,0.3);
+  }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.danger {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.3);
+    color: #fca5a5;
+  }
+  .btn.danger:hover { background: rgba(239,68,68,0.2); }
+  .btn .ico { font-size: 16px; }
+
+  /* 검색 */
+  .search-box {
+    flex: 1;
+    min-width: 240px;
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 14px 10px 38px;
+    color: var(--text);
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: all .15s;
+  }
+  .search-box input:focus {
+    border-color: var(--accent);
+    background: rgba(0,212,170,0.05);
+  }
+  .search-box::before {
+    content: '🔍';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    opacity: 0.5;
+  }
+
+  /* 필터 칩 */
+  .filters {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    padding: 6px 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--text-dim);
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Jua', sans-serif;
+    transition: all .15s;
+  }
+  .filter-chip:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+  .filter-chip.active {
+    background: var(--accent);
+    color: #002a22;
+    border-color: transparent;
+    font-weight: 600;
+  }
+  .filter-chip.active[data-f="sci"] { background: var(--t-sci); color: white; }
+  .filter-chip.active[data-f="rok"] { background: var(--t-rok); color: #1a1d28; }
+  .filter-chip.active[data-f="pap"] { background: var(--t-pap); color: #2a230a; }
+
+  /* 카드 그리드 */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+  }
+  .card-wrap {
+    position: relative;
+  }
+  .card-wrap:hover .card-actions { opacity: 1; }
+  .card-actions {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    gap: 4px;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .card-actions button {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .card-actions button:hover { transform: scale(1.1); }
+  .card-actions .edit:hover { background: var(--accent); color: #002a22; }
+  .card-actions .dup:hover { background: var(--accent-2); color: #002a22; }
+  .card-actions .del:hover { background: var(--bad); }
+
+  /* 카드 자체 (게임과 동일한 스타일) */
+  .card {
+    position: relative;
+    aspect-ratio: 5 / 7;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    cursor: pointer;
+    background: var(--bg-2);
+    border: 1.5px solid var(--line);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    transition: transform .15s, box-shadow .2s;
+  }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.5); }
+  .card .art {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--bg-3);
+  }
+  .card .art:not([style])::after {
+    content: attr(data-emoji);
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 52px;
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
+  }
+  .card[data-type="sci"] .art { background: linear-gradient(160deg, #5a1c2c 0%, #2a0d18 60%, #1a0810 100%); }
+  .card[data-type="rok"] .art { background: linear-gradient(160deg, #3a4055 0%, #1c2030 60%, #0e1018 100%); }
+  .card[data-type="pap"] .art { background: linear-gradient(160deg, #6b5520 0%, #2a230a 60%, #1a1505 100%); }
+  .card .frame {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 6px 7px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 25%, transparent 70%, rgba(0,0,0,0.85) 100%);
+    pointer-events: none;
+  }
+  .card .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card .type-badge {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    background: rgba(0,0,0,0.4);
+  }
+  .card[data-type="sci"] .type-badge { background: var(--t-sci); }
+  .card[data-type="rok"] .type-badge { background: var(--t-rok); }
+  .card[data-type="pap"] .type-badge { background: var(--t-pap); color: #2a230a; }
+  .card .hp {
+    font-family: 'Jua', sans-serif;
+    font-size: 12px;
+    background: rgba(0,0,0,0.55);
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.18);
+  }
+  .card .bot { text-align: center; }
+  .card .name {
+    font-family: 'Jua', sans-serif;
+    font-size: 12px;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .card .rarity {
+    display: inline-flex;
+    gap: 1px;
+    margin-top: 2px;
+  }
+  .card .rarity span {
+    width: 5px; height: 5px;
+    background: var(--r-c);
+    border-radius: 50%;
+    box-shadow: 0 0 4px currentColor;
+  }
+  .card[data-rarity="r"] .rarity span { background: var(--r-r); color: var(--r-r); }
+  .card[data-rarity="sr"] .rarity span { background: var(--r-sr); color: var(--r-sr); }
+  .card[data-rarity="ssr"] .rarity span { background: var(--r-ssr); color: var(--r-ssr); }
+  /* 카드 ID (어드민에서만 표시) */
+  .card .id-tag {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background: rgba(0,0,0,0.7);
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 2px 5px;
+    border-radius: 3px;
+    z-index: 2;
+  }
+
+  /* 빈 상태 */
+  .empty {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-dim);
+  }
+  .empty .ico { font-size: 64px; margin-bottom: 16px; opacity: 0.6; }
+  .empty .ttl { font-family: 'Jua', sans-serif; font-size: 20px; color: var(--text); margin-bottom: 8px; }
+  .empty .desc { font-size: 14px; margin-bottom: 20px; }
+
+  /* ============ 모달 (편집기) ============ */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: fadeIn .25s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal.active { display: flex; }
+  .modal-card {
+    background: var(--bg-1);
+    border: 1px solid var(--line-strong);
+    border-radius: 18px;
+    max-width: 720px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: pop .3s cubic-bezier(.18,.89,.43,1.18);
+    scrollbar-width: thin;
+  }
+  @keyframes pop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-header h2 {
+    margin: 0;
+    font-family: 'Jua', sans-serif;
+    font-size: 18px;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+  /* 편집기: 좌우 분할 */
+  .editor-body {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    padding: 24px;
+  }
+  @media (max-width: 640px) {
+    .editor-body {
+      grid-template-columns: 1fr;
+    }
+  }
+  .editor-left {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .preview-card {
+    width: 100%;
+    aspect-ratio: 5 / 7;
+    position: relative;
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    border: 2px solid var(--line);
+    background: var(--bg-3);
+  }
+  .preview-card .art {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+  }
+  .preview-card .art:not([style])::after {
+    content: attr(data-emoji);
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5));
+  }
+  .preview-card[data-type="sci"] .art { background: linear-gradient(160deg, #5a1c2c 0%, #2a0d18 60%, #1a0810 100%); }
+  .preview-card[data-type="rok"] .art { background: linear-gradient(160deg, #3a4055 0%, #1c2030 60%, #0e1018 100%); }
+  .preview-card[data-type="pap"] .art { background: linear-gradient(160deg, #6b5520 0%, #2a230a 60%, #1a1505 100%); }
+  .preview-card .frame {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 25%, transparent 70%, rgba(0,0,0,0.85) 100%);
+  }
+  .preview-card .top {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .preview-card .type-badge {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    border: 1.5px solid rgba(255,255,255,0.6);
+    background: rgba(0,0,0,0.4);
+  }
+  .preview-card[data-type="sci"] .type-badge { background: var(--t-sci); }
+  .preview-card[data-type="rok"] .type-badge { background: var(--t-rok); }
+  .preview-card[data-type="pap"] .type-badge { background: var(--t-pap); color: #2a230a; }
+  .preview-card .hp {
+    font-family: 'Jua', sans-serif;
+    font-size: 13px;
+    background: rgba(0,0,0,0.6);
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .preview-card .bot { text-align: center; }
+  .preview-card .name {
+    font-family: 'Jua', sans-serif;
+    font-size: 14px;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  }
+  .preview-card .rarity {
+    display: inline-flex;
+    gap: 2px;
+    margin-top: 3px;
+  }
+  .preview-card .rarity span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--r-c);
+    box-shadow: 0 0 5px currentColor;
+  }
+  .preview-card[data-rarity="r"] .rarity span { background: var(--r-r); color: var(--r-r); }
+  .preview-card[data-rarity="sr"] .rarity span { background: var(--r-sr); color: var(--r-sr); }
+  .preview-card[data-rarity="ssr"] .rarity span { background: var(--r-ssr); color: var(--r-ssr); }
+
+  .preview-label {
+    text-align: center;
+    color: var(--text-mute);
+    font-size: 11px;
+    font-family: 'Jua', sans-serif;
+    letter-spacing: 1px;
+  }
+
+  /* 이미지 업로드 버튼 */
+  .upload-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .upload-btn {
+    width: 100%;
+    padding: 8px;
+    background: rgba(0,212,170,0.1);
+    border: 1px dashed rgba(0,212,170,0.4);
+    border-radius: 8px;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: 'Jua', sans-serif;
+    font-size: 12px;
+    text-align: center;
+    transition: all .15s;
+  }
+  .upload-btn:hover { background: rgba(0,212,170,0.18); }
+  .upload-btn.has-image {
+    background: rgba(255,255,255,0.04);
+    border-style: solid;
+    border-color: var(--line);
+    color: var(--text-dim);
+  }
+  .clear-btn {
+    background: none;
+    border: none;
+    color: var(--bad);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 4px;
+    font-family: 'Jua', sans-serif;
+  }
+  .clear-btn:hover { text-decoration: underline; }
+
+  /* 우측 폼 */
+  .editor-right {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .form-group label {
+    display: block;
+    font-family: 'Jua', sans-serif;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  .form-group label .val {
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    margin-left: 6px;
+  }
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: all .15s;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus {
+    border-color: var(--accent);
+    background: rgba(0,212,170,0.05);
+  }
+  .form-group textarea {
+    resize: vertical;
+    min-height: 60px;
+    line-height: 1.5;
+  }
+  .form-group input[type="range"] {
+    padding: 0;
+    accent-color: var(--accent);
+  }
+
+  .pill-group {
+    display: flex;
+    gap: 6px;
+  }
+  .pill {
+    flex: 1;
+    padding: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text-dim);
+    cursor: pointer;
+    text-align: center;
+    font-family: 'Jua', sans-serif;
+    font-size: 13px;
+    transition: all .15s;
+  }
+  .pill:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+  .pill.active {
+    background: var(--accent);
+    border-color: transparent;
+    color: #002a22;
+    font-weight: 600;
+  }
+  .pill[data-type="sci"].active { background: var(--t-sci); color: white; }
+  .pill[data-type="rok"].active { background: var(--t-rok); color: #1a1d28; }
+  .pill[data-type="pap"].active { background: var(--t-pap); color: #2a230a; }
+  .pill[data-rarity="c"].active   { background: linear-gradient(135deg, #6b7280, #9ca3af); color: white; }
+  .pill[data-rarity="r"].active   { background: linear-gradient(135deg, #0ea5e9, #62d2ff); color: white; }
+  .pill[data-rarity="sr"].active  { background: linear-gradient(135deg, #9333ea, #c084fc); color: white; }
+  .pill[data-rarity="ssr"].active { background: linear-gradient(135deg, #f59e0b, #ffd166); color: #2a1c00; }
+
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .modal-footer .btn { min-width: 96px; justify-content: center; }
+
+  /* 작은 confirm dialog */
+  .confirm-card { max-width: 360px; }
+  .confirm-body {
+    padding: 20px 24px;
+  }
+  .confirm-body h3 {
+    margin: 0 0 8px;
+    font-family: 'Jua', sans-serif;
+    font-size: 16px;
+  }
+  .confirm-body p {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* 토스트 */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(0,0,0,0.92);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    border: 1px solid var(--line-strong);
+    opacity: 0;
+    transition: all .3s;
+    pointer-events: none;
+    z-index: 1000;
+    font-family: 'Jua', sans-serif;
+    max-width: 90%;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .toast.success { border-color: rgba(74,222,128,0.5); }
+  .toast.error   { border-color: rgba(239,68,68,0.5); }
+
+  /* 안내 박스 */
+  .info-box {
+    background: rgba(0,212,170,0.05);
+    border: 1px solid rgba(0,212,170,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--text-dim);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .info-box .icn { font-size: 16px; flex-shrink: 0; }
+  .info-box b { color: var(--text); }
+
+  /* 드래그앤드롭 활성화 */
+  body.dragging::before {
+    content: '이미지를 드롭하면 새 카드를 추가합니다';
+    position: fixed;
+    inset: 12px;
+    border: 3px dashed var(--accent);
+    border-radius: 16px;
+    background: rgba(0,212,170,0.1);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Jua', sans-serif;
+    font-size: 18px;
+    color: var(--accent);
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<!-- 상단 헤더 -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <span class="brand-tool">🛠 ADMIN</span>
+      <span class="brand-name">COM 올스타 · <b>카드 운영 도구</b></span>
+    </div>
+    <div class="header-stats">
+      <div class="h-chip" data-t="total"><span class="l">TOTAL</span><span class="v" id="hTotal">0</span></div>
+      <div class="h-chip" data-t="sci"><span class="l">✌️</span><span class="v" id="hSci">0</span></div>
+      <div class="h-chip" data-t="rok"><span class="l">✊</span><span class="v" id="hRok">0</span></div>
+      <div class="h-chip" data-t="pap"><span class="l">✋</span><span class="v" id="hPap">0</span></div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <!-- 안내 -->
+  <div class="info-box">
+    <span class="icn">💡</span>
+    <div>
+      <b>운영자 전용 페이지</b>입니다. 이곳에서 등록한 카드는 같은 브라우저의 게임에 자동 반영돼요.<br>
+      카드 데이터는 브라우저에 저장되므로, 다른 기기로 옮기려면 <b>내보내기</b>로 백업하세요.
+    </div>
+  </div>
+
+  <!-- 툴바 -->
+  <div class="toolbar">
+    <button class="btn primary" onclick="openEditor()">
+      <span class="ico">＋</span> 새 카드 추가
+    </button>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="카드 이름이나 설명으로 검색..." oninput="renderGrid()">
+    </div>
+    <button class="btn" onclick="exportCards()">
+      <span class="ico">💾</span> 내보내기
+    </button>
+    <button class="btn" onclick="document.getElementById('importInput').click()">
+      <span class="ico">📂</span> 불러오기
+    </button>
+    <input type="file" id="importInput" accept=".json,application/json" hidden onchange="importCards(event)">
+    <button class="btn danger" onclick="confirmResetSeed()">
+      <span class="ico">🔄</span> 초기화
+    </button>
+  </div>
+
+  <!-- 필터 -->
+  <div class="filters">
+    <div class="filter-chip active" data-f="all" onclick="setFilter('all')">전체</div>
+    <div class="filter-chip" data-f="sci" onclick="setFilter('sci')">✌️ 가위</div>
+    <div class="filter-chip" data-f="rok" onclick="setFilter('rok')">✊ 바위</div>
+    <div class="filter-chip" data-f="pap" onclick="setFilter('pap')">✋ 보</div>
+    <span style="width:1px; height:24px; background:var(--line); margin:0 6px; align-self:center;"></span>
+    <div class="filter-chip" data-f="c" onclick="setFilter('c')">C</div>
+    <div class="filter-chip" data-f="r" onclick="setFilter('r')">R</div>
+    <div class="filter-chip" data-f="sr" onclick="setFilter('sr')">SR</div>
+    <div class="filter-chip" data-f="ssr" onclick="setFilter('ssr')">SSR</div>
+  </div>
+
+  <!-- 그리드 -->
+  <div id="cardArea"></div>
+</main>
+
+<!-- 편집기 모달 -->
+<div class="modal" id="editorModal" onclick="if(event.target===this) closeEditor()">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2 id="editorTitle">새 카드 추가</h2>
+      <button class="modal-close" onclick="closeEditor()">✕</button>
+    </div>
+    <div class="editor-body">
+      <!-- 좌측: 미리보기 -->
+      <div class="editor-left">
+        <div class="preview-card" id="previewCard">
+          <div class="art" id="previewArt" data-emoji="🃏"></div>
+          <div class="frame">
+            <div class="top">
+              <div class="type-badge" id="previewBadge">✌️</div>
+              <div class="hp" id="previewHp">HP 100</div>
+            </div>
+            <div class="bot">
+              <div class="name" id="previewName">카드 이름</div>
+              <div class="rarity" id="previewRarity"><span></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-label">실시간 미리보기</div>
+        <div class="upload-controls">
+          <button class="upload-btn" id="uploadBtn" onclick="document.getElementById('imageInput').click()">
+            📷 이미지 업로드
+          </button>
+          <button class="clear-btn" id="clearImgBtn" onclick="clearUploadImage()" style="display:none;">
+            이미지 제거
+          </button>
+        </div>
+        <input type="file" id="imageInput" accept="image/*" hidden onchange="handleImageUpload(event)">
+      </div>
+
+      <!-- 우측: 폼 -->
+      <div class="editor-right">
+        <div class="form-group">
+          <label>카드 이름</label>
+          <input id="editName" placeholder="예: 가위병정" maxlength="20" oninput="updatePreview()">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>속성</label>
+            <div class="pill-group" id="typeGroup">
+              <div class="pill" data-type="sci" onclick="selectType('sci')">✌️ 가위</div>
+              <div class="pill" data-type="rok" onclick="selectType('rok')">✊ 바위</div>
+              <div class="pill" data-type="pap" onclick="selectType('pap')">✋ 보</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>희귀도</label>
+            <div class="pill-group" id="rarityGroup">
+              <div class="pill" data-rarity="c"   onclick="selectRarity('c')">C</div>
+              <div class="pill" data-rarity="r"   onclick="selectRarity('r')">R</div>
+              <div class="pill" data-rarity="sr"  onclick="selectRarity('sr')">SR</div>
+              <div class="pill" data-rarity="ssr" onclick="selectRarity('ssr')">SSR</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>HP <span class="val" id="hpDisplay">100</span></label>
+            <input type="range" id="editHp" min="20" max="200" step="10" value="100" oninput="updateHp(this.value)">
+          </div>
+          <div class="form-group">
+            <label>이모지 (이미지 없을 때)</label>
+            <input id="editEmoji" placeholder="예: ✂️" maxlength="4" oninput="updatePreview()">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>카드 설명</label>
+          <textarea id="editDesc" placeholder="이 카드의 특징이나 스토리를 입력하세요" maxlength="80"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeEditor()">취소</button>
+      <button class="btn primary" onclick="saveCard()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 확인 다이얼로그 -->
+<div class="modal" id="confirmDialog">
+  <div class="modal-card confirm-card">
+    <div class="confirm-body">
+      <h3 id="confirmTitle">확인</h3>
+      <p id="confirmMsg">정말 진행하시겠습니까?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="confirmCancel">취소</button>
+      <button class="btn primary" id="confirmOK">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   COM 올스타 — 운영자 도구
+   STORAGE_KEY는 게임 파일과 동일해야 함 (데이터 공유)
+   ============================================================ */
+const STORAGE_KEY = 'com_allstar_cards_v1';
+
+const SEED_CARDS = [
+  { id: 'sci01', name: '가위병정',     type: 'sci', hp: 60,  rarity: 'c',  image: '', emoji: '✂️', desc: '재빠른 일격으로 보 타입에게 강합니다.' },
+  { id: 'sci02', name: '쌍칼냥이',     type: 'sci', hp: 70,  rarity: 'r',  image: '', emoji: '🐱', desc: '두 자루의 칼을 휘두르는 민첩한 고양이.' },
+  { id: 'sci04', name: '칼날도깨비',   type: 'sci', hp: 90,  rarity: 'sr', image: '', emoji: '👹', desc: '거대한 가위로 보를 단숨에 베어버립니다.' },
+  { id: 'sci05', name: '월광검사',     type: 'sci', hp: 120, rarity: 'ssr',image: '', emoji: '🌙', desc: '달빛 아래에서 더 강해지는 전설의 검사.' },
+  { id: 'rok01', name: '돌멩이꼬마',   type: 'rok', hp: 80,  rarity: 'c',  image: '', emoji: '🪨', desc: '단단하고 듬직한 작은 돌.' },
+  { id: 'rok02', name: '바위거북',     type: 'rok', hp: 110, rarity: 'r',  image: '', emoji: '🐢', desc: '등껍질이 화강암으로 만들어진 거북.' },
+  { id: 'rok03', name: '화산골렘',     type: 'rok', hp: 140, rarity: 'sr', image: '', emoji: '🌋', desc: '용암으로 단련된 거대한 골렘.' },
+  { id: 'rok07', name: '암석의왕',     type: 'rok', hp: 160, rarity: 'ssr',image: '', emoji: '👑', desc: '모든 광물을 다스리는 전설의 왕.' },
+  { id: 'pap01', name: '종이학',       type: 'pap', hp: 50,  rarity: 'c',  image: '', emoji: '🕊️', desc: '바람을 타고 우아하게 비행해요.' },
+  { id: 'pap02', name: '책읽는마법사', type: 'pap', hp: 70,  rarity: 'r',  image: '', emoji: '🧙', desc: '오래된 책에서 강력한 마법을 꺼내요.' },
+  { id: 'pap04', name: '두루마리현자', type: 'pap', hp: 90,  rarity: 'sr', image: '', emoji: '📜', desc: '고대의 지혜를 두루마리에 새긴 현자.' },
+  { id: 'pap05', name: '구름의여신',   type: 'pap', hp: 130, rarity: 'ssr',image: '', emoji: '☁️', desc: '구름을 부려 바위를 봉인합니다.' }
+];
+
+const TYPE_EMOJI = { sci: '✌️', rok: '✊', pap: '✋' };
+
+let CARDS = loadCards() || SEED_CARDS.slice().map(c => ({...c}));
+if (!loadCards()) saveCards();
+
+let currentFilter = 'all';
+let editingId = null;
+let pendingImage = '';
+let pendingType = 'sci';
+let pendingRarity = 'c';
+
+/* ============ 저장소 ============ */
+function loadCards() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return null;
+}
+function saveCards() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(CARDS));
+    return true;
+  } catch(e) {
+    if (e.name === 'QuotaExceededError') {
+      toast('⚠️ 저장 공간이 부족해요. 이미지 크기를 줄이거나 카드를 삭제하세요.', 'error');
+    } else {
+      toast('저장 실패: ' + e.message, 'error');
+    }
+    return false;
+  }
+}
+
+/* ============ 카드 HTML 생성 ============ */
+function cardHTML(card) {
+  const rarityDots = { c: 1, r: 2, sr: 3, ssr: 4 }[card.rarity] || 1;
+  const rarityHTML = Array.from({length: rarityDots}, () => '<span></span>').join('');
+  const artStyle = card.image ? `style="background-image:url('${card.image}')"` : '';
+  return `
+    <div class="card" data-type="${card.type}" data-rarity="${card.rarity}" data-id="${card.id}">
+      <div class="id-tag">${card.id}</div>
+      <div class="art" data-emoji="${card.emoji || '🃏'}" ${artStyle}></div>
+      <div class="frame">
+        <div class="top">
+          <div class="type-badge">${TYPE_EMOJI[card.type]}</div>
+          <div class="hp">HP ${card.hp}</div>
+        </div>
+        <div class="bot">
+          <div class="name">${escapeHTML(card.name)}</div>
+          <div class="rarity">${rarityHTML}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function escapeHTML(s) {
+  return (s || '').replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
+}
+
+/* ============ 그리드 렌더 ============ */
+function renderGrid() {
+  // 통계 (전체)
+  const counts = { sci: 0, rok: 0, pap: 0 };
+  CARDS.forEach(c => { if (counts[c.type] !== undefined) counts[c.type]++; });
+  document.getElementById('hTotal').textContent = CARDS.length;
+  document.getElementById('hSci').textContent = counts.sci;
+  document.getElementById('hRok').textContent = counts.rok;
+  document.getElementById('hPap').textContent = counts.pap;
+
+  // 필터 + 검색 적용
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let list = CARDS.slice();
+
+  if (['sci','rok','pap'].includes(currentFilter)) {
+    list = list.filter(c => c.type === currentFilter);
+  } else if (['c','r','sr','ssr'].includes(currentFilter)) {
+    list = list.filter(c => c.rarity === currentFilter);
+  }
+  if (q) {
+    list = list.filter(c =>
+      (c.name || '').toLowerCase().includes(q) ||
+      (c.desc || '').toLowerCase().includes(q) ||
+      (c.id || '').toLowerCase().includes(q)
+    );
+  }
+
+  // 정렬: 속성 → 희귀도 → 이름
+  const typeOrder = { sci: 0, rok: 1, pap: 2 };
+  const rOrder = { c: 0, r: 1, sr: 2, ssr: 3 };
+  list.sort((a, b) =>
+    (typeOrder[a.type] ?? 9) - (typeOrder[b.type] ?? 9) ||
+    rOrder[b.rarity] - rOrder[a.rarity] ||
+    a.name.localeCompare(b.name)
+  );
+
+  const area = document.getElementById('cardArea');
+  if (list.length === 0) {
+    if (CARDS.length === 0) {
+      area.innerHTML = `
+        <div class="empty">
+          <div class="ico">🃏</div>
+          <div class="ttl">등록된 카드가 없어요</div>
+          <div class="desc">우측 상단의 "새 카드 추가" 버튼으로 시작하세요</div>
+          <button class="btn primary" onclick="openEditor()">＋ 첫 카드 만들기</button>
+        </div>`;
+    } else {
+      area.innerHTML = `
+        <div class="empty">
+          <div class="ico">🔍</div>
+          <div class="ttl">검색 결과 없음</div>
+          <div class="desc">다른 키워드로 검색하거나 필터를 변경해보세요</div>
+        </div>`;
+    }
+    return;
+  }
+
+  area.innerHTML = `<div class="grid">${list.map(c => `
+    <div class="card-wrap">
+      <div class="card-actions">
+        <button class="edit" onclick="openEditor('${c.id}')" title="편집">✎</button>
+        <button class="dup" onclick="duplicateCard('${c.id}')" title="복제">⎘</button>
+        <button class="del" onclick="confirmDelete('${c.id}')" title="삭제">🗑</button>
+      </div>
+      ${cardHTML(c)}
+    </div>
+  `).join('')}</div>`;
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(el =>
+    el.classList.toggle('active', el.dataset.f === f));
+  renderGrid();
+}
+
+/* ============ 편집기 ============ */
+function openEditor(id) {
+  editingId = id || null;
+  pendingImage = '';
+  pendingType = 'sci';
+  pendingRarity = 'c';
+
+  if (id) {
+    const c = CARDS.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('editorTitle').textContent = `카드 편집 · ${c.id}`;
+    document.getElementById('editName').value = c.name || '';
+    document.getElementById('editEmoji').value = c.emoji || '';
+    document.getElementById('editDesc').value = c.desc || '';
+    document.getElementById('editHp').value = c.hp || 100;
+    pendingType = c.type || 'sci';
+    pendingRarity = c.rarity || 'c';
+    pendingImage = c.image || '';
+  } else {
+    document.getElementById('editorTitle').textContent = '새 카드 추가';
+    document.getElementById('editName').value = '';
+    document.getElementById('editEmoji').value = '';
+    document.getElementById('editDesc').value = '';
+    document.getElementById('editHp').value = 100;
+  }
+  updateTypePills();
+  updateRarityPills();
+  updatePreview();
+  updateHp(document.getElementById('editHp').value);
+  document.getElementById('editorModal').classList.add('active');
+  setTimeout(() => document.getElementById('editName').focus(), 100);
+}
+function closeEditor() {
+  document.getElementById('editorModal').classList.remove('active');
+}
+
+function selectType(t) { pendingType = t; updateTypePills(); updatePreview(); }
+function selectRarity(r) { pendingRarity = r; updateRarityPills(); updatePreview(); }
+function updateTypePills() {
+  document.querySelectorAll('#typeGroup .pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.type === pendingType));
+}
+function updateRarityPills() {
+  document.querySelectorAll('#rarityGroup .pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.rarity === pendingRarity));
+}
+function updateHp(v) {
+  document.getElementById('hpDisplay').textContent = v;
+  document.getElementById('previewHp').textContent = 'HP ' + v;
+}
+
+/* 실시간 미리보기 */
+function updatePreview() {
+  const name = document.getElementById('editName').value.trim() || '카드 이름';
+  const emoji = document.getElementById('editEmoji').value.trim() || '🃏';
+  const card = document.getElementById('previewCard');
+  card.dataset.type = pendingType;
+  card.dataset.rarity = pendingRarity;
+  document.getElementById('previewName').textContent = name;
+  document.getElementById('previewBadge').textContent = TYPE_EMOJI[pendingType];
+  const art = document.getElementById('previewArt');
+  art.dataset.emoji = emoji;
+  if (pendingImage) {
+    art.style.backgroundImage = `url('${pendingImage}')`;
+  } else {
+    art.style.backgroundImage = '';
+  }
+  const rarityDots = { c: 1, r: 2, sr: 3, ssr: 4 }[pendingRarity];
+  document.getElementById('previewRarity').innerHTML =
+    Array.from({length: rarityDots}, () => '<span></span>').join('');
+}
+
+/* ============ 이미지 업로드 ============ */
+function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    toast('이미지 파일만 업로드 가능해요', 'error');
+    return;
+  }
+  resizeImage(file, 500, 700, 0.85).then(dataUrl => {
+    pendingImage = dataUrl;
+    document.getElementById('uploadBtn').classList.add('has-image');
+    document.getElementById('uploadBtn').textContent = '📷 이미지 변경';
+    document.getElementById('clearImgBtn').style.display = 'block';
+    updatePreview();
+  }).catch(err => {
+    toast('이미지 처리 실패', 'error');
+    console.error(err);
+  });
+  event.target.value = '';
+}
+function clearUploadImage() {
+  pendingImage = '';
+  document.getElementById('uploadBtn').classList.remove('has-image');
+  document.getElementById('uploadBtn').textContent = '📷 이미지 업로드';
+  document.getElementById('clearImgBtn').style.display = 'none';
+  updatePreview();
+}
+function resizeImage(file, maxW, maxH, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.naturalWidth, h = img.naturalHeight;
+        const ratio = Math.min(maxW / w, maxH / h, 1);
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        try {
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        } catch(err) { reject(err); }
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ============ 저장 / 삭제 / 복제 ============ */
+function saveCard() {
+  const name = document.getElementById('editName').value.trim();
+  const emoji = document.getElementById('editEmoji').value.trim();
+  const desc = document.getElementById('editDesc').value.trim();
+  const hp = parseInt(document.getElementById('editHp').value);
+  if (!name) { toast('카드 이름을 입력하세요', 'error'); return; }
+  if (!emoji && !pendingImage) { toast('이미지나 이모지 중 하나는 필요해요', 'error'); return; }
+
+  const data = {
+    name, hp, type: pendingType, rarity: pendingRarity,
+    emoji: emoji || '🃏',
+    image: pendingImage || '',
+    desc: desc || '-'
+  };
+
+  if (editingId) {
+    const idx = CARDS.findIndex(c => c.id === editingId);
+    if (idx >= 0) CARDS[idx] = { ...CARDS[idx], ...data };
+  } else {
+    data.id = 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    CARDS.push(data);
+  }
+  if (saveCards()) {
+    toast(editingId ? '✓ 카드가 수정되었어요' : '✓ 새 카드가 추가되었어요', 'success');
+    closeEditor();
+    renderGrid();
+  }
+}
+
+function duplicateCard(id) {
+  const c = CARDS.find(x => x.id === id);
+  if (!c) return;
+  const copy = {
+    ...c,
+    id: 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    name: c.name + ' (복제)'
+  };
+  CARDS.push(copy);
+  if (saveCards()) {
+    toast('⎘ 카드가 복제되었어요', 'success');
+    renderGrid();
+  }
+}
+
+function confirmDelete(id) {
+  const card = CARDS.find(c => c.id === id);
+  if (!card) return;
+  showConfirm(
+    '카드 삭제',
+    `"${escapeHTML(card.name)}" 카드를 삭제할까요?<br>게임의 보유 목록과 덱에서도 자동으로 제거됩니다.`,
+    () => {
+      CARDS = CARDS.filter(c => c.id !== id);
+      saveCards();
+      renderGrid();
+      toast('🗑 카드가 삭제되었어요', 'success');
+    },
+    '삭제'
+  );
+}
+
+function confirmResetSeed() {
+  showConfirm(
+    '기본 카드로 초기화',
+    `현재 ${CARDS.length}장의 카드를 모두 지우고 기본 12장으로 되돌립니다.<br><b style="color:#fca5a5">이 작업은 되돌릴 수 없어요.</b><br>먼저 <b>내보내기</b>로 백업하는 것을 권장해요.`,
+    () => {
+      CARDS = SEED_CARDS.slice().map(c => ({...c}));
+      saveCards();
+      renderGrid();
+      toast('🔄 기본 카드로 초기화되었어요', 'success');
+    },
+    '초기화'
+  );
+}
+
+/* ============ 내보내기 / 불러오기 ============ */
+function exportCards() {
+  const data = JSON.stringify(CARDS, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const today = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `com-allstar-cards-${today}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast(`💾 ${CARDS.length}장 내보냈어요`, 'success');
+}
+
+function importCards(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error('JSON 배열 형식이 아닙니다');
+      const valid = data.filter(c =>
+        c && typeof c === 'object' && c.id && c.name &&
+        ['sci','rok','pap'].includes(c.type) &&
+        ['c','r','sr','ssr'].includes(c.rarity));
+      if (valid.length === 0) throw new Error('유효한 카드가 없습니다');
+
+      showConfirm(
+        `${valid.length}장의 카드를 발견했어요`,
+        `현재 카드를 어떻게 처리할까요?<br><b>덮어쓰기</b>: 현재 카드를 모두 지우고 교체<br><b>합치기</b>: 기존 카드 유지 + 같은 ID는 새 것으로 교체`,
+        () => {
+          CARDS = valid;
+          saveCards();
+          renderGrid();
+          toast(`📂 ${valid.length}장 불러왔어요 (덮어쓰기)`, 'success');
+        },
+        '덮어쓰기',
+        () => {
+          const map = new Map(CARDS.map(c => [c.id, c]));
+          valid.forEach(c => map.set(c.id, c));
+          CARDS = Array.from(map.values());
+          saveCards();
+          renderGrid();
+          toast(`📂 ${valid.length}장 합쳤어요 (총 ${CARDS.length}장)`, 'success');
+        },
+        '합치기'
+      );
+    } catch (err) {
+      toast('❌ 파일을 읽을 수 없어요: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+/* ============ 확인 다이얼로그 ============ */
+let confirmOKCallback = null;
+let confirmCancelCallback = null;
+function showConfirm(title, msg, onOK, okLabel = '확인', onCancel = null, cancelLabel = '취소') {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').innerHTML = msg;
+  document.getElementById('confirmOK').textContent = okLabel;
+  document.getElementById('confirmCancel').textContent = cancelLabel;
+  confirmOKCallback = onOK;
+  confirmCancelCallback = onCancel;
+  document.getElementById('confirmDialog').classList.add('active');
+}
+document.getElementById('confirmOK').addEventListener('click', () => {
+  document.getElementById('confirmDialog').classList.remove('active');
+  if (confirmOKCallback) { const cb = confirmOKCallback; confirmOKCallback = null; cb(); }
+});
+document.getElementById('confirmCancel').addEventListener('click', () => {
+  document.getElementById('confirmDialog').classList.remove('active');
+  if (confirmCancelCallback) { const cb = confirmCancelCallback; confirmCancelCallback = null; cb(); }
+});
+document.getElementById('confirmDialog').addEventListener('click', e => {
+  if (e.target.id === 'confirmDialog') {
+    document.getElementById('confirmDialog').classList.remove('active');
+    confirmOKCallback = null;
+    confirmCancelCallback = null;
+  }
+});
+
+/* ============ 토스트 ============ */
+let toastTimer;
+function toast(msg, kind = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + kind;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ============ 전역 드래그앤드롭 ============ */
+let dragCounter = 0;
+window.addEventListener('dragenter', e => {
+  if (e.dataTransfer && Array.from(e.dataTransfer.items || []).some(i => i.kind === 'file')) {
+    dragCounter++;
+    document.body.classList.add('dragging');
+  }
+});
+window.addEventListener('dragleave', e => {
+  dragCounter--;
+  if (dragCounter <= 0) {
+    dragCounter = 0;
+    document.body.classList.remove('dragging');
+  }
+});
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => {
+  e.preventDefault();
+  dragCounter = 0;
+  document.body.classList.remove('dragging');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    // 새 카드 만들고 이미지 자동 채우기
+    resizeImage(file, 500, 700, 0.85).then(dataUrl => {
+      openEditor();
+      pendingImage = dataUrl;
+      document.getElementById('uploadBtn').classList.add('has-image');
+      document.getElementById('uploadBtn').textContent = '📷 이미지 변경';
+      document.getElementById('clearImgBtn').style.display = 'block';
+      updatePreview();
+    });
+  }
+});
+
+/* ============ 단축키 ============ */
+document.addEventListener('keydown', e => {
+  // Esc: 모달 닫기
+  if (e.key === 'Escape') {
+    if (document.getElementById('editorModal').classList.contains('active')) closeEditor();
+    if (document.getElementById('confirmDialog').classList.contains('active')) {
+      document.getElementById('confirmDialog').classList.remove('active');
+      confirmOKCallback = null;
+      confirmCancelCallback = null;
+    }
+  }
+  // N: 새 카드 추가 (입력 중 아닐 때만)
+  if (e.key.toLowerCase() === 'n' && !e.ctrlKey && !e.metaKey) {
+    const tag = (document.activeElement || {}).tagName;
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA' &&
+        !document.getElementById('editorModal').classList.contains('active')) {
+      openEditor();
+    }
+  }
+});
+
+/* 초기 렌더 */
+renderGrid();
+selectType('sci');
+selectRarity('c');
+</script>
+</body>
+</html>
