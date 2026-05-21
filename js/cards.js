@@ -1,7 +1,7 @@
 // ===================================================================
 // 카드 마스터 데이터
-// 카드 에디터로 생성 · 2026. 5. 21. 오후 6:00:49
-// 카드 수: 12장 (★5 6 · ★4 3 · ★3 3)
+// 카드 에디터로 생성 · 2026. 5. 21. 오후 7:59:55
+// 카드 수: 18장 (★5 6 · ★4 6 · ★3 6)
 // ===================================================================
 
 const CARDS = [
@@ -17,11 +17,17 @@ const CARDS = [
   { id:'new_card_3', name:'캐릭터1(바위)', ip:'서머너즈워', stars:4, attr:'rock', image:'assets/cards/new_card_3.jpg' },
   { id:'new_card_3_v2', name:'캐릭터1(가위)', ip:'서머너즈워', stars:4, attr:'scissors', image:'assets/cards/new_card_3_v2.jpg' },
   { id:'new_card_3_v2_v2', name:'캐릭터1(보)', ip:'서머너즈워', stars:4, attr:'paper', image:'assets/cards/new_card_3_v2_v2.jpg' },
+  { id:'new_card_6', name:'캐릭터2(가위)', ip:'서머너즈워', stars:4, attr:'scissors', image:'assets/cards/new_card_6.jpg' },
+  { id:'new_card_6_v2', name:'캐릭터2(바위)', ip:'서머너즈워', stars:4, attr:'rock', image:'assets/cards/new_card_6_v2.jpg' },
+  { id:'new_card_6_v2_v2', name:'캐릭터2(보)', ip:'서머너즈워', stars:4, attr:'paper', image:'assets/cards/new_card_6_v2_v2.jpg' },
 
   // ===== 3성 =====
   { id:'new_card_2', name:'캐릭터1(보)', ip:'컴투스프로야구', stars:3, attr:'paper', image:'assets/cards/new_card_2.jpg' },
   { id:'new_card_2_v2', name:'캐릭터1(가위)', ip:'컴투스프로야구', stars:3, attr:'scissors', image:'assets/cards/new_card_2_v2.jpg' },
   { id:'new_card_2_v2_v2', name:'캐릭터1(바위)', ip:'컴투스프로야구', stars:3, attr:'rock', image:'assets/cards/new_card_2_v2_v2.jpg' },
+  { id:'new_card_5', name:'카드1 (보)', ip:'서머너즈워', stars:3, attr:'paper', image:'assets/cards/new_card_5.jpg' },
+  { id:'new_card_5_v2', name:'카드2 (복제)', ip:'서머너즈워', stars:3, attr:'rock', image:'assets/cards/new_card_5_v2.jpg' },
+  { id:'new_card_5_v2_v2', name:'카드3 (가위)', ip:'서머너즈워', stars:3, attr:'scissors', image:'assets/cards/new_card_5_v2_v2.jpg' },
 
 ];
 
