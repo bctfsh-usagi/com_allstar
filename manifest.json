@@ -1,0 +1,14 @@
+{
+  "name": "컴투스 올스타 카드 배틀",
+  "short_name": "올스타 배틀",
+  "description": "컴투스 IP 크로스오버 TCG - 가위바위보 카드 배틀",
+  "start_url": ".",
+  "scope": ".",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "portrait",
+  "background_color": "#050818",
+  "theme_color": "#050818",
+  "categories": ["games", "entertainment"],
+  "lang": "ko"
+}
