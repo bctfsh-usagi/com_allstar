@@ -2619,3 +2619,105 @@ body {
     font-size: 14px !important;
   }
 }
+/* ===================================================================
+   AD DIRECTOR MOBILE CLEANUP v2.3
+   하단 네비 뒤에 CTA가 숨어 보이는 문제 해결
+   - 모바일 허브에서는 스킵 버튼 숨김
+   - READY/확률칩을 하단 네비 위로 정리
+   - 기능 변경 없음
+   =================================================================== */
+
+#hub-screen .hub-body {
+  padding-bottom: 92px !important;
+}
+
+/* 모바일 허브에서는 데모용 스킵 버튼을 숨긴다 */
+#hub-screen .btn-secondary {
+  display: none !important;
+}
+
+/* READY 영역을 하단 네비와 겹치지 않게 압축 */
+#hub-screen .cooldown-display {
+  margin-top: -28px !important;
+  z-index: 8 !important;
+}
+
+#hub-screen .cooldown-status {
+  font-size: clamp(12px, 3.4vw, 15px) !important;
+  letter-spacing: clamp(3px, .9vw, 5px) !important;
+}
+
+#hub-screen .cooldown-time {
+  font-size: clamp(34px, 9.2vw, 48px) !important;
+  line-height: .82 !important;
+}
+
+/* READY가 너무 커서 네비 뒤로 들어가는 문제 방지 */
+#hub-screen .cooldown-time {
+  max-height: 46px !important;
+  overflow: hidden !important;
+}
+
+/* 확률칩은 네비 위에 얹히도록 위치 조정 */
+#hub-screen .probability-info {
+  position: relative !important;
+  z-index: 9 !important;
+  margin-top: 4px !important;
+  margin-bottom: 6px !important;
+  gap: 6px !important;
+}
+
+#hub-screen .probability-info span {
+  min-width: 66px !important;
+  padding: 6px 8px !important;
+  font-size: 11px !important;
+}
+
+/* 하단 네비는 조금 더 아래, 대신 잘리지는 않게 */
+#hub-screen .bottom-nav {
+  bottom: max(20px, calc(env(safe-area-inset-bottom) + 12px)) !important;
+  height: 70px !important;
+}
+
+/* 매우 낮은 화면에서는 READY를 더 줄인다 */
+@media (max-height: 760px) {
+  #hub-screen .hub-body {
+    padding-bottom: 88px !important;
+  }
+
+  #hub-screen .cooldown-display {
+    margin-top: -30px !important;
+  }
+
+  #hub-screen .cooldown-time {
+    font-size: clamp(30px, 8.5vw, 42px) !important;
+    max-height: 40px !important;
+  }
+
+  #hub-screen .probability-info {
+    margin-top: 2px !important;
+  }
+
+  #hub-screen .probability-info span {
+    min-width: 60px !important;
+    padding: 5px 7px !important;
+    font-size: 10px !important;
+  }
+
+  #hub-screen .bottom-nav {
+    height: 66px !important;
+  }
+}
+
+/* 아이폰처럼 실제 표시 영역이 좁은 경우: 하단은 더 깔끔하게 */
+@media (max-height: 700px) {
+  #hub-screen .cooldown-time {
+    font-size: 32px !important;
+    max-height: 34px !important;
+  }
+
+  #hub-screen .probability-info {
+    display: none !important;
+  }
+}
+
