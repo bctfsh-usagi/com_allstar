@@ -7,6 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Bagel+Fat+One&display=swap" rel="stylesheet">
+<!-- Firebase SDK (Firestore) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 <style>
   :root {
     /* 색상 시스템 */
@@ -128,6 +131,20 @@
   }
   .chip .gem { background: linear-gradient(135deg, #62d2ff, #7c5cff); box-shadow: 0 0 8px #7c5cff80; }
   .chip .coin { background: linear-gradient(135deg, #ffd166, #ff9f43); box-shadow: 0 0 8px #ffd16680; }
+  .chip .trophy { background: linear-gradient(135deg, #ffd166, #ff4d6d); box-shadow: 0 0 8px #ff4d6d80; }
+  .trophy-chip { cursor: pointer; transition: transform .12s; }
+  .trophy-chip:hover { background: rgba(255,209,102,0.1); }
+  .trophy-chip:active { transform: scale(0.95); }
+  .trophy-chip .slash { color: var(--text-mute); font-size: 11px; }
+  .trophy-chip.ready {
+    background: linear-gradient(135deg, rgba(255,209,102,0.25), rgba(255,77,109,0.2));
+    border-color: rgba(255,209,102,0.4);
+    animation: trophyPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes trophyPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,209,102,0); }
+    50% { box-shadow: 0 0 0 6px rgba(255,209,102,0.15); }
+  }
 
   /* 컨텐츠 영역 */
   .content {
@@ -1232,334 +1249,730 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  /* ============ 관리자 버튼 ============ */
-  .admin-btn {
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--line);
-    background: rgba(255,255,255,0.06);
-    color: var(--text);
-    font-size: 16px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: transform .15s, background .2s;
-  }
-  .admin-btn:hover { background: rgba(255,255,255,0.12); transform: rotate(30deg); }
-  .admin-btn:active { transform: scale(0.92); }
-
-  /* ============ 관리자 오버레이 ============ */
-  .admin-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 200;
-    background: var(--bg-0);
-    display: none;
-    flex-direction: column;
-    animation: fadeUp 0.3s ease both;
-  }
-  .admin-overlay.active { display: flex; }
-  .admin-topbar {
-    padding: 14px 18px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--line);
-    background: linear-gradient(180deg, rgba(124,92,255,0.1), transparent);
-  }
-  .admin-topbar .title {
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 18px;
-    letter-spacing: 1px;
-  }
-  .admin-close {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid var(--line);
-    color: var(--text);
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-family: 'Jua', sans-serif;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  .admin-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px 18px 30px;
-    scrollbar-width: none;
-  }
-  .admin-body::-webkit-scrollbar { display: none; }
-
-  .admin-stats-bar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-    flex-wrap: wrap;
-  }
-  .admin-stats-bar .stat-chip {
-    flex: 1;
-    min-width: 70px;
-    padding: 10px 8px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    text-align: center;
-  }
-  .admin-stats-bar .stat-chip .v {
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 18px;
-  }
-  .admin-stats-bar .stat-chip .l {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 2px;
-  }
-
-  .admin-actions {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  .admin-actions .btn {
-    padding: 11px 8px;
-    font-size: 13px;
-  }
-  .admin-danger-row {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 12px;
-  }
-  .btn-danger {
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.3);
-    color: #fca5a5;
-    padding: 6px 12px;
-    border-radius: 999px;
-    font-family: 'Jua', sans-serif;
-    font-size: 11px;
-    cursor: pointer;
-  }
-  .btn-danger:hover { background: rgba(239,68,68,0.2); }
-
-  .admin-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-  .admin-grid .admin-card-wrap {
+  /* ============ 새 홈: 메인 팩 (Hero V2) ============ */
+  .hero-pack-v2 {
     position: relative;
-  }
-  .admin-grid .card-actions {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    display: flex;
-    gap: 4px;
-    z-index: 2;
-  }
-  .ca-btn {
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    border: none;
-    background: rgba(0,0,0,0.7);
-    color: white;
-    font-size: 12px;
-    cursor: pointer;
-    backdrop-filter: blur(6px);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .ca-btn:hover { background: rgba(0,0,0,0.9); }
-  .ca-btn.del:hover { background: var(--bad); }
-
-  .empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-dim);
-  }
-  .empty-state .ico { font-size: 48px; margin-bottom: 12px; }
-  .empty-state .ttl { font-family: 'Jua', sans-serif; font-size: 16px; color: var(--text); margin-bottom: 6px; }
-
-  /* ============ 카드 편집기 모달 ============ */
-  .editor-modal .modal-inner {
-    max-width: 360px;
-    text-align: left;
-    max-height: 85vh;
-    overflow-y: auto;
-    scrollbar-width: thin;
-  }
-  .editor-modal .modal-inner::-webkit-scrollbar { width: 4px; }
-  .editor-modal .modal-inner::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
-
-  .editor-title {
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 18px;
-    text-align: center;
-    margin-bottom: 14px;
-    letter-spacing: 1px;
-  }
-
-  /* 이미지 업로드 영역 */
-  .upload-area {
-    position: relative;
-    width: 160px;
-    aspect-ratio: 5 / 7;
-    margin: 0 auto 16px;
-    border-radius: 14px;
-    border: 2px dashed rgba(255,255,255,0.2);
-    background: rgba(255,255,255,0.03);
+    border-radius: 24px;
+    padding: 24px 20px 20px;
+    margin-bottom: 16px;
+    background:
+      radial-gradient(600px 300px at 80% 0%, rgba(255,209,102,0.18), transparent 60%),
+      radial-gradient(600px 300px at 20% 100%, rgba(124,92,255,0.30), transparent 60%),
+      linear-gradient(160deg, #1a1f44 0%, #2a1855 50%, #1a0d3a 100%);
+    border: 1px solid rgba(255,255,255,0.1);
     overflow: hidden;
-    cursor: pointer;
-    transition: border-color .2s, background .2s;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
   }
-  .upload-area:hover {
-    border-color: var(--accent);
-    background: rgba(124,92,255,0.05);
-  }
-  .upload-area.has-image {
-    border-style: solid;
-    border-color: var(--line);
-  }
-  .upload-area.drag-over {
-    border-color: var(--accent);
-    background: rgba(124,92,255,0.15);
-  }
-  .upload-preview-img {
+  .hero-pack-v2::before {
+    content: '';
     position: absolute;
     inset: 0;
-    background-size: cover;
-    background-position: center;
+    background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 16px 16px;
+    pointer-events: none;
+    opacity: 0.4;
   }
-  .upload-placeholder {
+  .hp-glow {
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,209,102,0.25), transparent 60%);
+    pointer-events: none;
+    animation: heroGlow 4s ease-in-out infinite;
+  }
+  @keyframes heroGlow {
+    0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+  }
+  .hp-header {
+    position: relative;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .hp-season {
+    display: inline-block;
+    font-family: 'Bagel Fat One', sans-serif;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: #ffd166;
+    background: rgba(255,209,102,0.1);
+    border: 1px solid rgba(255,209,102,0.3);
+    padding: 3px 12px;
+    border-radius: 999px;
+    margin-bottom: 8px;
+  }
+  .hp-title {
+    font-family: 'Bagel Fat One', sans-serif;
+    font-size: 32px;
+    line-height: 1;
+    background: linear-gradient(180deg, #fff 30%, #ffd166 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    text-shadow: 0 4px 20px rgba(255,209,102,0.3);
+  }
+  .hp-sub {
+    color: var(--text-dim);
+    font-size: 12px;
+    font-family: 'Jua', sans-serif;
+  }
+
+  /* 팩 무대 (3D 둥둥) */
+  .hp-pack-stage {
+    position: relative;
+    height: 260px;
+    margin: 8px auto;
+    width: 180px;
+    perspective: 1000px;
+  }
+  .hp-pack-3d {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    animation: heroPackFloat 5s ease-in-out infinite;
+  }
+  @keyframes heroPackFloat {
+    0%, 100% { transform: rotateY(-15deg) rotateX(5deg) translateY(0); }
+    50%      { transform: rotateY(15deg) rotateX(-3deg) translateY(-12px); }
+  }
+  .hp-pack-face {
     position: absolute;
     inset: 0;
+    border-radius: 18px;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.3), transparent 60%),
+      linear-gradient(135deg, #ff4d6d 0%, #7c5cff 50%, #62d2ff 100%);
+    box-shadow:
+      0 30px 60px rgba(124,92,255,0.5),
+      0 0 0 2px rgba(255,255,255,0.15) inset,
+      0 4px 0 rgba(255,255,255,0.4) inset;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: var(--text-dim);
-    font-size: 12px;
-    text-align: center;
-    padding: 10px;
-  }
-  .upload-placeholder .ico { font-size: 36px; margin-bottom: 6px; }
-  .upload-clear {
-    position: absolute;
-    top: 6px; right: 6px;
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.7);
+    padding: 18px;
     color: white;
-    border: none;
-    cursor: pointer;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
   }
-  .upload-area.has-image .upload-clear { display: flex; }
-
-  /* 폼 요소 */
-  .form-group { margin-bottom: 12px; }
-  .form-label {
-    display: block;
-    font-family: 'Jua', sans-serif;
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-bottom: 6px;
-    letter-spacing: 0.5px;
+  .hp-pack-face::before {
+    content: '';
+    position: absolute;
+    top: 10px; left: 10px; right: 10px; bottom: 10px;
+    border: 2px dashed rgba(255,255,255,0.4);
+    border-radius: 13px;
   }
-  .form-label .val {
-    color: var(--accent);
+  .hp-pf-title {
     font-family: 'Bagel Fat One', sans-serif;
-    margin-left: 6px;
+    font-size: 38px;
+    line-height: 0.92;
+    text-align: center;
+    text-shadow: 0 3px 0 rgba(0,0,0,0.25);
+    letter-spacing: 1.5px;
   }
-  .form-input,
-  .form-textarea {
-    width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 10px 12px;
-    color: var(--text);
-    font-family: 'Gowun Dodum', sans-serif;
-    font-size: 14px;
-    outline: none;
-    transition: border-color .2s, background .2s;
+  .hp-pf-stars {
+    font-size: 18px;
+    margin-top: 10px;
+    letter-spacing: 4px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
   }
-  .form-input:focus,
-  .form-textarea:focus {
-    border-color: var(--accent);
-    background: rgba(124,92,255,0.05);
+  .hp-pf-sub {
+    margin-top: 8px;
+    font-family: 'Jua', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    opacity: 0.9;
   }
-  .form-textarea {
-    resize: none;
-    min-height: 60px;
-    line-height: 1.5;
+  /* 떠다니는 장식 */
+  .hp-floater {
+    position: absolute;
+    font-size: 24px;
+    opacity: 0.5;
+    pointer-events: none;
+    animation: floaterFloat 4s ease-in-out infinite;
+  }
+  .hp-floater.f1 { top: 10%; left: -10%; animation-delay: 0s; }
+  .hp-floater.f2 { top: 40%; right: -15%; animation-delay: 1.3s; font-size: 20px; }
+  .hp-floater.f3 { bottom: 15%; left: -5%; animation-delay: 2.6s; font-size: 18px; }
+  @keyframes floaterFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
+    50% { transform: translateY(-20px) rotate(15deg); opacity: 0.8; }
   }
 
-  .pill-group {
+  /* 확률 표시 */
+  .hp-rates {
     display: flex;
+    justify-content: center;
     gap: 6px;
     flex-wrap: wrap;
+    margin: 16px 0 14px;
   }
-  .pill {
-    flex: 1;
-    min-width: 60px;
-    padding: 9px 8px;
-    background: rgba(255,255,255,0.04);
+  .rate-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: rgba(0,0,0,0.3);
     border: 1px solid var(--line);
-    border-radius: 10px;
+    border-radius: 999px;
+    font-size: 11px;
     color: var(--text-dim);
-    cursor: pointer;
-    text-align: center;
     font-family: 'Jua', sans-serif;
-    font-size: 13px;
-    transition: all .15s;
   }
-  .pill:hover { background: rgba(255,255,255,0.08); }
-  .pill.active {
-    background: linear-gradient(135deg, #7c5cff, #ff4d6d);
-    border-color: transparent;
-    color: white;
-    box-shadow: 0 4px 12px rgba(124,92,255,0.3);
-  }
-  .pill[data-rarity="c"].active   { background: linear-gradient(135deg, #6b7280, #9ca3af); }
-  .pill[data-rarity="r"].active   { background: linear-gradient(135deg, #0ea5e9, #62d2ff); }
-  .pill[data-rarity="sr"].active  { background: linear-gradient(135deg, #9333ea, #c084fc); }
-  .pill[data-rarity="ssr"].active { background: linear-gradient(135deg, #f59e0b, #ffd166); color: #2a1c00; }
-
-  .form-range {
-    width: 100%;
-    accent-color: var(--accent);
+  .rate-pill .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    box-shadow: 0 0 4px currentColor;
   }
 
-  .editor-actions {
+  /* 팩 액션 버튼 */
+  .hp-actions {
     display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 8px;
-    margin-top: 16px;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 10px;
+  }
+  .hp-actions .btn {
+    padding: 14px 16px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .hp-btn-main {
+    font-family: 'Jua', sans-serif;
+    font-size: 15px;
+  }
+  .hp-btn-sub {
+    font-size: 11px;
+    opacity: 0.8;
+    font-family: 'Jua', sans-serif;
+  }
+  .hp-free {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .hp-free:hover { background: rgba(255,255,255,0.14); }
+  .hp-gem {
+    box-shadow: 0 12px 30px rgba(124,92,255,0.5);
   }
 
-  /* 확인 다이얼로그 (간단 confirm) */
-  .confirm-dialog .modal-inner {
-    max-width: 280px;
-    text-align: center;
+  /* 무료 팩 배너 (10승 달성시) */
+  .free-pack-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    background: linear-gradient(135deg, rgba(255,209,102,0.18), rgba(255,77,109,0.15));
+    border: 1px solid rgba(255,209,102,0.4);
+    border-radius: 16px;
+    animation: bannerGlow 2s ease-in-out infinite;
   }
-  .confirm-dialog h3 {
+  @keyframes bannerGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,209,102,0); }
+    50%      { box-shadow: 0 0 0 8px rgba(255,209,102,0.15); }
+  }
+  .fpb-icon { font-size: 32px; flex-shrink: 0; }
+  .fpb-content { flex: 1; }
+  .fpb-title {
     font-family: 'Jua', sans-serif;
-    font-size: 16px;
-    margin: 0 0 8px;
+    font-size: 15px;
+    margin-bottom: 2px;
   }
-  .confirm-dialog .msg {
+  .fpb-sub {
+    font-size: 12px;
     color: var(--text-dim);
-    font-size: 13px;
-    line-height: 1.6;
-    margin-bottom: 16px;
   }
-  .confirm-dialog .btns {
+
+  /* 빠른 메뉴 (간소화 - 2열) */
+  .quick-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* ============ 진행률 카드 ============ */
+  .progress-card {
+    background: linear-gradient(135deg, rgba(255,209,102,0.08), rgba(255,77,109,0.08));
+    border: 1px solid rgba(255,209,102,0.2);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .progress-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .progress-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .progress-stat {
+    font-family: 'Bagel Fat One', sans-serif;
+    font-size: 22px;
+    line-height: 1;
+  }
+  .progress-stat b {
+    background: linear-gradient(135deg, #ffd166, #ff4d6d);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .progress-stat .muted-stat {
+    color: var(--text-mute);
+    font-size: 14px;
+    font-family: 'Jua', sans-serif;
+    margin-left: 4px;
+  }
+  .claim-btn {
+    padding: 8px 14px;
+    font-size: 13px;
+    animation: claimPulse 1.5s ease-in-out infinite;
+  }
+  @keyframes claimPulse {
+    0%, 100% { box-shadow: 0 4px 14px rgba(124,92,255,0.4); }
+    50% { box-shadow: 0 4px 22px rgba(255,209,102,0.6); }
+  }
+  .progress-bar {
+    height: 8px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #ffd166, #ff4d6d);
+    border-radius: 999px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 0 8px rgba(255,209,102,0.5);
+  }
+  .progress-stats {
+    display: flex;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .ps b { font-family: 'Jua', sans-serif; color: var(--text); margin-right: 2px; }
+  .ps.win b { color: var(--good); }
+  .ps.lose b { color: var(--bad); }
+  .ps.tie b { color: var(--text-dim); }
+  .ps.pack b { color: var(--warn); }
+
+  /* ============ 모드 탭 ============ */
+  .mode-tabs {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
+    margin-bottom: 14px;
+    padding: 4px;
+    background: rgba(0,0,0,0.25);
+    border-radius: 12px;
+    border: 1px solid var(--line);
+  }
+  .mode-tab {
+    padding: 9px 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-family: 'Jua', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all .2s;
+  }
+  .mode-tab:hover { color: var(--text); }
+  .mode-tab.active {
+    background: linear-gradient(135deg, #7c5cff, #ff4d6d);
+    color: white;
+    box-shadow: 0 4px 10px rgba(124,92,255,0.3);
+  }
+
+  /* ============ 출전 카드 선택 (피커) ============ */
+  .fighter-picker {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 4px 12px;
+    scrollbar-width: thin;
+    margin-bottom: 12px;
+  }
+  .fighter-picker::-webkit-scrollbar { height: 4px; }
+  .fighter-picker::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+  .fighter-picker .card {
+    flex: 0 0 100px;
+    width: 100px;
+    transition: all .2s;
+  }
+  .fighter-picker .card.selected {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(255,77,109,0.4);
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .fighter-picker-empty {
+    width: 100%;
+    text-align: center;
+    padding: 30px 16px;
+    color: var(--text-dim);
+    font-size: 13px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+  }
+  .big-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+  }
+  .big-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: rgba(255,255,255,0.06);
+    box-shadow: none;
+  }
+  .center { text-align: center; }
+
+  /* ============ 매칭 검색 화면 ============ */
+  .search-stage {
+    text-align: center;
+    padding: 32px 20px;
+  }
+  .search-ring {
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    position: relative;
+    background: radial-gradient(circle, rgba(124,92,255,0.15), transparent 70%);
+  }
+  .search-ring::before, .search-ring::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    border-top-color: var(--accent);
+    animation: searchSpin 1.5s linear infinite;
+  }
+  .search-ring::after {
+    inset: 12px;
+    border-top-color: #ff4d6d;
+    animation-duration: 2s;
+    animation-direction: reverse;
+  }
+  @keyframes searchSpin { to { transform: rotate(360deg); } }
+  .search-card-mini {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px; height: 110px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--bg-3), var(--bg-2));
+    border: 1.5px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 38px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+  }
+  .search-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+  .search-sub {
+    color: var(--text-dim);
+    font-size: 12px;
+    margin-bottom: 24px;
+  }
+  .cancel-btn {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.3);
+    color: #fca5a5;
+    min-width: 120px;
+  }
+  .cancel-btn:hover { background: rgba(239,68,68,0.2); }
+
+  /* ============ 매칭 플레이 화면 ============ */
+  .match-stage {
+    background: radial-gradient(circle at 50% 50%, rgba(124,92,255,0.1), transparent 70%);
+    border-radius: 18px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border: 1px solid var(--line);
+    margin-bottom: 14px;
+  }
+  .match-side {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .match-side.opp { flex-direction: row; }
+  .match-side.me { flex-direction: row-reverse; }
+  .player-info {
+    flex: 1;
+    text-align: left;
+  }
+  .match-side.me .player-info { text-align: right; }
+  .player-name {
+    font-family: 'Jua', sans-serif;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+  .player-rarity {
+    display: inline-flex;
+    gap: 2px;
+  }
+  .player-rarity span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--r-c);
+    box-shadow: 0 0 4px currentColor;
+  }
+  .player-rarity[data-rarity="r"] span { background: var(--r-r); color: var(--r-r); }
+  .player-rarity[data-rarity="sr"] span { background: var(--r-sr); color: var(--r-sr); }
+  .player-rarity[data-rarity="ssr"] span { background: var(--r-ssr); color: var(--r-ssr); }
+
+  .match-card {
+    width: 90px;
+    aspect-ratio: 5 / 7;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    border: 1.5px solid var(--line);
+    background: var(--bg-3);
+    flex-shrink: 0;
+  }
+  .match-card .art {
+    position: absolute; inset: 0;
+    background-size: cover;
+    background-position: center;
+  }
+  .match-card[data-type="sci"] .art { background: linear-gradient(160deg, #5a1c2c 0%, #2a0d18 60%, #1a0810 100%); }
+  .match-card[data-type="rok"] .art { background: linear-gradient(160deg, #3a4055 0%, #1c2030 60%, #0e1018 100%); }
+  .match-card[data-type="pap"] .art { background: linear-gradient(160deg, #6b5520 0%, #2a230a 60%, #1a1505 100%); }
+  .match-card .art:not([style])::after {
+    content: attr(data-emoji);
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+  }
+  .match-card .frame {
+    position: absolute; inset: 0;
+    padding: 4px 6px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 30%, transparent 65%, rgba(0,0,0,0.85) 100%);
+  }
+  .match-card .top { display: flex; justify-content: space-between; align-items: center; }
+  .match-card .type-badge {
+    width: 18px; height: 18px;
+    border-radius: 50%; font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.4);
+  }
+  .match-card[data-type="sci"] .type-badge { background: var(--t-sci); }
+  .match-card[data-type="rok"] .type-badge { background: var(--t-rok); }
+  .match-card[data-type="pap"] .type-badge { background: var(--t-pap); color: #2a230a; }
+  .match-card .hp {
+    font-family: 'Jua', sans-serif;
+    font-size: 9px;
+    background: rgba(0,0,0,0.5);
+    padding: 1px 5px;
+    border-radius: 999px;
+  }
+  .match-card .bot .name {
+    font-family: 'Jua', sans-serif;
+    font-size: 10px;
+    color: white;
+    text-align: center;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hand-display {
+    width: 48px;
+    height: 48px;
+    background: rgba(0,0,0,0.4);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+    transition: all .3s;
+  }
+  .hand-display.revealed {
+    border-color: var(--accent);
+    background: rgba(124,92,255,0.15);
+    transform: scale(1.1);
+  }
+  .hand-display.waiting {
+    animation: handBlink 1s ease-in-out infinite;
+  }
+  @keyframes handBlink {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  .match-vs {
+    text-align: center;
+    font-family: 'Bagel Fat One', sans-serif;
+    font-size: 18px;
+    background: linear-gradient(135deg, #ff4d6d, #7c5cff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 2px;
+  }
+
+  .match-status {
+    text-align: center;
+    font-family: 'Jua', sans-serif;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    min-height: 20px;
+  }
+
+  .hand-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .hand-btn {
+    padding: 14px 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+    color: var(--text);
+    border-radius: 14px;
+    font-family: 'Jua', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    transition: all .15s;
+  }
+  .hand-btn:active { transform: scale(0.96); }
+  .hand-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .hand-btn .ico { font-size: 28px; }
+  .hand-btn[data-type="sci"]:hover:not(:disabled) { background: var(--t-sci-bg); border-color: var(--t-sci); }
+  .hand-btn[data-type="rok"]:hover:not(:disabled) { background: var(--t-rok-bg); border-color: var(--t-rok-2); }
+  .hand-btn[data-type="pap"]:hover:not(:disabled) { background: var(--t-pap-bg); border-color: var(--t-pap); }
+  .hand-btn.selected {
+    background: linear-gradient(135deg, #7c5cff, #ff4d6d);
+    border-color: transparent;
+    color: white;
+  }
+
+  /* ============ 결과 화면 ============ */
+  .result-stage {
+    text-align: center;
+    padding: 24px 20px;
+    background: radial-gradient(circle at 50% 30%, rgba(255,209,102,0.15), transparent 70%);
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    animation: resultAppear .5s ease both;
+  }
+  @keyframes resultAppear {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .result-emoji {
+    font-size: 64px;
+    margin-bottom: 4px;
+    animation: emojiBounce .8s cubic-bezier(.18,.89,.43,1.18);
+  }
+  @keyframes emojiBounce {
+    0% { transform: scale(0) rotate(-180deg); }
+    60% { transform: scale(1.15) rotate(0deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+  .result-title {
+    font-family: 'Bagel Fat One', sans-serif;
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+  .result-title.win { background: linear-gradient(135deg, #4ade80, #62d2ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .result-title.lose { color: #ef4444; }
+  .result-title.tie { color: var(--text-dim); }
+  .result-title.star {
+    background: linear-gradient(135deg, #ffd166, #c084fc);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .result-desc {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .result-cards {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .rc-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .rc-label { font-family: 'Jua', sans-serif; font-size: 12px; color: var(--text-dim); }
+  .rc-hand {
+    font-size: 48px;
+    width: 80px; height: 80px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    border: 1.5px solid var(--line);
+  }
+  .rc-rarity {
+    font-size: 12px;
+    color: var(--text-mute);
+    font-family: 'Jua', sans-serif;
+  }
+  .rc-rarity.winner { color: var(--warn); font-weight: bold; }
+  .rc-vs {
+    font-family: 'Bagel Fat One', sans-serif;
+    font-size: 16px;
+    color: var(--text-mute);
+  }
+  .result-actions {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 8px;
+  }
+
+  /* Firebase 미설정 화면 */
+  .firebase-setup {
+    text-align: center;
+    padding: 40px 20px;
+    border: 1px dashed var(--line);
+    border-radius: 16px;
+    background: rgba(255,255,255,0.02);
+  }
+  .firebase-setup .fs-icon { font-size: 48px; margin-bottom: 12px; }
+  .firebase-setup .fs-title {
+    font-family: 'Jua', sans-serif;
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  .firebase-setup .fs-desc {
+    color: var(--text-dim);
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 20px;
   }
 </style>
 </head>
@@ -1574,9 +1987,11 @@
       <span class="brand-main">올스타 카드 배틀</span>
     </div>
     <div class="currency">
+      <div class="chip trophy-chip" onclick="goto('battle')" title="승리 진행률">
+        <span class="dot trophy"></span><span id="winsCount">0</span><span class="slash">/10</span>
+      </div>
       <div class="chip"><span class="dot gem"></span><span id="gemCount">280</span></div>
       <div class="chip"><span class="dot coin"></span><span id="coinCount">1,240</span></div>
-      <button class="admin-btn" onclick="openAdmin()" title="카드 관리">⚙️</button>
     </div>
   </header>
 
@@ -1585,77 +2000,69 @@
 
     <!-- ============ 홈 페이지 ============ -->
     <section class="page active" data-page="home">
-      <!-- 메인 팩 -->
-      <div class="hero-pack">
-        <div class="pack-header">
-          <div>
-            <div class="pack-title">시즌 1 · 첫 번째 손짓</div>
-            <div class="pack-sub">매일 무료 1팩 · 5장 보장</div>
-          </div>
-          <div class="pack-tag">NEW</div>
+      <!-- 메인 팩 (홈의 주인공) -->
+      <div class="hero-pack-v2">
+        <div class="hp-glow"></div>
+        <div class="hp-header">
+          <div class="hp-season">SEASON 01</div>
+          <div class="hp-title">올스타 팩</div>
+          <div class="hp-sub">5장 보장 · 매일 무료 1팩</div>
         </div>
-        <div class="pack-art">
-          <div class="pack-3d">
-            <div class="pack-face">
-              <div class="pf-title">ALL<br>STAR</div>
-              <div class="pf-rps">✊✋✌️</div>
-              <div class="pf-sub">COM · SEASON 01</div>
+
+        <div class="hp-pack-stage">
+          <div class="hp-pack-3d">
+            <div class="hp-pack-face">
+              <div class="hp-pf-title">ALL<br>STAR</div>
+              <div class="hp-pf-stars">★ ★ ★</div>
+              <div class="hp-pf-sub">COM</div>
             </div>
           </div>
+          <!-- 주변 떠다니는 카드 미리보기 -->
+          <div class="hp-floater f1">🃏</div>
+          <div class="hp-floater f2">⭐</div>
+          <div class="hp-floater f3">✨</div>
         </div>
-        <div class="pack-actions">
-          <button class="btn" onclick="openPack(true)">무료 오픈</button>
-          <button class="btn primary" onclick="openPack(false)">팩 열기<span class="cost">💎 50</span></button>
+
+        <div class="hp-rates">
+          <div class="rate-pill"><span class="dot" style="background:var(--r-c)"></span>C 50%</div>
+          <div class="rate-pill"><span class="dot" style="background:var(--r-r)"></span>R 38%</div>
+          <div class="rate-pill"><span class="dot" style="background:var(--r-sr)"></span>SR 9.5%</div>
+          <div class="rate-pill"><span class="dot" style="background:var(--r-ssr)"></span>SSR 2.5%</div>
+        </div>
+
+        <div class="hp-actions">
+          <button class="btn hp-free" onclick="openPack(true)">
+            <div class="hp-btn-main">무료 오픈</div>
+            <div class="hp-btn-sub" id="freePackInfo">하루 1회</div>
+          </button>
+          <button class="btn primary hp-gem" onclick="openPack(false)">
+            <div class="hp-btn-main">팩 열기</div>
+            <div class="hp-btn-sub">💎 50</div>
+          </button>
         </div>
       </div>
 
-      <!-- 빠른 메뉴 -->
-      <div class="section-title"><span class="bar"></span>이벤트</div>
+      <!-- 무료 팩 알림 (10승 달성시 노출) -->
+      <div class="free-pack-banner" id="freePackBanner" style="display:none">
+        <div class="fpb-icon">🎁</div>
+        <div class="fpb-content">
+          <div class="fpb-title">무료 팩이 도착했어요!</div>
+          <div class="fpb-sub">10승 달성 보상</div>
+        </div>
+        <button class="btn primary" onclick="claimFreePack()">받기</button>
+      </div>
+
+      <!-- 빠른 메뉴 (간소화) -->
       <div class="quick-grid">
-        <div class="quick" onclick="toast('일일 미션 진행률: 2/3')">
-          <div class="icn">🎯</div>
-          <div class="ttl">일일 미션</div>
-          <div class="desc">2/3 진행 중</div>
-        </div>
-        <div class="quick" onclick="toast('곧 오픈 예정!')">
-          <div class="icn">🏆</div>
-          <div class="ttl">랭크전</div>
-          <div class="desc">COMING SOON</div>
-        </div>
         <div class="quick" onclick="goto('battle')">
           <div class="icn">⚔️</div>
-          <div class="ttl">빠른 대전</div>
-          <div class="desc">AI와 연습</div>
+          <div class="ttl">대전</div>
+          <div class="desc"><span id="quickWins">0</span>승 · 10승마다 무료 팩</div>
         </div>
-        <div class="quick" onclick="toast('상점은 준비 중입니다')">
-          <div class="icn">🛒</div>
-          <div class="ttl">상점</div>
-          <div class="desc">팩 / 한정 카드</div>
-        </div>
-      </div>
-
-      <!-- 속성 가이드 -->
-      <div class="section-title"><span class="bar"></span>속성 상성</div>
-      <div class="type-guide">
-        <div style="font-size: 13px; color: var(--text-dim);">
-          이 게임의 카드는 <b style="color:var(--text)">가위 · 바위 · 보</b> 세 가지 속성을 가져요.
-        </div>
-        <div class="type-ring">
-          <div class="type-cell sci">
-            <div class="ico">✌️</div>
-            <div class="nm">가위</div>
-          </div>
-          <div class="type-cell rok">
-            <div class="ico">✊</div>
-            <div class="nm">바위</div>
-          </div>
-          <div class="type-cell pap">
-            <div class="ico">✋</div>
-            <div class="nm">보</div>
-          </div>
-        </div>
-        <div class="type-rule">
-          <b>✊ 바위</b>는 <b>✌️ 가위</b>에게 강해요 · <b>✌️ 가위</b>는 <b>✋ 보</b>에게 강해요 · <b>✋ 보</b>는 <b>✊ 바위</b>에게 강해요
+        <div class="quick" onclick="goto('collection')">
+          <div class="icn">📚</div>
+          <div class="ttl">컬렉션</div>
+          <div class="desc"><span id="quickOwned">0</span> / <span id="quickTotal">0</span> 수집</div>
         </div>
       </div>
 
@@ -1725,43 +2132,196 @@
 
     <!-- ============ 배틀 페이지 ============ -->
     <section class="page" data-page="battle">
-      <div class="section-title"><span class="bar"></span>대전</div>
+      <!-- 진행률 -->
+      <div class="progress-card" id="progressCard">
+        <div class="progress-top">
+          <div>
+            <div class="progress-label">🏆 다음 무료 팩까지</div>
+            <div class="progress-stat"><b id="progressWins">0</b><span class="muted-stat">/ 10승</span></div>
+          </div>
+          <button class="btn primary claim-btn" id="claimBtn" onclick="claimFreePack()" style="display:none;">
+            🎁 무료 팩 받기
+          </button>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-stats">
+          <span class="ps win"><b id="statWins">0</b> 승</span>
+          <span class="ps lose"><b id="statLosses">0</b> 패</span>
+          <span class="ps tie"><b id="statTies">0</b> 무</span>
+          <span class="ps pack"><b id="statPacks">0</b> 받음</span>
+        </div>
+      </div>
 
-      <div class="battle-stage">
-        <!-- 상대 -->
-        <div class="battle-side">
-          <div class="label">상대 · LV.3 AI</div>
-          <div class="battle-card opp">❓</div>
-          <div class="hp-bar"><div style="width:78%"></div></div>
+      <!-- 모드 탭 -->
+      <div class="mode-tabs">
+        <button class="mode-tab active" data-mode="online" onclick="setBattleMode('online')">
+          🌐 온라인 매칭
+        </button>
+        <button class="mode-tab" data-mode="cpu" onclick="setBattleMode('cpu')">
+          🤖 CPU 연습
+        </button>
+      </div>
+
+      <!-- ====== 온라인 매칭 모드 ====== -->
+      <div class="battle-mode" id="modeOnline">
+        <!-- IDLE 상태 -->
+        <div class="online-state" id="onlineIdle">
+          <div class="section-title" style="margin-top:8px"><span class="bar"></span>출전 카드 선택</div>
+          <div class="muted" style="margin-bottom:10px">대전에서 사용할 카드를 골라주세요. (희귀도가 높으면 같은 손에서 유리해요)</div>
+          <div class="fighter-picker" id="fighterPicker">
+            <!-- JS로 카드 목록 채움 -->
+          </div>
+          <button class="btn primary big-btn" id="startMatchBtn" onclick="startOnlineMatch()" disabled>
+            ⚔️ 매칭 시작
+          </button>
+          <div class="muted center" style="margin-top:10px" id="onlineStatus">
+            온라인 대전 준비 완료
+          </div>
         </div>
 
-        <!-- VS -->
-        <div class="vs-mark">VS</div>
+        <!-- SEARCHING 상태 -->
+        <div class="online-state" id="onlineSearching" style="display:none">
+          <div class="search-stage">
+            <div class="search-ring">
+              <div class="search-card-mini" id="searchMyCard">🃏</div>
+            </div>
+            <div class="search-title">상대를 찾는 중...</div>
+            <div class="search-sub" id="searchSub">전 세계 플레이어를 검색하고 있어요</div>
+            <button class="btn cancel-btn" onclick="cancelMatchmaking()">취소</button>
+          </div>
+        </div>
 
-        <!-- 나 -->
-        <div class="battle-side">
-          <div class="hp-bar"><div style="width:92%"></div></div>
-          <div class="battle-card">✊</div>
-          <div class="label">나</div>
+        <!-- PLAYING 상태 -->
+        <div class="online-state" id="onlinePlaying" style="display:none">
+          <div class="match-stage">
+            <!-- 상대 -->
+            <div class="match-side opp">
+              <div class="player-info">
+                <div class="player-name" id="oppName">상대</div>
+                <div class="player-rarity" id="oppRarity"></div>
+              </div>
+              <div class="match-card opp-card" id="oppMatchCard">
+                <div class="art" data-emoji="❓"></div>
+                <div class="frame">
+                  <div class="top">
+                    <div class="type-badge" id="oppBadge">❓</div>
+                    <div class="hp" id="oppHp">HP -</div>
+                  </div>
+                  <div class="bot"><div class="name" id="oppCardName">대기 중...</div></div>
+                </div>
+              </div>
+              <div class="hand-display" id="oppHandDisplay">❓</div>
+            </div>
+
+            <div class="match-vs">VS</div>
+
+            <!-- 나 -->
+            <div class="match-side me">
+              <div class="hand-display" id="myHandDisplay">?</div>
+              <div class="match-card my-card" id="myMatchCard">
+                <!-- JS로 채움 -->
+              </div>
+              <div class="player-info">
+                <div class="player-name" id="myName">나</div>
+                <div class="player-rarity" id="myRarity"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="match-status" id="matchStatus">손을 내세요</div>
+
+          <div class="hand-buttons" id="handButtons">
+            <button class="hand-btn" data-type="sci" onclick="submitOnlineHand('sci')">
+              <div class="ico">✌️</div>가위
+            </button>
+            <button class="hand-btn" data-type="rok" onclick="submitOnlineHand('rok')">
+              <div class="ico">✊</div>바위
+            </button>
+            <button class="hand-btn" data-type="pap" onclick="submitOnlineHand('pap')">
+              <div class="ico">✋</div>보
+            </button>
+          </div>
+        </div>
+
+        <!-- RESULT 상태 -->
+        <div class="online-state" id="onlineResult" style="display:none">
+          <div class="result-stage">
+            <div class="result-emoji" id="resultEmoji">🎉</div>
+            <div class="result-title" id="resultTitle">승리!</div>
+            <div class="result-desc" id="resultDesc">상대를 이겼습니다</div>
+            <div class="result-cards">
+              <div class="rc-side">
+                <div class="rc-label">나</div>
+                <div class="rc-hand" id="resultMyHand">✊</div>
+                <div class="rc-rarity" id="resultMyRarity">★</div>
+              </div>
+              <div class="rc-vs">vs</div>
+              <div class="rc-side">
+                <div class="rc-label">상대</div>
+                <div class="rc-hand" id="resultOppHand">✌️</div>
+                <div class="rc-rarity" id="resultOppRarity">★</div>
+              </div>
+            </div>
+            <div class="result-actions">
+              <button class="btn" onclick="leaveOnlineMatch()">나가기</button>
+              <button class="btn primary" onclick="rematchOnline()">한 번 더</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Firebase 미설정 시 (네트워크 오류 등) -->
+        <div class="online-state" id="onlineNoFirebase" style="display:none">
+          <div class="firebase-setup">
+            <div class="fs-icon">⚠️</div>
+            <div class="fs-title">서버에 연결할 수 없어요</div>
+            <div class="fs-desc">
+              네트워크 상태를 확인하거나<br>
+              잠시 후 다시 시도해주세요.
+            </div>
+            <button class="btn primary" onclick="location.reload()">새로고침</button>
+          </div>
         </div>
       </div>
 
-      <div class="section-title"><span class="bar"></span>손짓 선택</div>
-      <div class="battle-actions">
-        <button class="action-btn" data-type="sci" onclick="playRPS('sci')">
-          <div class="ico">✌️</div>가위
-        </button>
-        <button class="action-btn" data-type="rok" onclick="playRPS('rok')">
-          <div class="ico">✊</div>바위
-        </button>
-        <button class="action-btn" data-type="pap" onclick="playRPS('pap')">
-          <div class="ico">✋</div>보
-        </button>
+      <!-- ====== CPU 연습 모드 ====== -->
+      <div class="battle-mode" id="modeCpu" style="display:none">
+        <div class="battle-stage">
+          <!-- 상대 -->
+          <div class="battle-side">
+            <div class="label">CPU · LV.3 AI</div>
+            <div class="battle-card opp">❓</div>
+            <div class="hp-bar"><div style="width:100%"></div></div>
+          </div>
+
+          <!-- VS -->
+          <div class="vs-mark">VS</div>
+
+          <!-- 나 -->
+          <div class="battle-side">
+            <div class="hp-bar"><div style="width:100%"></div></div>
+            <div class="battle-card">✊</div>
+            <div class="label">나</div>
+          </div>
+        </div>
+
+        <div class="section-title"><span class="bar"></span>손짓 선택</div>
+        <div class="battle-actions">
+          <button class="action-btn" data-type="sci" onclick="playRPS('sci')">
+            <div class="ico">✌️</div>가위
+          </button>
+          <button class="action-btn" data-type="rok" onclick="playRPS('rok')">
+            <div class="ico">✊</div>바위
+          </button>
+          <button class="action-btn" data-type="pap" onclick="playRPS('pap')">
+            <div class="ico">✋</div>보
+          </button>
+        </div>
+
+        <div class="battle-log" id="battleLog">
+          <span class="turn">— 연습 모드입니다. 승수는 카운트되지 않아요 —</span>
+        </div>
       </div>
 
-      <div class="battle-log" id="battleLog">
-        <span class="turn">— 손짓을 선택하세요 —</span>
-      </div>
       <div style="height: 30px;"></div>
     </section>
 
@@ -1848,191 +2408,77 @@
     </div>
   </div>
 
+  <!-- 닉네임 설정 모달 -->
+  <div class="modal" id="nameModal" onclick="if(event.target===this) closeModal('nameModal')">
+    <div class="modal-inner" style="max-width:320px;">
+      <h3 style="margin:0 0 8px; font-family:'Jua', sans-serif;">닉네임 설정</h3>
+      <div class="muted" style="margin-bottom:12px; font-size:13px;">상대방에게 보일 닉네임이에요</div>
+      <input id="nameInput" maxlength="12" placeholder="닉네임 입력"
+             style="width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--line); border-radius:10px; padding:10px 12px; color:var(--text); font-family:'Jua', sans-serif; font-size:15px; outline:none; text-align:center;">
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button class="btn" style="flex:1" onclick="closeModal('nameModal')">취소</button>
+        <button class="btn primary" style="flex:2" onclick="saveName()">저장</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast -->
   <div class="toast" id="toast"></div>
-
-  <!-- ============ 관리자 오버레이 ============ -->
-  <div class="admin-overlay" id="adminOverlay">
-    <div class="admin-topbar">
-      <div class="title">⚙️ 카드 관리</div>
-      <button class="admin-close" onclick="closeAdmin()">완료</button>
-    </div>
-    <div class="admin-body">
-      <!-- 통계 -->
-      <div class="admin-stats-bar">
-        <div class="stat-chip">
-          <div class="v" id="admTotal">0</div>
-          <div class="l">총 카드</div>
-        </div>
-        <div class="stat-chip">
-          <div class="v" id="admSci" style="color:var(--t-sci)">0</div>
-          <div class="l">✌️ 가위</div>
-        </div>
-        <div class="stat-chip">
-          <div class="v" id="admRok" style="color:var(--t-rok-2)">0</div>
-          <div class="l">✊ 바위</div>
-        </div>
-        <div class="stat-chip">
-          <div class="v" id="admPap" style="color:var(--t-pap)">0</div>
-          <div class="l">✋ 보</div>
-        </div>
-      </div>
-
-      <!-- 액션 -->
-      <div class="admin-actions">
-        <button class="btn primary" onclick="openCardEditor()">＋ 새 카드 추가</button>
-        <button class="btn" onclick="exportCards()">💾 내보내기</button>
-        <button class="btn" onclick="document.getElementById('importInput').click()">📂 불러오기</button>
-        <input type="file" id="importInput" accept=".json,application/json" hidden onchange="importCards(event)">
-      </div>
-
-      <div class="admin-danger-row">
-        <button class="btn-danger" onclick="confirmResetSeed()">🔄 기본 카드로 초기화</button>
-      </div>
-
-      <!-- 카드 그리드 -->
-      <div id="adminCardArea">
-        <div class="admin-grid" id="adminGrid"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ 카드 편집기 모달 ============ -->
-  <div class="modal editor-modal" id="editorModal" onclick="if(event.target===this) closeEditor()">
-    <div class="modal-inner">
-      <div class="editor-title" id="editorTitle">카드 추가</div>
-
-      <!-- 이미지 업로드 -->
-      <div class="upload-area" id="uploadArea" onclick="document.getElementById('imageInput').click()">
-        <div class="upload-preview-img" id="uploadPreviewImg"></div>
-        <div class="upload-placeholder" id="uploadPlaceholder">
-          <div class="ico">📷</div>
-          <div>이미지 선택<br>또는 드래그</div>
-        </div>
-        <button class="upload-clear" onclick="event.stopPropagation(); clearUploadImage()">✕</button>
-      </div>
-      <input type="file" id="imageInput" accept="image/*" hidden onchange="handleImageUpload(event)">
-
-      <!-- 카드 이름 -->
-      <div class="form-group">
-        <label class="form-label">카드 이름</label>
-        <input class="form-input" id="editName" placeholder="예: 가위병정" maxlength="20">
-      </div>
-
-      <!-- 속성 -->
-      <div class="form-group">
-        <label class="form-label">속성</label>
-        <div class="pill-group" id="typeGroup">
-          <div class="pill" data-type="sci" onclick="selectType('sci')">✌️ 가위</div>
-          <div class="pill" data-type="rok" onclick="selectType('rok')">✊ 바위</div>
-          <div class="pill" data-type="pap" onclick="selectType('pap')">✋ 보</div>
-        </div>
-      </div>
-
-      <!-- 희귀도 -->
-      <div class="form-group">
-        <label class="form-label">희귀도</label>
-        <div class="pill-group" id="rarityGroup">
-          <div class="pill" data-rarity="c"   onclick="selectRarity('c')">C</div>
-          <div class="pill" data-rarity="r"   onclick="selectRarity('r')">R</div>
-          <div class="pill" data-rarity="sr"  onclick="selectRarity('sr')">SR</div>
-          <div class="pill" data-rarity="ssr" onclick="selectRarity('ssr')">SSR</div>
-        </div>
-      </div>
-
-      <!-- HP -->
-      <div class="form-group">
-        <label class="form-label">HP <span class="val" id="hpDisplay">100</span></label>
-        <input type="range" class="form-range" id="editHp" min="20" max="200" step="10" value="100"
-               oninput="document.getElementById('hpDisplay').textContent=this.value">
-      </div>
-
-      <!-- 이모지 (이미지 없을 때 표시) -->
-      <div class="form-group">
-        <label class="form-label">이모지 (이미지 없을 때 표시)</label>
-        <input class="form-input" id="editEmoji" placeholder="예: ✂️" maxlength="4">
-      </div>
-
-      <!-- 설명 -->
-      <div class="form-group">
-        <label class="form-label">카드 설명</label>
-        <textarea class="form-textarea" id="editDesc" placeholder="카드의 특징이나 스토리를 적어주세요" maxlength="80"></textarea>
-      </div>
-
-      <div class="editor-actions">
-        <button class="btn" onclick="closeEditor()">취소</button>
-        <button class="btn primary" onclick="saveCard()">저장</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 확인 다이얼로그 -->
-  <div class="modal confirm-dialog" id="confirmDialog">
-    <div class="modal-inner">
-      <h3 id="confirmTitle">확인</h3>
-      <div class="msg" id="confirmMsg">정말 진행하시겠습니까?</div>
-      <div class="btns">
-        <button class="btn" onclick="closeConfirm()">취소</button>
-        <button class="btn primary" id="confirmOK">확인</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script>
 /* ============================================================
-   카드 데이터 (저장소 기반)
-   타입: sci=가위 / rok=바위 / pap=보
-   희귀도: c, r, sr, ssr
+   Firebase 초기화 (Firestore)
    ============================================================ */
-const STORAGE_KEY = 'com_allstar_cards_v1';
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCZdrY0QEdeyjo_djOoAGF0QvF84dmlVWc",
+  authDomain: "comallstar-c8e58.firebaseapp.com",
+  projectId: "comallstar-c8e58",
+  storageBucket: "comallstar-c8e58.firebasestorage.app",
+  messagingSenderId: "749606419198",
+  appId: "1:749606419198:web:4b507053183fefd40f43af"
+};
 
-// 초기 시드 데이터 (사용자가 카드를 한 번도 등록한 적 없을 때)
+let firebaseDB = null;
+let firebaseReady = false;
+try {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  firebaseDB = firebase.firestore();
+  firebaseReady = true;
+} catch(e) {
+  console.error('Firebase 초기화 실패', e);
+}
+
+/* ============================================================
+   카드 데이터 (Firestore에서 실시간 동기화)
+   ============================================================ */
+const LOCAL_CARDS_CACHE = 'com_allstar_cards_cache_v2';
+
+// 폴백용 최소 시드 (Firestore 비어있을 때 처음 한 번만 사용)
 const SEED_CARDS = [
-  // 가위 ✌️
-  { id: 'sci01', name: '가위병정',     type: 'sci', hp: 60,  rarity: 'c',  image: '', emoji: '✂️', desc: '재빠른 일격으로 보 타입에게 강합니다.' },
-  { id: 'sci02', name: '쌍칼냥이',     type: 'sci', hp: 70,  rarity: 'r',  image: '', emoji: '🐱', desc: '두 자루의 칼을 휘두르는 민첩한 고양이.' },
-  { id: 'sci04', name: '칼날도깨비',   type: 'sci', hp: 90,  rarity: 'sr', image: '', emoji: '👹', desc: '거대한 가위로 보를 단숨에 베어버립니다.' },
-  { id: 'sci05', name: '월광검사',     type: 'sci', hp: 120, rarity: 'ssr',image: '', emoji: '🌙', desc: '달빛 아래에서 더 강해지는 전설의 검사.' },
-  // 바위 ✊
-  { id: 'rok01', name: '돌멩이꼬마',   type: 'rok', hp: 80,  rarity: 'c',  image: '', emoji: '🪨', desc: '단단하고 듬직한 작은 돌.' },
-  { id: 'rok02', name: '바위거북',     type: 'rok', hp: 110, rarity: 'r',  image: '', emoji: '🐢', desc: '등껍질이 화강암으로 만들어진 거북.' },
-  { id: 'rok03', name: '화산골렘',     type: 'rok', hp: 140, rarity: 'sr', image: '', emoji: '🌋', desc: '용암으로 단련된 거대한 골렘.' },
-  { id: 'rok07', name: '암석의왕',     type: 'rok', hp: 160, rarity: 'ssr',image: '', emoji: '👑', desc: '모든 광물을 다스리는 전설의 왕.' },
-  // 보 ✋
-  { id: 'pap01', name: '종이학',       type: 'pap', hp: 50,  rarity: 'c',  image: '', emoji: '🕊️', desc: '바람을 타고 우아하게 비행해요.' },
-  { id: 'pap02', name: '책읽는마법사', type: 'pap', hp: 70,  rarity: 'r',  image: '', emoji: '🧙', desc: '오래된 책에서 강력한 마법을 꺼내요.' },
-  { id: 'pap04', name: '두루마리현자', type: 'pap', hp: 90,  rarity: 'sr', image: '', emoji: '📜', desc: '고대의 지혜를 두루마리에 새긴 현자.' },
-  { id: 'pap05', name: '구름의여신',   type: 'pap', hp: 130, rarity: 'ssr',image: '', emoji: '☁️', desc: '구름을 부려 바위를 봉인합니다.' }
+  { id: 'sci01', name: '가위병정',     type: 'sci', hp: 60,  rarity: 'c',  image: '', emoji: '✂️', desc: '재빠른 일격.' },
+  { id: 'sci02', name: '쌍칼냥이',     type: 'sci', hp: 70,  rarity: 'r',  image: '', emoji: '🐱', desc: '두 자루의 칼을 휘두르는 고양이.' },
+  { id: 'sci04', name: '칼날도깨비',   type: 'sci', hp: 90,  rarity: 'sr', image: '', emoji: '👹', desc: '거대한 가위.' },
+  { id: 'sci05', name: '월광검사',     type: 'sci', hp: 120, rarity: 'ssr',image: '', emoji: '🌙', desc: '달빛 아래에서 더 강해지는 검사.' },
+  { id: 'rok01', name: '돌멩이꼬마',   type: 'rok', hp: 80,  rarity: 'c',  image: '', emoji: '🪨', desc: '단단하고 듬직한 돌.' },
+  { id: 'rok02', name: '바위거북',     type: 'rok', hp: 110, rarity: 'r',  image: '', emoji: '🐢', desc: '화강암 등껍질의 거북.' },
+  { id: 'rok03', name: '화산골렘',     type: 'rok', hp: 140, rarity: 'sr', image: '', emoji: '🌋', desc: '용암으로 단련된 골렘.' },
+  { id: 'rok07', name: '암석의왕',     type: 'rok', hp: 160, rarity: 'ssr',image: '', emoji: '👑', desc: '모든 광물을 다스리는 왕.' },
+  { id: 'pap01', name: '종이학',       type: 'pap', hp: 50,  rarity: 'c',  image: '', emoji: '🕊️', desc: '바람을 타고 비행.' },
+  { id: 'pap02', name: '책읽는마법사', type: 'pap', hp: 70,  rarity: 'r',  image: '', emoji: '🧙', desc: '오래된 책의 마법.' },
+  { id: 'pap04', name: '두루마리현자', type: 'pap', hp: 90,  rarity: 'sr', image: '', emoji: '📜', desc: '고대의 지혜.' },
+  { id: 'pap05', name: '구름의여신',   type: 'pap', hp: 130, rarity: 'ssr',image: '', emoji: '☁️', desc: '구름을 부려 바위를 봉인.' }
 ];
 
-// 저장소 함수
-function loadCardsFromStorage() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) { console.warn('저장소 읽기 실패', e); }
-  return null;
-}
-function saveCardsToStorage() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(CARDS));
-    return true;
-  } catch(e) {
-    if (e.name === 'QuotaExceededError') {
-      toast('⚠️ 저장 공간 부족 — 이미지를 줄이거나 카드를 삭제하세요');
-    } else {
-      toast('저장 실패: ' + e.message);
-    }
-    return false;
-  }
-}
+// 캐시 로딩 (Firestore 응답 전에 잠깐 표시할 용도)
+let CARDS = [];
+try {
+  const cached = localStorage.getItem(LOCAL_CARDS_CACHE);
+  if (cached) CARDS = JSON.parse(cached) || [];
+} catch(e) {}
 
-// 초기 로드
-let CARDS = loadCardsFromStorage();
-if (!CARDS || CARDS.length === 0) {
-  CARDS = SEED_CARDS.slice().map(c => ({...c}));
-  saveCardsToStorage();
+function saveCardsCache() {
+  try { localStorage.setItem(LOCAL_CARDS_CACHE, JSON.stringify(CARDS)); } catch(e) {}
 }
 
 /* 보유 상태 (실제 게임에서는 서버/스토리지) */
@@ -2059,6 +2505,11 @@ function goto(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
   if (name === 'collection') renderCollection();
   if (name === 'deck') renderDeck();
+  if (name === 'home') updateHomeStats();
+  if (name === 'battle') {
+    const mode = document.querySelector('.mode-tab.active')?.dataset.mode || 'online';
+    setBattleMode(mode);
+  }
 }
 
 /* ============================================================
@@ -2463,363 +2914,566 @@ function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
 }
 
-/* 초기 렌더 */
+/* 초기 렌더 (캐시 기반 우선 표시) */
 renderCollection();
 renderDeck();
 
 /* ============================================================
-   관리자 (카드 CRUD)
+   Firestore 실시간 카드 구독
+   - 운영툴에서 카드 등록/수정/삭제하면 즉시 반영
+   - 어느 브라우저든 동일한 데이터 공유
    ============================================================ */
-let editingId = null;        // null = 새 카드, 그 외 = 편집중인 id
-let pendingImage = '';       // 업로드된 이미지 (data URL)
-let pendingType = 'sci';
-let pendingRarity = 'c';
-
-function openAdmin() {
-  document.getElementById('adminOverlay').classList.add('active');
-  renderAdmin();
+if (firebaseReady) {
+  firebaseDB.collection('cards').onSnapshot(snap => {
+    const fresh = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    CARDS = fresh;
+    saveCardsCache();
+    cleanupOwnedDeck();
+    // 현재 활성 페이지 다시 그리기
+    const active = document.querySelector('.page.active')?.dataset.page;
+    if (active === 'collection') renderCollection();
+    if (active === 'deck') renderDeck();
+    if (active === 'home') updateHomeStats();
+    if (active === 'battle') {
+      const mode = document.querySelector('.mode-tab.active')?.dataset.mode;
+      if (mode === 'online' && onlineState === 'idle') renderOnlineIdle();
+    }
+  }, err => {
+    console.error('Firestore cards 구독 실패', err);
+    toast('카드 데이터 동기화 실패 — 캐시 사용 중');
+  });
 }
-function closeAdmin() {
-  document.getElementById('adminOverlay').classList.remove('active');
-  // 컬렉션/덱 등 다른 화면에 변경사항 반영
-  renderCollection();
-  renderDeck();
+
+function updateHomeStats() {
+  const ownedCount = CARDS.filter(c => owned.has(c.id)).length;
+  const totalCount = CARDS.length;
+  const winsEl = document.getElementById('quickWins');
+  const ownedEl = document.getElementById('quickOwned');
+  const totalEl = document.getElementById('quickTotal');
+  if (winsEl) winsEl.textContent = playerState.wins;
+  if (ownedEl) ownedEl.textContent = ownedCount;
+  if (totalEl) totalEl.textContent = totalCount;
+  // 무료 팩 배너
+  const banner = document.getElementById('freePackBanner');
+  if (banner) banner.style.display = availableFreePacks() > 0 ? '' : 'none';
 }
 
-function renderAdmin() {
-  // 통계
-  const counts = { sci: 0, rok: 0, pap: 0 };
-  CARDS.forEach(c => { if (counts[c.type] !== undefined) counts[c.type]++; });
-  document.getElementById('admTotal').textContent = CARDS.length;
-  document.getElementById('admSci').textContent = counts.sci;
-  document.getElementById('admRok').textContent = counts.rok;
-  document.getElementById('admPap').textContent = counts.pap;
+/* ============================================================
+   플레이어 상태 (승수, 무료 팩 등)
+   ============================================================ */
+const PLAYER_STATE_KEY = 'com_allstar_player_v1';
+const PLAYER_ID_KEY = 'com_allstar_player_id';
+const PLAYER_NAME_KEY = 'com_allstar_player_name';
+const WINS_PER_PACK = 10;
 
-  const grid = document.getElementById('adminGrid');
-  if (CARDS.length === 0) {
-    document.getElementById('adminCardArea').innerHTML = `
-      <div class="empty-state">
-        <div class="ico">🃏</div>
-        <div class="ttl">등록된 카드가 없어요</div>
-        <div>위의 "새 카드 추가" 버튼으로 시작해보세요</div>
-      </div>`;
+function loadPlayerState() {
+  try {
+    const raw = localStorage.getItem(PLAYER_STATE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return null;
+}
+function savePlayerState() {
+  try { localStorage.setItem(PLAYER_STATE_KEY, JSON.stringify(playerState)); } catch(e) {}
+}
+let playerState = loadPlayerState() || { wins: 0, losses: 0, ties: 0, claimedPacks: 0 };
+
+function getPlayerId() {
+  let id = localStorage.getItem(PLAYER_ID_KEY);
+  if (!id) {
+    id = 'p_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+    localStorage.setItem(PLAYER_ID_KEY, id);
+  }
+  return id;
+}
+function getPlayerName() {
+  let n = localStorage.getItem(PLAYER_NAME_KEY);
+  if (!n) {
+    n = '플레이어' + Math.floor(Math.random()*9000 + 1000);
+    localStorage.setItem(PLAYER_NAME_KEY, n);
+  }
+  return n;
+}
+let myPlayerId = getPlayerId();
+let myPlayerName = getPlayerName();
+
+function availableFreePacks() {
+  return Math.floor(playerState.wins / WINS_PER_PACK) - playerState.claimedPacks;
+}
+
+function updateProgressUI() {
+  // 헤더 트로피 칩
+  const total = playerState.wins;
+  const cycle = total % WINS_PER_PACK;
+  const ready = availableFreePacks() > 0;
+  document.getElementById('winsCount').textContent = ready ? '🎁' : cycle;
+  document.getElementById('progressWins').textContent = cycle;
+  document.getElementById('progressFill').style.width = (cycle / WINS_PER_PACK * 100) + '%';
+  document.getElementById('statWins').textContent = playerState.wins;
+  document.getElementById('statLosses').textContent = playerState.losses;
+  document.getElementById('statTies').textContent = playerState.ties;
+  document.getElementById('statPacks').textContent = playerState.claimedPacks;
+  document.querySelector('.trophy-chip').classList.toggle('ready', ready);
+  document.getElementById('claimBtn').style.display = ready ? '' : 'none';
+  // 홈 통계도 갱신
+  if (document.getElementById('quickWins')) updateHomeStats();
+}
+updateProgressUI();
+
+function claimFreePack() {
+  if (availableFreePacks() <= 0) return;
+  playerState.claimedPacks++;
+  savePlayerState();
+  updateProgressUI();
+  openPack(true); // 무료 팩 열기 (잼 차감 없음)
+}
+
+/* 닉네임 설정 */
+function openNameModal() {
+  document.getElementById('nameInput').value = myPlayerName;
+  document.getElementById('nameModal').classList.add('active');
+}
+function saveName() {
+  const v = document.getElementById('nameInput').value.trim();
+  if (!v) { toast('닉네임을 입력하세요'); return; }
+  myPlayerName = v;
+  localStorage.setItem(PLAYER_NAME_KEY, v);
+  closeModal('nameModal');
+  toast('닉네임 변경: ' + v);
+}
+
+/* ============================================================
+   배틀 모드 전환
+   ============================================================ */
+function setBattleMode(mode) {
+  document.querySelectorAll('.mode-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.mode === mode));
+  document.getElementById('modeOnline').style.display = mode === 'online' ? '' : 'none';
+  document.getElementById('modeCpu').style.display = mode === 'cpu' ? '' : 'none';
+  if (mode === 'online') {
+    renderOnlineIdle();
+  }
+}
+
+/* ============================================================
+   온라인 매칭 — 상태 머신
+   ============================================================ */
+let selectedFighter = null;    // 출전 카드
+let onlineState = 'idle';      // idle / searching / playing / result
+let queueRef = null;
+let queueListener = null;
+let matchRef = null;
+let matchListener = null;
+let myRole = null;             // 'p1' or 'p2'
+let oppRole = null;
+let currentMatchData = null;
+let matchResolved = false;     // 중복 결과 처리 방지
+
+function setOnlineState(state) {
+  onlineState = state;
+  ['Idle','Searching','Playing','Result','NoFirebase'].forEach(s => {
+    document.getElementById('online' + s).style.display = 'none';
+  });
+  if (!firebaseReady && state === 'idle') {
+    document.getElementById('onlineNoFirebase').style.display = '';
+    return;
+  }
+  const targetMap = { idle: 'Idle', searching: 'Searching', playing: 'Playing', result: 'Result' };
+  document.getElementById('online' + targetMap[state]).style.display = '';
+}
+
+function renderOnlineIdle() {
+  setOnlineState('idle');
+  if (!firebaseReady) return;
+
+  // 출전 카드 피커 (보유 카드 중에서)
+  const ownedCards = CARDS.filter(c => owned.has(c.id));
+  const picker = document.getElementById('fighterPicker');
+  if (ownedCards.length === 0) {
+    picker.innerHTML = `<div class="fighter-picker-empty">보유한 카드가 없어요. 먼저 팩을 열어보세요!</div>`;
+    document.getElementById('startMatchBtn').disabled = true;
     return;
   }
 
-  // 카드 그리드 (정렬: 속성 → 희귀도 → 이름)
-  const typeOrder = { sci: 0, rok: 1, pap: 2 };
-  const rOrder = { c: 0, r: 1, sr: 2, ssr: 3 };
-  const sorted = [...CARDS].sort((a, b) =>
-    (typeOrder[a.type] ?? 9) - (typeOrder[b.type] ?? 9) ||
-    rOrder[b.rarity] - rOrder[a.rarity] ||
-    a.name.localeCompare(b.name)
-  );
+  // 기본 선택: 가장 희귀도 높은 카드
+  if (!selectedFighter || !ownedCards.find(c => c.id === selectedFighter.id)) {
+    const rOrder = { c: 0, r: 1, sr: 2, ssr: 3 };
+    selectedFighter = [...ownedCards].sort((a, b) => rOrder[b.rarity] - rOrder[a.rarity])[0];
+  }
 
-  document.getElementById('adminCardArea').innerHTML = `<div class="admin-grid"></div>`;
-  const newGrid = document.querySelector('#adminCardArea .admin-grid');
-  newGrid.innerHTML = sorted.map(c => `
-    <div class="admin-card-wrap">
-      <div class="card-actions">
-        <button class="ca-btn" onclick="openCardEditor('${c.id}')" title="편집">✎</button>
-        <button class="ca-btn del" onclick="confirmDelete('${c.id}')" title="삭제">🗑</button>
+  picker.innerHTML = ownedCards.map(c => cardHTML(c, {forceReveal:true})).join('');
+  picker.querySelectorAll('.card').forEach(el => {
+    if (el.dataset.id === selectedFighter.id) el.classList.add('selected');
+    el.addEventListener('click', () => {
+      const c = CARDS.find(x => x.id === el.dataset.id);
+      selectedFighter = c;
+      picker.querySelectorAll('.card').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+    });
+  });
+
+  document.getElementById('startMatchBtn').disabled = false;
+  document.getElementById('onlineStatus').textContent =
+    `${myPlayerName} · 온라인 대전 준비 완료 (닉네임 변경하려면 탭)`;
+  document.getElementById('onlineStatus').onclick = openNameModal;
+  document.getElementById('onlineStatus').style.cursor = 'pointer';
+}
+
+/* 카드 정보를 Firebase로 보낼 때 (이미지는 큰 경우 생략 가능) */
+function cardForNet(card) {
+  return {
+    id: card.id,
+    name: card.name,
+    type: card.type,
+    hp: card.hp,
+    rarity: card.rarity,
+    emoji: card.emoji || '🃏',
+    image: card.image || ''   // 데이터URL이 너무 크면 비울 수도 있음
+  };
+}
+
+async function startOnlineMatch() {
+  if (!firebaseReady) { toast('Firebase 설정이 필요해요'); return; }
+  if (!selectedFighter) { toast('출전 카드를 선택하세요'); return; }
+
+  setOnlineState('searching');
+  // 검색 화면에 내 카드 표시
+  const mini = document.getElementById('searchMyCard');
+  if (selectedFighter.image) {
+    mini.style.backgroundImage = `url('${selectedFighter.image}')`;
+    mini.textContent = '';
+  } else {
+    mini.style.backgroundImage = '';
+    mini.textContent = selectedFighter.emoji || '🃏';
+  }
+
+  try {
+    // 1) 대기열에 등록 (Firestore)
+    queueRef = firebaseDB.collection('queue').doc(myPlayerId);
+    await queueRef.set({
+      name: myPlayerName,
+      card: cardForNet(selectedFighter),
+      ts: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    // 2) 대기열 감시 (상대 찾기)
+    queueListener = firebaseDB.collection('queue').onSnapshot(snap => {
+      if (onlineState !== 'searching') return;
+      const others = snap.docs
+        .filter(d => d.id !== myPlayerId)
+        .map(d => ({ id: d.id, ...d.data() }));
+      if (others.length === 0) return; // 계속 대기
+
+      // 가장 오래 기다린 사람과 매칭 (ts 기준)
+      others.sort((a, b) => (a.ts?.toMillis?.() || 0) - (b.ts?.toMillis?.() || 0));
+      const opponent = others[0];
+
+      // 결정적 매치 ID (양쪽이 같은 ID 계산)
+      const matchId = [myPlayerId, opponent.id].sort().join('_');
+      const role = myPlayerId < opponent.id ? 'p1' : 'p2';
+      const oRole = role === 'p1' ? 'p2' : 'p1';
+
+      // 큐 감시 종료
+      if (queueListener) { queueListener(); queueListener = null; }
+
+      setupMatch(matchId, role, oRole, opponent);
+    }, err => {
+      console.error('queue 구독 실패', err);
+      toast('매칭 실패: ' + err.message);
+      cleanupMatchmaking();
+      setOnlineState('idle');
+    });
+  } catch(e) {
+    toast('매칭 실패: ' + e.message);
+    cleanupMatchmaking();
+    setOnlineState('idle');
+  }
+}
+
+async function setupMatch(matchId, role, oRole, opponentData) {
+  myRole = role;
+  oppRole = oRole;
+  matchResolved = false;
+  matchRef = firebaseDB.collection('matches').doc(matchId);
+
+  // 내 정보 기록 (merge로 상대 데이터 보존)
+  await matchRef.set({
+    [role]: {
+      id: myPlayerId,
+      name: myPlayerName,
+      card: cardForNet(selectedFighter),
+      hand: null,
+      joined: true
+    },
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true });
+
+  // 큐에서 제거
+  if (queueRef) {
+    try { await queueRef.delete(); } catch(e) {}
+    queueRef = null;
+  }
+
+  // UI: 플레이 상태로
+  setOnlineState('playing');
+  renderMatchUI(opponentData);
+
+  // 매치 감시 (Firestore onSnapshot)
+  matchListener = matchRef.onSnapshot(snap => {
+    const m = snap.data();
+    if (!m) return;
+    currentMatchData = m;
+    handleMatchUpdate(m);
+  }, err => {
+    console.error('match 구독 실패', err);
+  });
+}
+
+function renderMatchUI(opponentData) {
+  // 상대 카드
+  const oppCard = opponentData.card;
+  document.getElementById('oppName').textContent = opponentData.name;
+  document.getElementById('oppCardName').textContent = oppCard.name;
+  document.getElementById('oppHp').textContent = 'HP ' + oppCard.hp;
+  document.getElementById('oppBadge').textContent = TYPE_EMOJI[oppCard.type];
+  const oppMatchCard = document.getElementById('oppMatchCard');
+  oppMatchCard.dataset.type = oppCard.type;
+  const oppArt = oppMatchCard.querySelector('.art');
+  oppArt.dataset.emoji = oppCard.emoji;
+  oppArt.style.backgroundImage = oppCard.image ? `url('${oppCard.image}')` : '';
+  const oppRarityDots = { c:1, r:2, sr:3, ssr:4 }[oppCard.rarity];
+  const oppRarity = document.getElementById('oppRarity');
+  oppRarity.innerHTML = Array.from({length: oppRarityDots}, () => '<span></span>').join('');
+  oppRarity.dataset.rarity = oppCard.rarity;
+
+  // 내 카드
+  document.getElementById('myName').textContent = myPlayerName;
+  const myCardDiv = document.getElementById('myMatchCard');
+  myCardDiv.dataset.type = selectedFighter.type;
+  myCardDiv.innerHTML = `
+    <div class="art" data-emoji="${selectedFighter.emoji}" ${selectedFighter.image ? `style="background-image:url('${selectedFighter.image}')"` : ''}></div>
+    <div class="frame">
+      <div class="top">
+        <div class="type-badge">${TYPE_EMOJI[selectedFighter.type]}</div>
+        <div class="hp">HP ${selectedFighter.hp}</div>
       </div>
-      ${cardHTML(c, {forceReveal:true})}
+      <div class="bot"><div class="name">${selectedFighter.name}</div></div>
     </div>
-  `).join('');
+  `;
+  const myRarityDots = { c:1, r:2, sr:3, ssr:4 }[selectedFighter.rarity];
+  const myRarity = document.getElementById('myRarity');
+  myRarity.innerHTML = Array.from({length: myRarityDots}, () => '<span></span>').join('');
+  myRarity.dataset.rarity = selectedFighter.rarity;
+
+  // 초기 손짓 표시 리셋
+  document.getElementById('myHandDisplay').textContent = '?';
+  document.getElementById('myHandDisplay').className = 'hand-display';
+  document.getElementById('oppHandDisplay').textContent = '❓';
+  document.getElementById('oppHandDisplay').className = 'hand-display';
+  document.getElementById('matchStatus').textContent = '손을 내세요';
+  document.querySelectorAll('.hand-btn').forEach(b => {
+    b.disabled = false;
+    b.classList.remove('selected');
+  });
 }
 
-/* 카드 편집기 */
-function openCardEditor(id) {
-  editingId = id || null;
-  pendingImage = '';
-  pendingType = 'sci';
-  pendingRarity = 'c';
+function handleMatchUpdate(m) {
+  const me = m[myRole];
+  const opp = m[oppRole];
+  if (!me || !opp) return;
 
-  if (id) {
-    const c = CARDS.find(x => x.id === id);
-    if (!c) return;
-    document.getElementById('editorTitle').textContent = '카드 편집';
-    document.getElementById('editName').value = c.name || '';
-    document.getElementById('editEmoji').value = c.emoji || '';
-    document.getElementById('editDesc').value = c.desc || '';
-    document.getElementById('editHp').value = c.hp || 100;
-    document.getElementById('hpDisplay').textContent = c.hp || 100;
-    pendingType = c.type || 'sci';
-    pendingRarity = c.rarity || 'c';
-    pendingImage = c.image || '';
-  } else {
-    document.getElementById('editorTitle').textContent = '카드 추가';
-    document.getElementById('editName').value = '';
-    document.getElementById('editEmoji').value = '';
-    document.getElementById('editDesc').value = '';
-    document.getElementById('editHp').value = 100;
-    document.getElementById('hpDisplay').textContent = 100;
-  }
-  updateTypePills();
-  updateRarityPills();
-  updateImagePreview();
-  document.getElementById('editorModal').classList.add('active');
-}
-function closeEditor() {
-  document.getElementById('editorModal').classList.remove('active');
-}
-
-function selectType(t) { pendingType = t; updateTypePills(); }
-function selectRarity(r) { pendingRarity = r; updateRarityPills(); }
-function updateTypePills() {
-  document.querySelectorAll('#typeGroup .pill').forEach(p =>
-    p.classList.toggle('active', p.dataset.type === pendingType));
-}
-function updateRarityPills() {
-  document.querySelectorAll('#rarityGroup .pill').forEach(p =>
-    p.classList.toggle('active', p.dataset.rarity === pendingRarity));
-}
-
-/* 이미지 업로드 (리사이즈 + 압축) */
-function handleImageUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  if (!file.type.startsWith('image/')) {
-    toast('이미지 파일만 업로드 가능해요');
+  if (opp.left) {
+    toast('상대가 나갔어요');
+    showResultUI('opp_left', me, opp);
     return;
   }
-  resizeImage(file, 500, 700, 0.85).then(dataUrl => {
-    pendingImage = dataUrl;
-    updateImagePreview();
-  }).catch(err => {
-    toast('이미지 처리 실패');
-    console.error(err);
+
+  // 내 손짓 상태 표시
+  if (me.hand) {
+    document.querySelectorAll('.hand-btn').forEach(b => b.disabled = true);
+  }
+
+  // 상대 손짓 대기 표시 (값은 공개하지 않음, 했는지만)
+  if (opp.hand && !me.hand) {
+    document.getElementById('matchStatus').textContent = '상대가 손을 냈어요! 손을 내세요';
+    document.getElementById('oppHandDisplay').className = 'hand-display waiting';
+  } else if (me.hand && !opp.hand) {
+    document.getElementById('matchStatus').textContent = '상대가 선택 중...';
+    document.getElementById('oppHandDisplay').className = 'hand-display waiting';
+  }
+
+  // 둘 다 손 냈으면 결과 처리
+  if (me.hand && opp.hand && !matchResolved) {
+    matchResolved = true;
+    // 손 공개 애니메이션
+    document.getElementById('myHandDisplay').textContent = TYPE_EMOJI[me.hand];
+    document.getElementById('myHandDisplay').className = 'hand-display revealed';
+    document.getElementById('oppHandDisplay').textContent = TYPE_EMOJI[opp.hand];
+    document.getElementById('oppHandDisplay').className = 'hand-display revealed';
+    document.getElementById('matchStatus').textContent = '결과 계산 중...';
+
+    setTimeout(() => resolveOnlineMatch(me, opp), 1100);
+  }
+}
+
+async function submitOnlineHand(hand) {
+  if (!matchRef || !myRole) return;
+  // 이미 냈으면 무시
+  if (currentMatchData && currentMatchData[myRole]?.hand) return;
+  document.querySelectorAll('.hand-btn').forEach(b => {
+    b.disabled = true;
+    if (b.dataset.type === hand) b.classList.add('selected');
   });
-  // 같은 파일 다시 선택 가능하게 리셋
-  event.target.value = '';
+  document.getElementById('myHandDisplay').textContent = TYPE_EMOJI[hand];
+  // Firestore: 중첩 필드 업데이트
+  await matchRef.update({ [`${myRole}.hand`]: hand });
 }
-function clearUploadImage() {
-  pendingImage = '';
-  updateImagePreview();
-}
-function updateImagePreview() {
-  const area = document.getElementById('uploadArea');
-  const img = document.getElementById('uploadPreviewImg');
-  const ph  = document.getElementById('uploadPlaceholder');
-  if (pendingImage) {
-    img.style.backgroundImage = `url('${pendingImage}')`;
-    area.classList.add('has-image');
-    ph.style.display = 'none';
+
+const TYPE_WIN_MAP = { sci: 'pap', rok: 'sci', pap: 'rok' };
+const RARITY_VAL = { c: 1, r: 2, sr: 3, ssr: 4 };
+
+function resolveOnlineMatch(me, opp) {
+  const myH = me.hand, oH = opp.hand;
+  const myR = RARITY_VAL[me.card.rarity];
+  const oR = RARITY_VAL[opp.card.rarity];
+
+  let result;
+  if (myH === oH) {
+    if (myR > oR) result = 'star_win';
+    else if (myR < oR) result = 'star_lose';
+    else result = 'tie';
+  } else if (TYPE_WIN_MAP[myH] === oH) {
+    result = 'win';
   } else {
-    img.style.backgroundImage = '';
-    area.classList.remove('has-image');
-    ph.style.display = '';
+    result = 'lose';
   }
-}
-function resizeImage(file, maxW, maxH, quality) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const img = new Image();
-      img.onload = () => {
-        let w = img.naturalWidth, h = img.naturalHeight;
-        const ratio = Math.min(maxW / w, maxH / h, 1);
-        w = Math.round(w * ratio);
-        h = Math.round(h * ratio);
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#000';
-        ctx.fillRect(0, 0, w, h);
-        ctx.drawImage(img, 0, 0, w, h);
-        try {
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        } catch (err) { reject(err); }
-      };
-      img.onerror = reject;
-      img.src = e.target.result;
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
 
-/* 드래그앤드롭 */
-(function setupDragDrop(){
-  const area = document.getElementById('uploadArea');
-  if (!area) return;
-  ['dragenter','dragover'].forEach(ev => area.addEventListener(ev, e => {
-    e.preventDefault(); e.stopPropagation();
-    area.classList.add('drag-over');
-  }));
-  ['dragleave','drop'].forEach(ev => area.addEventListener(ev, e => {
-    e.preventDefault(); e.stopPropagation();
-    area.classList.remove('drag-over');
-  }));
-  area.addEventListener('drop', e => {
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      resizeImage(file, 500, 700, 0.85).then(dataUrl => {
-        pendingImage = dataUrl;
-        updateImagePreview();
-      });
-    }
-  });
-})();
-
-/* 카드 저장 */
-function saveCard() {
-  const name = document.getElementById('editName').value.trim();
-  const emoji = document.getElementById('editEmoji').value.trim();
-  const desc = document.getElementById('editDesc').value.trim();
-  const hp = parseInt(document.getElementById('editHp').value);
-  if (!name) { toast('카드 이름을 입력하세요'); return; }
-  if (!emoji && !pendingImage) { toast('이미지나 이모지 중 하나는 필요해요'); return; }
-
-  const data = {
-    name, hp, type: pendingType, rarity: pendingRarity,
-    emoji: emoji || '🃏',
-    image: pendingImage || '',
-    desc: desc || '-'
-  };
-
-  if (editingId) {
-    const idx = CARDS.findIndex(c => c.id === editingId);
-    if (idx >= 0) CARDS[idx] = { ...CARDS[idx], ...data };
+  // 통계 갱신
+  if (result === 'win' || result === 'star_win') {
+    playerState.wins++;
+  } else if (result === 'lose' || result === 'star_lose') {
+    playerState.losses++;
   } else {
-    data.id = 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-    CARDS.push(data);
+    playerState.ties++;
   }
-  if (saveCardsToStorage()) {
-    toast(editingId ? '✓ 카드가 수정되었어요' : '✓ 새 카드가 추가되었어요');
-    closeEditor();
-    renderAdmin();
+  savePlayerState();
+  updateProgressUI();
+
+  showResultUI(result, me, opp);
+}
+
+function showResultUI(result, me, opp) {
+  const emoji = document.getElementById('resultEmoji');
+  const title = document.getElementById('resultTitle');
+  const desc = document.getElementById('resultDesc');
+  const myRC = document.getElementById('resultMyRarity');
+  const oppRC = document.getElementById('resultOppRarity');
+
+  document.getElementById('resultMyHand').textContent = TYPE_EMOJI[me?.hand] || '❓';
+  document.getElementById('resultOppHand').textContent = TYPE_EMOJI[opp?.hand] || '❓';
+  myRC.textContent = '★'.repeat(RARITY_VAL[me?.card?.rarity] || 1);
+  oppRC.textContent = '★'.repeat(RARITY_VAL[opp?.card?.rarity] || 1);
+  myRC.classList.remove('winner');
+  oppRC.classList.remove('winner');
+
+  title.className = 'result-title';
+  switch(result) {
+    case 'win':
+      emoji.textContent = '🎉';
+      title.textContent = '승리!';
+      title.classList.add('win');
+      desc.innerHTML = `손짓 상성으로 이겼어요!<br><b style="color:var(--good)">+1승</b> (다음 무료 팩까지 ${WINS_PER_PACK - (playerState.wins % WINS_PER_PACK)}승)`;
+      break;
+    case 'star_win':
+      emoji.textContent = '✨';
+      title.textContent = '별빛 승리!';
+      title.classList.add('star');
+      desc.innerHTML = `같은 손이지만 카드 등급이 더 높아 이겼어요<br><b style="color:var(--warn)">+1승</b> (다음 무료 팩까지 ${WINS_PER_PACK - (playerState.wins % WINS_PER_PACK)}승)`;
+      myRC.classList.add('winner');
+      break;
+    case 'lose':
+      emoji.textContent = '😖';
+      title.textContent = '패배';
+      title.classList.add('lose');
+      desc.textContent = '다음엔 더 좋은 손을 노려보세요';
+      break;
+    case 'star_lose':
+      emoji.textContent = '💫';
+      title.textContent = '별빛 패배';
+      title.classList.add('lose');
+      desc.innerHTML = '같은 손이었지만 상대 카드가 더 빛났어요<br>더 좋은 카드를 모아보세요!';
+      oppRC.classList.add('winner');
+      break;
+    case 'tie':
+      emoji.textContent = '🤝';
+      title.textContent = '완벽한 무승부';
+      title.classList.add('tie');
+      desc.textContent = '같은 손, 같은 등급. 진정한 호각입니다';
+      break;
+    case 'opp_left':
+      emoji.textContent = '👋';
+      title.textContent = '상대 퇴장';
+      title.classList.add('tie');
+      desc.textContent = '상대가 매치를 떠났어요';
+      break;
+  }
+
+  cleanupMatchListeners();
+  setOnlineState('result');
+}
+
+async function cleanupMatchmaking() {
+  if (queueListener) {
+    queueListener(); // Firestore unsubscribe
+    queueListener = null;
+  }
+  if (queueRef) {
+    try { await queueRef.delete(); } catch(e) {}
+    queueRef = null;
   }
 }
-
-/* 삭제 */
-function confirmDelete(id) {
-  const card = CARDS.find(c => c.id === id);
-  if (!card) return;
-  showConfirm(
-    '카드 삭제',
-    `"${card.name}" 카드를 삭제할까요?<br>덱과 보유 목록에서도 함께 제거됩니다.`,
-    () => {
-      CARDS = CARDS.filter(c => c.id !== id);
-      owned.delete(id);
-      deck = deck.filter(d => d !== id);
-      saveCardsToStorage();
-      renderAdmin();
-      toast('🗑 카드가 삭제되었어요');
-    }
-  );
-}
-
-/* 시드 초기화 */
-function confirmResetSeed() {
-  showConfirm(
-    '기본 카드로 초기화',
-    '현재 카드를 모두 지우고 기본 12장으로 되돌립니다.<br><b style="color:#fca5a5">이 작업은 되돌릴 수 없어요.</b>',
-    () => {
-      CARDS = SEED_CARDS.slice().map(c => ({...c}));
-      owned = new Set(['sci01','sci02','rok01','rok02','pap01']);
-      deck = [];
-      saveCardsToStorage();
-      renderAdmin();
-      toast('🔄 기본 카드로 초기화되었어요');
-    }
-  );
-}
-
-/* 내보내기 */
-function exportCards() {
-  const data = JSON.stringify(CARDS, null, 2);
-  const blob = new Blob([data], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const today = new Date().toISOString().slice(0,10);
-  a.href = url;
-  a.download = `com-allstar-cards-${today}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  toast(`💾 ${CARDS.length}장 내보냈어요`);
-}
-
-/* 불러오기 */
-function importCards(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (!Array.isArray(data)) throw new Error('JSON 배열 형식이 아닙니다');
-      // 검증
-      const valid = data.filter(c =>
-        c && typeof c === 'object' && c.id && c.name &&
-        ['sci','rok','pap'].includes(c.type) &&
-        ['c','r','sr','ssr'].includes(c.rarity));
-      if (valid.length === 0) throw new Error('유효한 카드가 없습니다');
-
-      showConfirm(
-        '카드 불러오기',
-        `${valid.length}장의 카드를 발견했어요.<br>현재 카드를 덮어쓸까요?<br><span style="color:var(--text-dim)">(취소시 기존 카드와 합치기)</span>`,
-        () => {
-          // 덮어쓰기
-          CARDS = valid;
-          cleanupOwnedDeck();
-          saveCardsToStorage();
-          renderAdmin();
-          toast(`📂 ${valid.length}장 불러왔어요 (덮어쓰기)`);
-        },
-        () => {
-          // 합치기 (id 중복은 새 것으로 교체)
-          const map = new Map(CARDS.map(c => [c.id, c]));
-          valid.forEach(c => map.set(c.id, c));
-          CARDS = Array.from(map.values());
-          cleanupOwnedDeck();
-          saveCardsToStorage();
-          renderAdmin();
-          toast(`📂 ${valid.length}장 합쳤어요 (총 ${CARDS.length}장)`);
-        },
-        '덮어쓰기', '합치기'
-      );
-    } catch (err) {
-      toast('❌ 파일을 읽을 수 없어요: ' + err.message);
-    }
-  };
-  reader.readAsText(file);
-  event.target.value = '';
-}
-
-/* 공용 확인 다이얼로그 */
-let confirmCallback = null;
-let confirmCancelCallback = null;
-function showConfirm(title, msg, onOK, onCancel, okLabel = '확인', cancelLabel = '취소') {
-  document.getElementById('confirmTitle').textContent = title;
-  document.getElementById('confirmMsg').innerHTML = msg;
-  const okBtn = document.getElementById('confirmOK');
-  okBtn.textContent = okLabel;
-  const cancelBtn = okBtn.parentElement.querySelector('.btn:not(.primary)');
-  cancelBtn.textContent = cancelLabel;
-  confirmCallback = onOK;
-  confirmCancelCallback = onCancel || null;
-  document.getElementById('confirmDialog').classList.add('active');
-}
-function closeConfirm() {
-  document.getElementById('confirmDialog').classList.remove('active');
-  if (confirmCancelCallback) {
-    const cb = confirmCancelCallback;
-    confirmCancelCallback = null;
-    cb();
+function cleanupMatchListeners() {
+  if (matchListener) {
+    matchListener(); // Firestore unsubscribe
+    matchListener = null;
   }
-  confirmCallback = null;
 }
-document.getElementById('confirmOK').addEventListener('click', () => {
-  document.getElementById('confirmDialog').classList.remove('active');
-  if (confirmCallback) {
-    const cb = confirmCallback;
-    confirmCallback = null;
-    confirmCancelCallback = null;
-    cb();
+async function cleanupMatch() {
+  cleanupMatchListeners();
+  if (matchRef && myRole) {
+    try { await matchRef.update({ [`${myRole}.left`]: true }); } catch(e) {}
   }
+  matchRef = null;
+  myRole = null;
+  oppRole = null;
+  currentMatchData = null;
+}
+
+async function cancelMatchmaking() {
+  await cleanupMatchmaking();
+  setOnlineState('idle');
+  toast('매칭을 취소했어요');
+}
+
+async function leaveOnlineMatch() {
+  await cleanupMatch();
+  renderOnlineIdle();
+}
+
+async function rematchOnline() {
+  await cleanupMatch();
+  startOnlineMatch();
+}
+
+// 페이지 떠날 때 정리
+window.addEventListener('beforeunload', () => {
+  if (queueRef) queueRef.delete();
+  if (matchRef && myRole) matchRef.update({ [`${myRole}.left`]: true });
+});
+
+/* 닉네임 input은 엔터로 저장 */
+document.getElementById('nameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveName();
 });
 </script>
 </body>
