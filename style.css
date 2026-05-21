@@ -2720,4 +2720,274 @@ body {
     display: none !important;
   }
 }
+/* ===================================================================
+   AD DIRECTOR POLISH v2.4
+   - ALLSTAR PACK 한 줄 처리
+   - 카드팩 단상(페데스탈) 퀄리티 업
+   - COLLECTION 카드 아이콘 고급화
+   - 기능/HTML/JS 변경 없음
+   =================================================================== */
 
+/* ---------------------------------------------------
+   1) 타이틀: ALLSTAR PACK 한 줄 고정
+   --------------------------------------------------- */
+#hub-screen .hub-title,
+#gacha-screen .hub-title {
+  width: 100% !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
+  letter-spacing: 1px !important;
+  line-height: .92 !important;
+  font-size: clamp(34px, 8.8vw, 58px) !important;
+  margin: 0 !important;
+}
+
+#hub-screen .hub-title::before,
+#gacha-screen .hub-title::before {
+  margin-bottom: 8px !important;
+  font-size: 13px !important;
+  letter-spacing: 10px !important;
+}
+
+#hub-screen .hub-title::after,
+#gacha-screen .hub-title::after {
+  margin-top: 10px !important;
+  font-size: 11px !important;
+  letter-spacing: 6px !important;
+}
+
+/* 아주 작은 아이폰 폭 대응 */
+@media (max-width: 390px) {
+  #hub-screen .hub-title,
+  #gacha-screen .hub-title {
+    font-size: clamp(30px, 8.2vw, 42px) !important;
+    letter-spacing: .5px !important;
+  }
+}
+
+/* ---------------------------------------------------
+   2) 상단 COLLECTION 카드 아이콘 고급화
+   --------------------------------------------------- */
+#hub-collection {
+  position: relative !important;
+  display: inline-block !important;
+  padding-left: 38px !important;
+  color: var(--ad-gold-450) !important;
+}
+
+/* 뒤 카드 */
+#hub-collection::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 50% !important;
+  width: 18px !important;
+  height: 24px !important;
+  transform: translateY(-52%) rotate(-10deg) !important;
+  border-radius: 4px !important;
+  border: 1.3px solid rgba(255, 225, 142, .82) !important;
+  background:
+    linear-gradient(180deg, rgba(28, 42, 92, .96), rgba(9, 20, 55, .98)) !important;
+  box-shadow:
+    0 6px 12px rgba(0,0,0,.26),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+
+/* 앞 카드 */
+#hub-collection::after {
+  content: '' !important;
+  position: absolute !important;
+  left: 11px !important;
+  top: 50% !important;
+  width: 18px !important;
+  height: 24px !important;
+  transform: translateY(-48%) rotate(8deg) !important;
+  border-radius: 4px !important;
+  border: 1.4px solid rgba(255, 225, 142, .92) !important;
+  background:
+    radial-gradient(circle at 40% 36%, rgba(255,255,255,.18), transparent 30%),
+    linear-gradient(180deg, rgba(36, 58, 122, .98), rgba(13, 27, 74, .98)) !important;
+  box-shadow:
+    0 7px 14px rgba(0,0,0,.32),
+    0 0 12px rgba(255, 198, 90, .16),
+    inset 0 1px 0 rgba(255,255,255,.22) !important;
+}
+
+/* ---------------------------------------------------
+   3) 카드팩 / 단상 퀄리티 업
+   --------------------------------------------------- */
+#hub-screen .gacha-pack-wrap {
+  width: min(78vw, 350px) !important;
+  padding: 4px 0 96px !important;
+  margin-top: 4px !important;
+  perspective: 1200px !important;
+}
+
+/* 메인 단상 바디 */
+#hub-screen .gacha-pack-wrap::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 8px !important;
+  width: min(92vw, 430px) !important;
+  height: 126px !important;
+  transform: translateX(-50%) !important;
+  border-radius: 50% / 34% 34% 64% 64% !important;
+  background:
+    radial-gradient(ellipse at 50% 14%,
+      rgba(255,255,255,.98) 0%,
+      rgba(255,248,225,.96) 7%,
+      rgba(255,231,162,.95) 15%,
+      rgba(219,177,104,.86) 19%,
+      rgba(18, 40, 89, .98) 20.5%,
+      rgba(12, 28, 67, .99) 49%,
+      rgba(8, 18, 46, 1) 76%,
+      rgba(4, 10, 26, 1) 100%) !important;
+  box-shadow:
+    0 22px 38px rgba(0,0,0,.34),
+    inset 0 2px 0 rgba(255,255,255,.50),
+    inset 0 -14px 22px rgba(0,0,0,.24),
+    0 0 22px rgba(255, 199, 94, .14) !important;
+  z-index: 0 !important;
+}
+
+/* 단상 윗면 하이라이트 링 */
+#hub-screen .gacha-pack-wrap::after {
+  content: '' !important;
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 92px !important;
+  width: min(78vw, 350px) !important;
+  height: 22px !important;
+  transform: translateX(-50%) !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(ellipse at center,
+      rgba(255,255,255,.98) 0%,
+      rgba(255,244,208,.92) 18%,
+      rgba(255,203,94,.64) 34%,
+      rgba(255,203,94,.18) 57%,
+      transparent 74%) !important;
+  box-shadow:
+    0 0 18px rgba(255, 220, 115, .42),
+    0 0 30px rgba(96, 148, 255, .12) !important;
+  z-index: 1 !important;
+}
+
+/* 팩 크기/위치 밸런스 */
+#hub-screen .gacha-pack {
+  width: min(50vw, 228px) !important;
+  position: relative !important;
+  z-index: 2 !important;
+  box-shadow:
+    0 24px 56px rgba(0,0,0,.46),
+    0 0 42px rgba(255, 198, 78, .32),
+    0 0 110px rgba(255, 117, 20, .16) !important;
+}
+
+/* 팩 아래 따뜻한 광원 */
+#hub-screen::after {
+  top: 66% !important;
+  width: min(78vw, 360px) !important;
+  height: 52px !important;
+  background:
+    radial-gradient(ellipse at center,
+      rgba(255, 244, 210, .95) 0%,
+      rgba(255, 196, 73, .42) 34%,
+      rgba(80, 137, 255, .14) 58%,
+      transparent 78%) !important;
+  filter: blur(6px) !important;
+  opacity: .86 !important;
+}
+
+/* ---------------------------------------------------
+   4) 모바일 세부 밸런스
+   --------------------------------------------------- */
+#hub-screen .cooldown-display {
+  margin-top: -26px !important;
+}
+
+#hub-screen .cooldown-status {
+  font-size: clamp(12px, 3.5vw, 15px) !important;
+  letter-spacing: 4px !important;
+}
+
+#hub-screen .cooldown-time {
+  font-size: clamp(34px, 9.5vw, 50px) !important;
+  line-height: .86 !important;
+}
+
+#hub-screen .probability-info {
+  gap: 6px !important;
+  margin-top: 4px !important;
+}
+
+#hub-screen .probability-info span {
+  min-width: 64px !important;
+  padding: 6px 8px !important;
+  font-size: 11px !important;
+}
+
+/* 모바일에선 스킵 버튼은 조금 더 작게 */
+#hub-screen .btn-secondary {
+  min-height: 40px !important;
+  padding: 0 18px !important;
+  font-size: 12px !important;
+}
+
+/* 하단 네비와 충돌 없게 */
+#hub-screen .hub-body {
+  padding-bottom: 94px !important;
+}
+
+#hub-screen .bottom-nav {
+  bottom: max(20px, calc(env(safe-area-inset-bottom) + 12px)) !important;
+  height: 70px !important;
+}
+
+/* 높이가 작은 기기용 추가 보정 */
+@media (max-height: 760px) {
+  #hub-screen .hub-title,
+  #gacha-screen .hub-title {
+    font-size: clamp(30px, 8.1vw, 40px) !important;
+  }
+
+  #hub-screen .gacha-pack-wrap {
+    padding-bottom: 82px !important;
+  }
+
+  #hub-screen .gacha-pack-wrap::before {
+    height: 108px !important;
+  }
+
+  #hub-screen .gacha-pack-wrap::after {
+    bottom: 78px !important;
+    height: 18px !important;
+  }
+
+  #hub-screen .gacha-pack {
+    width: min(47vw, 208px) !important;
+  }
+
+  #hub-screen .cooldown-display {
+    margin-top: -24px !important;
+  }
+
+  #hub-screen .cooldown-time {
+    font-size: clamp(30px, 8.6vw, 42px) !important;
+  }
+
+  #hub-screen .probability-info span {
+    min-width: 58px !important;
+    font-size: 10px !important;
+  }
+
+  #hub-screen .btn-secondary {
+    display: none !important;
+  }
+
+  #hub-screen .bottom-nav {
+    height: 66px !important;
+  }
+}
