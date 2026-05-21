@@ -134,12 +134,22 @@ function tryPull(){
 function resetGachaScreen(){
   $('gacha-stage1').style.display = 'flex';
   $('gacha-stage2').style.display = 'none';
+
+  const screen = $('gacha-screen');
+  screen.className = screen.className
+    .replace(/\bis-pack-(pressed|charging|opening)\b/g, '')
+    .replace(/\brarity-\d+\b/g, '')
+    .replace(/\bis-revealing\b/g, '')
+    .trim();
+
   const pack = $('opening-pack');
   // 기존 + 새 상태 클래스 모두 리셋
-  pack.classList.remove('opening', 'burst', 'is-pressed', 'is-charging', 'is-opening');
+  pack.classList.remove('opening', 'burst', 'is-pressed', 'is-charging', 'is-opening', 'is-locked');
+
   $('card-reveal').className = 'card-reveal';
   $('reveal-info').classList.remove('show');
   $('gacha-instruction').textContent = '탭해서 팩을 열어!';
+
   // gacha-stage2의 rarity 클래스 리셋
   const stage2 = $('gacha-stage2');
   stage2.className = stage2.className.replace(/\brarity-\d+\b/g, '').trim();
@@ -147,20 +157,33 @@ function resetGachaScreen(){
 
 function openPack(){
   const pack = $('opening-pack');
+  const screen = $('gacha-screen');
+
+  // 연타 방지: 연출 중 중복 pullCard 호출 방지
+  if(pack.classList.contains('is-locked')) return;
+  pack.classList.add('is-locked');
+
   $('gacha-instruction').textContent = '두근두근...';
 
-  // ===== 디자이너 핸드오프 단계 =====
+  // ===== AD 연출 단계 =====
   // 1) Tap/Press (220ms) → 2) Charge (600ms) → 3) Open/Tear (720ms) → 4) Reveal
+  screen.classList.add('is-pack-pressed');
   pack.classList.add('is-pressed');
 
   setTimeout(() => {
+    screen.classList.remove('is-pack-pressed');
+    screen.classList.add('is-pack-charging');
     pack.classList.remove('is-pressed');
     pack.classList.add('is-charging');
+    $('gacha-instruction').textContent = '빛이 모이고 있어...';
   }, 220);
 
   setTimeout(() => {
+    screen.classList.remove('is-pack-charging');
+    screen.classList.add('is-pack-opening');
     pack.classList.remove('is-charging');
     pack.classList.add('is-opening');
+    $('gacha-instruction').textContent = 'OPEN!';
   }, 820);
 
   setTimeout(() => {
@@ -171,6 +194,13 @@ function openPack(){
 }
 
 function showReveal({ card, isNew }){
+  const screen = $('gacha-screen');
+  screen.className = screen.className
+    .replace(/\bis-pack-(pressed|charging|opening)\b/g, '')
+    .replace(/\brarity-\d+\b/g, '')
+    .trim();
+  screen.classList.add('is-revealing', 'rarity-' + card.stars);
+
   $('gacha-stage1').style.display = 'none';
   $('gacha-stage2').style.display = 'flex';
 
@@ -184,7 +214,7 @@ function showReveal({ card, isNew }){
   $('reveal-content').innerHTML = makeArt(card);
   $('reveal-stars').textContent = '★'.repeat(card.stars);
 
-  // 카드 등장 + rarity glow (디자이너 핸드오프: is-revealing + rarity-N)
+  // 카드 등장 + rarity glow
   setTimeout(() => {
     reveal.classList.add('show', 'is-revealing', 'rarity-' + card.stars, 's' + card.stars);
   }, 100);
