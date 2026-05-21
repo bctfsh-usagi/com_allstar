@@ -7,6 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Bagel+Fat+One&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<!-- Firebase SDK (Firestore) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 <style>
   :root {
     --bg-0: #0a0d18;
@@ -776,11 +779,11 @@
 
 <main>
   <!-- 안내 -->
-  <div class="info-box">
-    <span class="icn">💡</span>
+  <div class="info-box" id="connStatus">
+    <span class="icn">☁️</span>
     <div>
-      <b>운영자 전용 페이지</b>입니다. 이곳에서 등록한 카드는 같은 브라우저의 게임에 자동 반영돼요.<br>
-      카드 데이터는 브라우저에 저장되므로, 다른 기기로 옮기려면 <b>내보내기</b>로 백업하세요.
+      <b>운영자 전용</b> · 카드 데이터는 Firebase에 저장되어 모든 플레이어에게 실시간 동기화돼요.<br>
+      <span id="connText" style="color:var(--text-mute)">연결 중...</span>
     </div>
   </div>
 
@@ -923,58 +926,66 @@
 
 <script>
 /* ============================================================
-   COM 올스타 — 운영자 도구
-   STORAGE_KEY는 게임 파일과 동일해야 함 (데이터 공유)
+   COM 올스타 — 운영자 도구 (Firestore)
    ============================================================ */
-const STORAGE_KEY = 'com_allstar_cards_v1';
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCZdrY0QEdeyjo_djOoAGF0QvF84dmlVWc",
+  authDomain: "comallstar-c8e58.firebaseapp.com",
+  projectId: "comallstar-c8e58",
+  storageBucket: "comallstar-c8e58.firebasestorage.app",
+  messagingSenderId: "749606419198",
+  appId: "1:749606419198:web:4b507053183fefd40f43af"
+};
+
+firebase.initializeApp(FIREBASE_CONFIG);
+const db = firebase.firestore();
 
 const SEED_CARDS = [
-  { id: 'sci01', name: '가위병정',     type: 'sci', hp: 60,  rarity: 'c',  image: '', emoji: '✂️', desc: '재빠른 일격으로 보 타입에게 강합니다.' },
-  { id: 'sci02', name: '쌍칼냥이',     type: 'sci', hp: 70,  rarity: 'r',  image: '', emoji: '🐱', desc: '두 자루의 칼을 휘두르는 민첩한 고양이.' },
-  { id: 'sci04', name: '칼날도깨비',   type: 'sci', hp: 90,  rarity: 'sr', image: '', emoji: '👹', desc: '거대한 가위로 보를 단숨에 베어버립니다.' },
-  { id: 'sci05', name: '월광검사',     type: 'sci', hp: 120, rarity: 'ssr',image: '', emoji: '🌙', desc: '달빛 아래에서 더 강해지는 전설의 검사.' },
-  { id: 'rok01', name: '돌멩이꼬마',   type: 'rok', hp: 80,  rarity: 'c',  image: '', emoji: '🪨', desc: '단단하고 듬직한 작은 돌.' },
-  { id: 'rok02', name: '바위거북',     type: 'rok', hp: 110, rarity: 'r',  image: '', emoji: '🐢', desc: '등껍질이 화강암으로 만들어진 거북.' },
-  { id: 'rok03', name: '화산골렘',     type: 'rok', hp: 140, rarity: 'sr', image: '', emoji: '🌋', desc: '용암으로 단련된 거대한 골렘.' },
-  { id: 'rok07', name: '암석의왕',     type: 'rok', hp: 160, rarity: 'ssr',image: '', emoji: '👑', desc: '모든 광물을 다스리는 전설의 왕.' },
-  { id: 'pap01', name: '종이학',       type: 'pap', hp: 50,  rarity: 'c',  image: '', emoji: '🕊️', desc: '바람을 타고 우아하게 비행해요.' },
-  { id: 'pap02', name: '책읽는마법사', type: 'pap', hp: 70,  rarity: 'r',  image: '', emoji: '🧙', desc: '오래된 책에서 강력한 마법을 꺼내요.' },
-  { id: 'pap04', name: '두루마리현자', type: 'pap', hp: 90,  rarity: 'sr', image: '', emoji: '📜', desc: '고대의 지혜를 두루마리에 새긴 현자.' },
-  { id: 'pap05', name: '구름의여신',   type: 'pap', hp: 130, rarity: 'ssr',image: '', emoji: '☁️', desc: '구름을 부려 바위를 봉인합니다.' }
+  { id: 'sci01', name: '가위병정',     type: 'sci', hp: 60,  rarity: 'c',  image: '', emoji: '✂️', desc: '재빠른 일격.' },
+  { id: 'sci02', name: '쌍칼냥이',     type: 'sci', hp: 70,  rarity: 'r',  image: '', emoji: '🐱', desc: '두 자루의 칼을 휘두르는 고양이.' },
+  { id: 'sci04', name: '칼날도깨비',   type: 'sci', hp: 90,  rarity: 'sr', image: '', emoji: '👹', desc: '거대한 가위.' },
+  { id: 'sci05', name: '월광검사',     type: 'sci', hp: 120, rarity: 'ssr',image: '', emoji: '🌙', desc: '달빛 아래에서 더 강해지는 검사.' },
+  { id: 'rok01', name: '돌멩이꼬마',   type: 'rok', hp: 80,  rarity: 'c',  image: '', emoji: '🪨', desc: '단단하고 듬직한 돌.' },
+  { id: 'rok02', name: '바위거북',     type: 'rok', hp: 110, rarity: 'r',  image: '', emoji: '🐢', desc: '화강암 등껍질의 거북.' },
+  { id: 'rok03', name: '화산골렘',     type: 'rok', hp: 140, rarity: 'sr', image: '', emoji: '🌋', desc: '용암으로 단련된 골렘.' },
+  { id: 'rok07', name: '암석의왕',     type: 'rok', hp: 160, rarity: 'ssr',image: '', emoji: '👑', desc: '모든 광물을 다스리는 왕.' },
+  { id: 'pap01', name: '종이학',       type: 'pap', hp: 50,  rarity: 'c',  image: '', emoji: '🕊️', desc: '바람을 타고 비행.' },
+  { id: 'pap02', name: '책읽는마법사', type: 'pap', hp: 70,  rarity: 'r',  image: '', emoji: '🧙', desc: '오래된 책의 마법.' },
+  { id: 'pap04', name: '두루마리현자', type: 'pap', hp: 90,  rarity: 'sr', image: '', emoji: '📜', desc: '고대의 지혜.' },
+  { id: 'pap05', name: '구름의여신',   type: 'pap', hp: 130, rarity: 'ssr',image: '', emoji: '☁️', desc: '구름을 부려 바위를 봉인.' }
 ];
 
 const TYPE_EMOJI = { sci: '✌️', rok: '✊', pap: '✋' };
 
-let CARDS = loadCards() || SEED_CARDS.slice().map(c => ({...c}));
-if (!loadCards()) saveCards();
-
+let CARDS = [];
+let cardsLoaded = false;
 let currentFilter = 'all';
 let editingId = null;
 let pendingImage = '';
 let pendingType = 'sci';
 let pendingRarity = 'c';
 
-/* ============ 저장소 ============ */
-function loadCards() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
-  return null;
+/* ============ Firestore 실시간 구독 ============ */
+function setConnStatus(text, color = 'var(--text-mute)') {
+  const el = document.getElementById('connText');
+  if (el) { el.textContent = text; el.style.color = color; }
 }
-function saveCards() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(CARDS));
-    return true;
-  } catch(e) {
-    if (e.name === 'QuotaExceededError') {
-      toast('⚠️ 저장 공간이 부족해요. 이미지 크기를 줄이거나 카드를 삭제하세요.', 'error');
-    } else {
-      toast('저장 실패: ' + e.message, 'error');
-    }
-    return false;
-  }
+
+function subscribeToCards() {
+  setConnStatus('Firebase에 연결 중...');
+  db.collection('cards').onSnapshot(snap => {
+    CARDS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    cardsLoaded = true;
+    setConnStatus(`✓ 연결됨 · ${CARDS.length}장 동기화`, 'var(--accent)');
+    renderGrid();
+  }, err => {
+    console.error('Firestore 구독 실패', err);
+    setConnStatus('⚠ 연결 실패 — 보안 규칙을 확인하세요', '#fca5a5');
+    cardsLoaded = true;
+    renderGrid();
+  });
 }
+subscribeToCards();
 
 /* ============ 카드 HTML 생성 ============ */
 function cardHTML(card) {
@@ -1006,7 +1017,7 @@ function escapeHTML(s) {
 
 /* ============ 그리드 렌더 ============ */
 function renderGrid() {
-  // 통계 (전체)
+  // 통계
   const counts = { sci: 0, rok: 0, pap: 0 };
   CARDS.forEach(c => { if (counts[c.type] !== undefined) counts[c.type]++; });
   document.getElementById('hTotal').textContent = CARDS.length;
@@ -1014,10 +1025,17 @@ function renderGrid() {
   document.getElementById('hRok').textContent = counts.rok;
   document.getElementById('hPap').textContent = counts.pap;
 
-  // 필터 + 검색 적용
+  const area = document.getElementById('cardArea');
+
+  // 로딩 중
+  if (!cardsLoaded) {
+    area.innerHTML = `<div class="empty"><div class="ico">⏳</div><div class="ttl">데이터 로딩 중...</div></div>`;
+    return;
+  }
+
+  // 필터 + 검색
   const q = document.getElementById('searchInput').value.trim().toLowerCase();
   let list = CARDS.slice();
-
   if (['sci','rok','pap'].includes(currentFilter)) {
     list = list.filter(c => c.type === currentFilter);
   } else if (['c','r','sr','ssr'].includes(currentFilter)) {
@@ -1031,7 +1049,6 @@ function renderGrid() {
     );
   }
 
-  // 정렬: 속성 → 희귀도 → 이름
   const typeOrder = { sci: 0, rok: 1, pap: 2 };
   const rOrder = { c: 0, r: 1, sr: 2, ssr: 3 };
   list.sort((a, b) =>
@@ -1040,22 +1057,24 @@ function renderGrid() {
     a.name.localeCompare(b.name)
   );
 
-  const area = document.getElementById('cardArea');
   if (list.length === 0) {
     if (CARDS.length === 0) {
       area.innerHTML = `
         <div class="empty">
           <div class="ico">🃏</div>
-          <div class="ttl">등록된 카드가 없어요</div>
-          <div class="desc">우측 상단의 "새 카드 추가" 버튼으로 시작하세요</div>
-          <button class="btn primary" onclick="openEditor()">＋ 첫 카드 만들기</button>
+          <div class="ttl">Firestore에 카드가 없어요</div>
+          <div class="desc">새 카드를 추가하거나 기본 12장으로 초기화하세요</div>
+          <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+            <button class="btn primary" onclick="openEditor()">＋ 첫 카드 만들기</button>
+            <button class="btn" onclick="seedCards()">🌱 기본 카드 12장 추가</button>
+          </div>
         </div>`;
     } else {
       area.innerHTML = `
         <div class="empty">
           <div class="ico">🔍</div>
           <div class="ttl">검색 결과 없음</div>
-          <div class="desc">다른 키워드로 검색하거나 필터를 변경해보세요</div>
+          <div class="desc">다른 키워드나 필터로 시도해보세요</div>
         </div>`;
     }
     return;
@@ -1105,6 +1124,16 @@ function openEditor(id) {
     document.getElementById('editDesc').value = '';
     document.getElementById('editHp').value = 100;
   }
+  // 이미지 미리보기/버튼 상태 동기화
+  if (pendingImage) {
+    document.getElementById('uploadBtn').classList.add('has-image');
+    document.getElementById('uploadBtn').textContent = '📷 이미지 변경';
+    document.getElementById('clearImgBtn').style.display = 'block';
+  } else {
+    document.getElementById('uploadBtn').classList.remove('has-image');
+    document.getElementById('uploadBtn').textContent = '📷 이미지 업로드';
+    document.getElementById('clearImgBtn').style.display = 'none';
+  }
   updateTypePills();
   updateRarityPills();
   updatePreview();
@@ -1131,7 +1160,6 @@ function updateHp(v) {
   document.getElementById('previewHp').textContent = 'HP ' + v;
 }
 
-/* 실시간 미리보기 */
 function updatePreview() {
   const name = document.getElementById('editName').value.trim() || '카드 이름';
   const emoji = document.getElementById('editEmoji').value.trim() || '🃏';
@@ -1207,8 +1235,12 @@ function resizeImage(file, maxW, maxH, quality) {
   });
 }
 
-/* ============ 저장 / 삭제 / 복제 ============ */
-function saveCard() {
+/* ============ Firestore CRUD ============ */
+function newCardId() {
+  return 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+
+async function saveCard() {
   const name = document.getElementById('editName').value.trim();
   const emoji = document.getElementById('editEmoji').value.trim();
   const desc = document.getElementById('editDesc').value.trim();
@@ -1220,35 +1252,39 @@ function saveCard() {
     name, hp, type: pendingType, rarity: pendingRarity,
     emoji: emoji || '🃏',
     image: pendingImage || '',
-    desc: desc || '-'
+    desc: desc || '-',
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
 
-  if (editingId) {
-    const idx = CARDS.findIndex(c => c.id === editingId);
-    if (idx >= 0) CARDS[idx] = { ...CARDS[idx], ...data };
-  } else {
-    data.id = 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-    CARDS.push(data);
-  }
-  if (saveCards()) {
+  try {
+    if (editingId) {
+      await db.collection('cards').doc(editingId).update(data);
+    } else {
+      data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection('cards').doc(newCardId()).set(data);
+    }
     toast(editingId ? '✓ 카드가 수정되었어요' : '✓ 새 카드가 추가되었어요', 'success');
     closeEditor();
-    renderGrid();
+    // renderGrid는 onSnapshot이 자동 호출
+  } catch(e) {
+    console.error(e);
+    toast('저장 실패: ' + e.message, 'error');
   }
 }
 
-function duplicateCard(id) {
+async function duplicateCard(id) {
   const c = CARDS.find(x => x.id === id);
   if (!c) return;
-  const copy = {
-    ...c,
-    id: 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
-    name: c.name + ' (복제)'
-  };
-  CARDS.push(copy);
-  if (saveCards()) {
+  const { id: _omitId, ...rest } = c;
+  const copy = { ...rest, name: c.name + ' (복제)' };
+  try {
+    await db.collection('cards').doc(newCardId()).set({
+      ...copy,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
     toast('⎘ 카드가 복제되었어요', 'success');
-    renderGrid();
+  } catch(e) {
+    toast('복제 실패: ' + e.message, 'error');
   }
 }
 
@@ -1257,12 +1293,14 @@ function confirmDelete(id) {
   if (!card) return;
   showConfirm(
     '카드 삭제',
-    `"${escapeHTML(card.name)}" 카드를 삭제할까요?<br>게임의 보유 목록과 덱에서도 자동으로 제거됩니다.`,
-    () => {
-      CARDS = CARDS.filter(c => c.id !== id);
-      saveCards();
-      renderGrid();
-      toast('🗑 카드가 삭제되었어요', 'success');
+    `"${escapeHTML(card.name)}" 카드를 삭제할까요?<br>이 작업은 모든 플레이어에게 즉시 반영됩니다.`,
+    async () => {
+      try {
+        await db.collection('cards').doc(id).delete();
+        toast('🗑 카드가 삭제되었어요', 'success');
+      } catch(e) {
+        toast('삭제 실패: ' + e.message, 'error');
+      }
     },
     '삭제'
   );
@@ -1271,15 +1309,44 @@ function confirmDelete(id) {
 function confirmResetSeed() {
   showConfirm(
     '기본 카드로 초기화',
-    `현재 ${CARDS.length}장의 카드를 모두 지우고 기본 12장으로 되돌립니다.<br><b style="color:#fca5a5">이 작업은 되돌릴 수 없어요.</b><br>먼저 <b>내보내기</b>로 백업하는 것을 권장해요.`,
-    () => {
-      CARDS = SEED_CARDS.slice().map(c => ({...c}));
-      saveCards();
-      renderGrid();
-      toast('🔄 기본 카드로 초기화되었어요', 'success');
+    `현재 <b>${CARDS.length}장</b>의 카드를 모두 지우고 기본 12장으로 되돌립니다.<br><b style="color:#fca5a5">이 작업은 되돌릴 수 없어요.</b><br>먼저 <b>내보내기</b>로 백업하는 것을 권장해요.`,
+    async () => {
+      try {
+        // 일괄 처리 (batch)
+        const batch = db.batch();
+        CARDS.forEach(c => batch.delete(db.collection('cards').doc(c.id)));
+        SEED_CARDS.forEach(c => {
+          const { id, ...data } = c;
+          batch.set(db.collection('cards').doc(id), {
+            ...data,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        });
+        await batch.commit();
+        toast('🔄 기본 카드로 초기화되었어요', 'success');
+      } catch(e) {
+        toast('초기화 실패: ' + e.message, 'error');
+      }
     },
     '초기화'
   );
+}
+
+async function seedCards() {
+  try {
+    const batch = db.batch();
+    SEED_CARDS.forEach(c => {
+      const { id, ...data } = c;
+      batch.set(db.collection('cards').doc(id), {
+        ...data,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+    await batch.commit();
+    toast('🌱 기본 카드 12장이 추가되었어요', 'success');
+  } catch(e) {
+    toast('시드 추가 실패: ' + e.message, 'error');
+  }
 }
 
 /* ============ 내보내기 / 불러오기 ============ */
@@ -1314,21 +1381,36 @@ function importCards(event) {
 
       showConfirm(
         `${valid.length}장의 카드를 발견했어요`,
-        `현재 카드를 어떻게 처리할까요?<br><b>덮어쓰기</b>: 현재 카드를 모두 지우고 교체<br><b>합치기</b>: 기존 카드 유지 + 같은 ID는 새 것으로 교체`,
-        () => {
-          CARDS = valid;
-          saveCards();
-          renderGrid();
-          toast(`📂 ${valid.length}장 불러왔어요 (덮어쓰기)`, 'success');
+        `<b>덮어쓰기</b>: 현재 카드 모두 지우고 교체<br><b>합치기</b>: 기존 카드 유지 + 같은 ID는 새 것으로 교체<br><span style="color:var(--text-mute)">변경사항은 모든 플레이어에게 즉시 반영됩니다</span>`,
+        async () => {
+          try {
+            const batch = db.batch();
+            CARDS.forEach(c => batch.delete(db.collection('cards').doc(c.id)));
+            valid.forEach(c => {
+              const { id, ...data } = c;
+              batch.set(db.collection('cards').doc(id), {
+                ...data,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+            });
+            await batch.commit();
+            toast(`📂 ${valid.length}장 불러왔어요 (덮어쓰기)`, 'success');
+          } catch(e) { toast('실패: ' + e.message, 'error'); }
         },
         '덮어쓰기',
-        () => {
-          const map = new Map(CARDS.map(c => [c.id, c]));
-          valid.forEach(c => map.set(c.id, c));
-          CARDS = Array.from(map.values());
-          saveCards();
-          renderGrid();
-          toast(`📂 ${valid.length}장 합쳤어요 (총 ${CARDS.length}장)`, 'success');
+        async () => {
+          try {
+            const batch = db.batch();
+            valid.forEach(c => {
+              const { id, ...data } = c;
+              batch.set(db.collection('cards').doc(id), {
+                ...data,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+              }, { merge: true });
+            });
+            await batch.commit();
+            toast(`📂 ${valid.length}장 합쳤어요`, 'success');
+          } catch(e) { toast('실패: ' + e.message, 'error'); }
         },
         '합치기'
       );
@@ -1433,10 +1515,8 @@ document.addEventListener('keydown', e => {
   }
 });
 
-/* 초기 렌더 */
+/* 초기 상태 (Firestore onSnapshot이 카드 로딩 후 렌더링 트리거) */
 renderGrid();
-selectType('sci');
-selectRarity('c');
 </script>
 </body>
 </html>
