@@ -62,6 +62,40 @@
     overflow: hidden;
   }
 
+  /* 타이틀 스크린 */
+  .title-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background:
+      linear-gradient(180deg, rgba(2,4,12,0.05), rgba(2,4,12,0.4)),
+      #05070f url('assets/title-screen.webp') center / cover no-repeat;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: max(24px, env(safe-area-inset-bottom)) 24px 44px;
+    cursor: pointer;
+    transition: opacity .45s ease, transform .45s ease;
+  }
+  .title-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(1.02);
+  }
+  .title-tap {
+    font-family: 'Bagel Fat One', 'Jua', sans-serif;
+    font-size: clamp(24px, 7vw, 44px);
+    letter-spacing: .08em;
+    color: #fff7d6;
+    text-shadow: 0 2px 18px rgba(255,209,102,.65), 0 4px 30px rgba(0,0,0,.8);
+    animation: titleTapPulse 1.4s ease-in-out infinite;
+    user-select: none;
+  }
+  @keyframes titleTapPulse {
+    0%, 100% { opacity: .72; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-4px); }
+  }
+
   /* 모바일 컨테이너 (데스크탑에서도 폰처럼 보이게) */
   .app {
     position: relative;
@@ -379,7 +413,7 @@
   }
   .card {
     position: relative;
-    aspect-ratio: 5 / 7;
+    aspect-ratio: 2 / 3;
     border-radius: var(--radius-card);
     overflow: hidden;
     cursor: pointer;
@@ -397,8 +431,19 @@
     inset: 0;
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
     background-color: var(--bg-3);
     /* 사용자가 카드 이미지 추가시: style="background-image:url(...)" 만 넣으면 됨 */
+  }
+  .card[data-fit="contain"] .art {
+    background-size: contain;
+    background-color: #05070f;
+  }
+  .card[data-frame="full"] .frame {
+    display: none;
+  }
+  .card[data-frame="full"] {
+    border-color: rgba(255,209,102,0.35);
   }
   /* 이미지가 없을 때 보여줄 placeholder */
   .card .art:empty::after,
@@ -578,7 +623,7 @@
     margin-bottom: 14px;
   }
   .slot {
-    aspect-ratio: 5 / 7;
+    aspect-ratio: 2 / 3;
     border-radius: 8px;
     border: 1.5px dashed rgba(255,255,255,0.2);
     background: rgba(255,255,255,0.02);
@@ -644,7 +689,7 @@
   }
   .battle-card {
     width: 100px;
-    aspect-ratio: 5 / 7;
+    aspect-ratio: 2 / 3;
     border-radius: 12px;
     background: linear-gradient(135deg, var(--bg-3), var(--bg-2));
     border: 1.5px solid var(--line);
@@ -778,7 +823,7 @@
   @keyframes modalPop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   .modal-card {
     width: 160px;
-    aspect-ratio: 5 / 7;
+    aspect-ratio: 2 / 3;
     margin: 0 auto 14px;
     border-radius: 16px;
     position: relative;
@@ -934,7 +979,7 @@
   .open-card {
     position: relative;
     width: 220px;
-    aspect-ratio: 5 / 7;
+    aspect-ratio: 2 / 3;
     transform-style: preserve-3d;
     transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
     animation: cardEnter 0.5s ease both;
@@ -1053,6 +1098,14 @@
     inset: 0;
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
+  }
+  .card-front[data-fit="contain"] .big-art {
+    background-size: contain;
+    background-color: #05070f;
+  }
+  .card-front[data-frame="full"] .big-frame {
+    display: none;
   }
   .card-front .big-art::after {
     content: attr(data-emoji);
@@ -1671,7 +1724,7 @@
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 80px; height: 110px;
+    width: 80px; aspect-ratio: 2 / 3;
     border-radius: 10px;
     background: linear-gradient(135deg, var(--bg-3), var(--bg-2));
     border: 1.5px solid var(--line);
@@ -1680,7 +1733,9 @@
     overflow: hidden;
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
   }
+  .search-card-mini.contain { background-size: contain; background-color: #05070f; }
   .search-title {
     font-family: 'Jua', sans-serif;
     font-size: 18px;
@@ -1742,7 +1797,7 @@
 
   .match-card {
     width: 90px;
-    aspect-ratio: 5 / 7;
+    aspect-ratio: 2 / 3;
     border-radius: 10px;
     overflow: hidden;
     position: relative;
@@ -1754,7 +1809,10 @@
     position: absolute; inset: 0;
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
   }
+  .match-card[data-fit="contain"] .art { background-size: contain; background-color: #05070f; }
+  .match-card[data-frame="full"] .frame { display: none; }
   .match-card[data-type="sci"] .art { background: linear-gradient(160deg, #5a1c2c 0%, #2a0d18 60%, #1a0810 100%); }
   .match-card[data-type="rok"] .art { background: linear-gradient(160deg, #3a4055 0%, #1c2030 60%, #0e1018 100%); }
   .match-card[data-type="pap"] .art { background: linear-gradient(160deg, #6b5520 0%, #2a230a 60%, #1a1505 100%); }
@@ -1977,6 +2035,10 @@
 </style>
 </head>
 <body>
+
+<div class="title-screen" id="titleScreen" onclick="enterGame()" role="button" aria-label="게임 시작">
+  <div class="title-tap">TAP TO START</div>
+</div>
 
 <div class="app" id="app">
 
@@ -2497,6 +2559,27 @@ const TYPE_NAME = { sci: '✌️ 가위', rok: '✊ 바위', pap: '✋ 보' };
 const TYPE_EMOJI = { sci: '✌️', rok: '✊', pap: '✋' };
 const RARITY_NAME = { c: 'C', r: 'R', sr: 'SR', ssr: 'SSR' };
 
+function enterGame() {
+  const title = document.getElementById('titleScreen');
+  if (title) title.classList.add('hidden');
+}
+
+function escapeHTML(s) {
+  return String(s || '').replace(/[&<>"']/g, m => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[m]));
+}
+function getFrameMode(card) {
+  return card.frameMode || (card.imageFit === 'contain' ? 'full' : 'art');
+}
+function getImageFit(card) {
+  const frameMode = getFrameMode(card);
+  return card.imageFit || (frameMode === 'full' ? 'contain' : 'cover');
+}
+function artStyle(card) {
+  return card.image ? `style="background-image:url('${card.image}')"` : '';
+}
+
 /* ============================================================
    페이지 전환
    ============================================================ */
@@ -2520,18 +2603,19 @@ function cardHTML(card, opts = {}) {
   const locked = !isOwned && !opts.forceReveal;
   const rarityDots = { c: 1, r: 2, sr: 3, ssr: 4 }[card.rarity] || 1;
   const rarityHTML = Array.from({length: rarityDots}, () => '<span></span>').join('');
-  const artStyle = card.image ? `style="background-image:url('${card.image}')"` : '';
+  const frameMode = getFrameMode(card);
+  const imageFit = getImageFit(card);
 
   return `
-    <div class="card ${locked ? 'locked' : ''}" data-type="${card.type}" data-rarity="${card.rarity}" data-id="${card.id}">
-      <div class="art" data-emoji="${card.emoji}" ${artStyle}></div>
+    <div class="card ${locked ? 'locked' : ''}" data-type="${card.type}" data-rarity="${card.rarity}" data-id="${card.id}" data-frame="${frameMode}" data-fit="${imageFit}">
+      <div class="art" data-emoji="${escapeHTML(card.emoji || '🃏')}" ${artStyle(card)}></div>
       <div class="frame">
         <div class="top">
           <div class="type-badge">${TYPE_EMOJI[card.type]}</div>
           <div class="hp">HP ${card.hp}</div>
         </div>
         <div class="bot">
-          <div class="name">${card.name}</div>
+          <div class="name">${escapeHTML(card.name)}</div>
           <div class="rarity">${rarityHTML}</div>
         </div>
       </div>
@@ -2630,25 +2714,14 @@ function removeFromDeck(idx) {
 function openCardModal(card) {
   const modalCard = document.getElementById('modalCard');
   modalCard.innerHTML = cardHTML(card, {forceReveal:true}).replace('class="card ', 'class="card modal-card-inner ');
-  // 모달용 카드 (전체 채움)
+  // 카드 모달의 속성/표시 모드 동기화
   const isOwned = owned.has(card.id);
-  modalCard.innerHTML = `
-    <div class="art" data-emoji="${card.emoji}" ${card.image ? `style="background-image:url('${card.image}')"` : ''}
-      ${!isOwned ? 'style="filter:grayscale(1) brightness(0.4)"' : ''}></div>
-    <div class="frame">
-      <div class="top">
-        <div class="type-badge">${TYPE_EMOJI[card.type]}</div>
-        <div class="hp">HP ${card.hp}</div>
-      </div>
-      <div class="bot">
-        <div class="name">${card.name}</div>
-        <div class="rarity">${Array.from({length:({c:1,r:2,sr:3,ssr:4})[card.rarity]}).map(()=>'<span></span>').join('')}</div>
-      </div>
-    </div>
-  `;
-  // 카드 모달의 art 배경 동기화
-  document.getElementById('modalCard').dataset.type = card.type;
-  document.getElementById('modalCard').dataset.rarity = card.rarity;
+  modalCard.dataset.type = card.type;
+  modalCard.dataset.rarity = card.rarity;
+  modalCard.dataset.frame = getFrameMode(card);
+  modalCard.dataset.fit = getImageFit(card);
+  if (!isOwned) modalCard.classList.add('locked');
+  else modalCard.classList.remove('locked');
 
   document.getElementById('modalName').textContent = card.name + (isOwned ? '' : ' (미보유)');
   document.getElementById('modalDesc').textContent = card.desc;
@@ -2714,18 +2787,19 @@ function showCardAt(idx) {
   const front = document.getElementById('cardFront');
   front.dataset.type = card.type;
   front.dataset.rarity = card.rarity;
+  front.dataset.frame = getFrameMode(card);
+  front.dataset.fit = getImageFit(card);
   const rarityDots = { c: 1, r: 2, sr: 3, ssr: 4 }[card.rarity];
   const rarityHTML = Array.from({length: rarityDots}, () => '<span></span>').join('');
-  const artStyle = card.image ? `style="background-image:url('${card.image}')"` : '';
   front.innerHTML = `
-    <div class="big-art" data-emoji="${card.emoji}" ${artStyle}></div>
+    <div class="big-art" data-emoji="${escapeHTML(card.emoji || '🃏')}" ${artStyle(card)}></div>
     <div class="big-frame">
       <div class="big-top">
         <div class="big-badge">${TYPE_EMOJI[card.type]}</div>
         <div class="big-hp">HP ${card.hp}</div>
       </div>
       <div class="big-bot">
-        <div class="big-name">${card.name}</div>
+        <div class="big-name">${escapeHTML(card.name)}</div>
         <div class="big-rarity">${rarityHTML}</div>
       </div>
     </div>
@@ -3128,7 +3202,9 @@ function cardForNet(card) {
     hp: card.hp,
     rarity: card.rarity,
     emoji: card.emoji || '🃏',
-    image: card.image || ''   // 데이터URL이 너무 크면 비울 수도 있음
+    image: card.image || '',   // 데이터URL이 너무 크면 비울 수도 있음
+    imageFit: getImageFit(card),
+    frameMode: getFrameMode(card)
   };
 }
 
@@ -3139,11 +3215,12 @@ async function startOnlineMatch() {
   setOnlineState('searching');
   // 검색 화면에 내 카드 표시
   const mini = document.getElementById('searchMyCard');
+  mini.classList.toggle('contain', getImageFit(selectedFighter) === 'contain');
   if (selectedFighter.image) {
     mini.style.backgroundImage = `url('${selectedFighter.image}')`;
     mini.textContent = '';
   } else {
-    mini.style.backgroundImage = '';
+    mini.style.removeProperty('background-image');
     mini.textContent = selectedFighter.emoji || '🃏';
   }
 
@@ -3238,9 +3315,12 @@ function renderMatchUI(opponentData) {
   document.getElementById('oppBadge').textContent = TYPE_EMOJI[oppCard.type];
   const oppMatchCard = document.getElementById('oppMatchCard');
   oppMatchCard.dataset.type = oppCard.type;
+  oppMatchCard.dataset.frame = getFrameMode(oppCard);
+  oppMatchCard.dataset.fit = getImageFit(oppCard);
   const oppArt = oppMatchCard.querySelector('.art');
-  oppArt.dataset.emoji = oppCard.emoji;
-  oppArt.style.backgroundImage = oppCard.image ? `url('${oppCard.image}')` : '';
+  oppArt.dataset.emoji = oppCard.emoji || '🃏';
+  if (oppCard.image) oppArt.style.backgroundImage = `url('${oppCard.image}')`;
+  else oppArt.style.removeProperty('background-image');
   const oppRarityDots = { c:1, r:2, sr:3, ssr:4 }[oppCard.rarity];
   const oppRarity = document.getElementById('oppRarity');
   oppRarity.innerHTML = Array.from({length: oppRarityDots}, () => '<span></span>').join('');
@@ -3250,14 +3330,16 @@ function renderMatchUI(opponentData) {
   document.getElementById('myName').textContent = myPlayerName;
   const myCardDiv = document.getElementById('myMatchCard');
   myCardDiv.dataset.type = selectedFighter.type;
+  myCardDiv.dataset.frame = getFrameMode(selectedFighter);
+  myCardDiv.dataset.fit = getImageFit(selectedFighter);
   myCardDiv.innerHTML = `
-    <div class="art" data-emoji="${selectedFighter.emoji}" ${selectedFighter.image ? `style="background-image:url('${selectedFighter.image}')"` : ''}></div>
+    <div class="art" data-emoji="${escapeHTML(selectedFighter.emoji || '🃏')}" ${artStyle(selectedFighter)}></div>
     <div class="frame">
       <div class="top">
         <div class="type-badge">${TYPE_EMOJI[selectedFighter.type]}</div>
         <div class="hp">HP ${selectedFighter.hp}</div>
       </div>
-      <div class="bot"><div class="name">${selectedFighter.name}</div></div>
+      <div class="bot"><div class="name">${escapeHTML(selectedFighter.name)}</div></div>
     </div>
   `;
   const myRarityDots = { c:1, r:2, sr:3, ssr:4 }[selectedFighter.rarity];
