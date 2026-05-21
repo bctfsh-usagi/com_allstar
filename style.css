@@ -3621,3 +3621,106 @@ body {
     font-size: 13px !important;
   }
 }
+/* ===================================================================
+   AD COLLECTION GRID FIX v1.1
+   카드 슬롯 겹침 해결
+   - 그리드 카드 높이 고정
+   - 빈 슬롯 내부 요소 중앙 정렬
+   - 카드 간격 안정화
+   =================================================================== */
+
+#collection-screen .collection-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  align-items: start !important;
+  grid-auto-rows: auto !important;
+  padding: 4px 0 28px !important;
+}
+
+/* 모든 컬렉션 카드는 독립된 2:3 카드로 고정 */
+#collection-screen .col-card {
+  width: 100% !important;
+  aspect-ratio: 2 / 3 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  display: block !important;
+  position: relative !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+}
+
+/* 빈 슬롯은 내부 flex가 겹침을 만들지 않도록 해제 */
+#collection-screen .col-card.empty {
+  display: block !important;
+}
+
+/* 빈 슬롯 중앙 잠금 */
+#collection-screen .col-card.empty .lock {
+  position: absolute !important;
+  left: 50% !important;
+  top: 46% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 28px !important;
+  height: 28px !important;
+  margin: 0 !important;
+}
+
+/* 빈 슬롯 별 힌트 */
+#collection-screen .col-card.empty .hint {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 12px !important;
+  margin: 0 !important;
+  text-align: center !important;
+}
+
+/* 물음표 장식이 너무 커서 겹쳐보이지 않게 */
+#collection-screen .col-card.empty::before {
+  top: 40% !important;
+  font-size: 28px !important;
+  opacity: .7 !important;
+}
+
+/* 잠금 고리 크기 보정 */
+#collection-screen .col-card.empty .lock::before {
+  width: 16px !important;
+  height: 16px !important;
+  top: -12px !important;
+  border-width: 3px !important;
+}
+
+/* 카드 내부 실제 이미지가 카드 밖으로 밀리지 않게 */
+#collection-screen .col-card .card-art,
+#collection-screen .col-card .card-art img,
+#collection-screen .col-card .concept-art {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 카드 배지들은 카드 안쪽에만 */
+#collection-screen .col-card .count-badge {
+  z-index: 6 !important;
+}
+
+#collection-screen .col-card .attr-badge {
+  z-index: 6 !important;
+}
+
+#collection-screen .col-card .stars-mini {
+  z-index: 6 !important;
+}
+
+/* 모바일 좁은 화면에서 간격 조금 축소 */
+@media (max-width: 390px) {
+  #collection-screen .collection-grid {
+    gap: 10px !important;
+  }
+
+  #collection-screen .col-card {
+    border-radius: 12px !important;
+  }
+}
