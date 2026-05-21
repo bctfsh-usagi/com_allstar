@@ -2,415 +2,283 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>COM 올스타 카드 배틀</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>COM 올스타 · 운영자 도구</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Bagel+Fat+One&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Bagel+Fat+One&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <!-- Firebase SDK (Firestore) -->
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
 <style>
   :root {
-    /* 색상 시스템 */
-    --bg-0: #0b0f1e;
-    --bg-1: #131831;
-    --bg-2: #1c2247;
-    --bg-3: #2a3160;
+    --bg-0: #0a0d18;
+    --bg-1: #121627;
+    --bg-2: #1a1f33;
+    --bg-3: #252b45;
     --line: rgba(255,255,255,0.08);
+    --line-strong: rgba(255,255,255,0.15);
     --text: #f4f5fb;
     --text-dim: #aab0d0;
     --text-mute: #6a719a;
 
-    /* 속성 색상: 가위(scissors), 바위(rock), 보(paper) */
-    --t-sci: #ff4d6d;        /* 가위 - 강렬한 레드 */
-    --t-sci-2: #ffa1b3;
+    --t-sci: #ff4d6d;
+    --t-rok: #9aa3b8;
+    --t-pap: #ffd166;
     --t-sci-bg: #2a0d18;
-    --t-rok: #6b7280;        /* 바위 - 슬레이트 */
-    --t-rok-2: #c9cfd9;
     --t-rok-bg: #1a1d28;
-    --t-pap: #ffd166;        /* 보 - 골드 */
-    --t-pap-2: #ffe9a8;
     --t-pap-bg: #2a230a;
 
-    /* 희귀도 */
-    --r-c: #b9c0d6;          /* Common */
-    --r-r: #62d2ff;          /* Rare */
-    --r-sr: #c084fc;         /* Super Rare */
-    --r-ssr: #ffd166;        /* SSR */
+    --r-c: #b9c0d6;
+    --r-r: #62d2ff;
+    --r-sr: #c084fc;
+    --r-ssr: #ffd166;
 
-    /* 효과 */
-    --accent: #7c5cff;
-    --good: #4ade80;
+    --accent: #00d4aa;       /* 운영툴 강조색: 청록 (게임의 보라핑크와 구분) */
+    --accent-2: #62d2ff;
     --warn: #fbbf24;
     --bad:  #ef4444;
+    --good: #4ade80;
 
-    --radius-card: 14px;
-    --radius-lg: 22px;
-    --shadow-card: 0 10px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);
+    --radius-card: 12px;
+    --radius-lg: 16px;
   }
 
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; padding: 0; height: 100%; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
   body {
     font-family: 'Gowun Dodum', system-ui, sans-serif;
     color: var(--text);
     background:
-      radial-gradient(1200px 600px at 50% -10%, #2a1a55 0%, transparent 60%),
-      radial-gradient(900px 600px at 100% 100%, #1a2a55 0%, transparent 60%),
+      radial-gradient(1400px 600px at 50% -200px, rgba(0,212,170,0.08) 0%, transparent 60%),
       var(--bg-0);
-    overflow: hidden;
+    min-height: 100vh;
+    line-height: 1.5;
   }
 
-  /* 타이틀 스크린 */
-  .title-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background:
-      linear-gradient(180deg, rgba(2,4,12,0.05), rgba(2,4,12,0.4)),
-      #05070f url('assets/title-screen.webp') center / cover no-repeat;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    padding: max(24px, env(safe-area-inset-bottom)) 24px 44px;
-    cursor: pointer;
-    transition: opacity .45s ease, transform .45s ease;
-  }
-  .title-screen.hidden {
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(1.02);
-  }
-  .title-tap {
-    font-family: 'Bagel Fat One', 'Jua', sans-serif;
-    font-size: clamp(24px, 7vw, 44px);
-    letter-spacing: .08em;
-    color: #fff7d6;
-    text-shadow: 0 2px 18px rgba(255,209,102,.65), 0 4px 30px rgba(0,0,0,.8);
-    animation: titleTapPulse 1.4s ease-in-out infinite;
-    user-select: none;
-  }
-  @keyframes titleTapPulse {
-    0%, 100% { opacity: .72; transform: translateY(0); }
-    50% { opacity: 1; transform: translateY(-4px); }
-  }
-
-  /* 모바일 컨테이너 (데스크탑에서도 폰처럼 보이게) */
-  .app {
-    position: relative;
-    width: 100%;
-    max-width: 440px;
-    margin: 0 auto;
-    height: 100vh;
-    background: linear-gradient(180deg, #0d1126 0%, #0b0f1e 100%);
-    border-left: 1px solid var(--line);
-    border-right: 1px solid var(--line);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* 상단 헤더 */
+  /* ============ 상단 헤더 ============ */
   .topbar {
-    flex-shrink: 0;
-    padding: 14px 18px 10px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(10, 13, 24, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 14px 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: linear-gradient(180deg, rgba(124,92,255,0.12), transparent);
-    border-bottom: 1px solid var(--line);
+    gap: 16px;
   }
   .brand {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-family: 'Bagel Fat One', 'Jua', sans-serif;
-    font-size: 18px;
-    letter-spacing: 0.3px;
+    gap: 10px;
+    font-family: 'Bagel Fat One', sans-serif;
   }
-  .com-badge {
-    background: linear-gradient(135deg, #ff4d6d, #7c5cff);
-    color: #fff;
-    font-size: 13px;
-    padding: 4px 8px;
+  .brand-tool {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #002a22;
+    padding: 5px 10px;
     border-radius: 6px;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 12px rgba(124,92,255,0.4);
+    font-size: 12px;
+    letter-spacing: 1.5px;
     transform: skewX(-6deg);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.2);
   }
-  .brand-main {
-    background: linear-gradient(180deg, #fff 40%, #c4b5fd 100%);
+  .brand-name {
+    font-family: 'Jua', sans-serif;
+    font-size: 16px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+  .brand-name b {
+    color: var(--text);
+    background: linear-gradient(180deg, #fff, #c4b5fd);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
-  .currency {
+
+  .header-stats {
     display: flex;
-    gap: 8px;
+    gap: 12px;
+    align-items: center;
   }
-  .chip {
+  .h-chip {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 10px;
-    background: rgba(255,255,255,0.06);
+    padding: 6px 12px;
+    background: rgba(255,255,255,0.04);
     border: 1px solid var(--line);
     border-radius: 999px;
     font-size: 13px;
-    font-family: 'Jua', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
   }
-  .chip .dot {
-    width: 10px; height: 10px; border-radius: 50%;
-  }
-  .chip .gem { background: linear-gradient(135deg, #62d2ff, #7c5cff); box-shadow: 0 0 8px #7c5cff80; }
-  .chip .coin { background: linear-gradient(135deg, #ffd166, #ff9f43); box-shadow: 0 0 8px #ffd16680; }
-  .chip .trophy { background: linear-gradient(135deg, #ffd166, #ff4d6d); box-shadow: 0 0 8px #ff4d6d80; }
-  .trophy-chip { cursor: pointer; transition: transform .12s; }
-  .trophy-chip:hover { background: rgba(255,209,102,0.1); }
-  .trophy-chip:active { transform: scale(0.95); }
-  .trophy-chip .slash { color: var(--text-mute); font-size: 11px; }
-  .trophy-chip.ready {
-    background: linear-gradient(135deg, rgba(255,209,102,0.25), rgba(255,77,109,0.2));
-    border-color: rgba(255,209,102,0.4);
-    animation: trophyPulse 1.5s ease-in-out infinite;
-  }
-  @keyframes trophyPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255,209,102,0); }
-    50% { box-shadow: 0 0 0 6px rgba(255,209,102,0.15); }
+  .h-chip .l { color: var(--text-mute); font-size: 11px; }
+  .h-chip .v { font-weight: 600; font-family: 'Jua', sans-serif; }
+  .h-chip[data-t="sci"] .v { color: var(--t-sci); }
+  .h-chip[data-t="rok"] .v { color: var(--t-rok); }
+  .h-chip[data-t="pap"] .v { color: var(--t-pap); }
+  .h-chip[data-t="total"] { background: linear-gradient(135deg, rgba(0,212,170,0.15), rgba(98,210,255,0.1)); border-color: rgba(0,212,170,0.3); }
+  .h-chip[data-t="total"] .v { color: var(--accent); font-size: 14px; }
+
+  /* ============ 메인 영역 ============ */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
   }
 
-  /* 컨텐츠 영역 */
-  .content {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 16px 18px 90px;
-    scrollbar-width: none;
-  }
-  .content::-webkit-scrollbar { display: none; }
-
-  /* 페이지 */
-  .page { display: none; animation: fadeUp .35s ease both; }
-  .page.active { display: block; }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .section-title {
-    font-family: 'Jua', sans-serif;
-    font-size: 18px;
-    margin: 18px 0 10px;
+  /* 툴바 */
+  .toolbar {
     display: flex;
-    align-items: center;
     gap: 8px;
-  }
-  .section-title .bar {
-    width: 4px; height: 18px; border-radius: 2px;
-    background: linear-gradient(180deg, var(--accent), #62d2ff);
-  }
-  .muted { color: var(--text-dim); font-size: 13px; }
-
-  /* ============ 홈: 팩 오픈 ============ */
-  .hero-pack {
-    position: relative;
-    border-radius: var(--radius-lg);
-    padding: 20px;
-    background:
-      radial-gradient(400px 200px at 80% 0%, rgba(255,209,102,0.25), transparent 60%),
-      radial-gradient(400px 200px at 0% 100%, rgba(124,92,255,0.30), transparent 60%),
-      linear-gradient(135deg, #1a1f44 0%, #2a1855 100%);
-    border: 1px solid var(--line);
-    overflow: hidden;
-  }
-  .hero-pack::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
-    background-size: 14px 14px;
-    pointer-events: none;
-    opacity: 0.5;
-  }
-  .pack-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    position: relative;
-  }
-  .pack-title {
-    font-family: 'Jua', sans-serif;
-    font-size: 22px;
-    line-height: 1.2;
-  }
-  .pack-sub {
-    color: var(--text-dim);
-    font-size: 13px;
-    margin-top: 4px;
-  }
-  .pack-tag {
-    background: linear-gradient(135deg, #ffd166, #ff9f43);
-    color: #2a230a;
-    font-family: 'Jua', sans-serif;
-    font-size: 11px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    letter-spacing: 0.5px;
-  }
-  .pack-art {
-    position: relative;
-    height: 200px;
-    margin: 16px auto 8px;
-    width: 140px;
-    perspective: 800px;
-  }
-  .pack-3d {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    animation: packFloat 4s ease-in-out infinite;
-  }
-  @keyframes packFloat {
-    0%,100% { transform: rotateY(-12deg) rotateX(4deg) translateY(0); }
-    50%     { transform: rotateY(12deg)  rotateX(-2deg) translateY(-8px); }
-  }
-  .pack-face {
-    position: absolute;
-    inset: 0;
-    border-radius: 14px;
-    background:
-      linear-gradient(135deg, #ff4d6d 0%, #7c5cff 50%, #62d2ff 100%);
-    box-shadow: 0 20px 40px rgba(124,92,255,0.4), inset 0 2px 0 rgba(255,255,255,0.3);
-    display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 14px;
-    color: white;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
   }
-  .pack-face::before {
-    content:'';
-    position: absolute;
-    top: 8px; left: 8px; right: 8px; bottom: 8px;
-    border: 1.5px dashed rgba(255,255,255,0.4);
-    border-radius: 10px;
-  }
-  .pack-face .pf-title {
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 26px;
-    line-height: 0.95;
-    text-align: center;
-    text-shadow: 0 2px 0 rgba(0,0,0,0.25);
-    letter-spacing: 1px;
-  }
-  .pack-face .pf-rps {
-    font-size: 36px;
-    margin-top: 8px;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-  }
-  .pack-face .pf-sub {
-    margin-top: 6px;
-    font-family: 'Jua', sans-serif;
-    font-size: 11px;
-    letter-spacing: 2px;
-    opacity: 0.9;
-  }
-  .pack-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 8px;
-    position: relative;
-  }
+  .toolbar .grow { flex: 1; min-width: 200px; }
+
   .btn {
     appearance: none;
     border: 1px solid var(--line);
-    background: rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.04);
     color: var(--text);
-    padding: 12px 14px;
-    border-radius: 14px;
+    padding: 9px 16px;
+    border-radius: 10px;
     font-family: 'Jua', sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     cursor: pointer;
-    transition: transform .12s ease, background .2s;
+    transition: all .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
   }
+  .btn:hover { background: rgba(255,255,255,0.08); border-color: var(--line-strong); }
   .btn:active { transform: scale(0.97); }
   .btn.primary {
-    background: linear-gradient(135deg, #7c5cff, #ff4d6d);
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
     border: none;
-    box-shadow: 0 10px 25px rgba(124,92,255,0.45);
+    color: #002a22;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(0,212,170,0.3);
   }
-  .btn.primary:hover { filter: brightness(1.1); }
-  .btn .cost {
-    display: inline-block;
-    margin-left: 6px;
-    font-size: 12px;
-    opacity: 0.85;
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.danger {
+    background: rgba(239,68,68,0.1);
+    border-color: rgba(239,68,68,0.3);
+    color: #fca5a5;
+  }
+  .btn.danger:hover { background: rgba(239,68,68,0.2); }
+  .btn .ico { font-size: 16px; }
+
+  /* 검색 */
+  .search-box {
+    flex: 1;
+    min-width: 240px;
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 14px 10px 38px;
+    color: var(--text);
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: all .15s;
+  }
+  .search-box input:focus {
+    border-color: var(--accent);
+    background: rgba(0,212,170,0.05);
+  }
+  .search-box::before {
+    content: '🔍';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    opacity: 0.5;
   }
 
-  /* 일일 미션 / 빠른 메뉴 */
-  .quick-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+  /* 필터 칩 */
+  .filters {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
   }
-  .quick {
-    padding: 14px;
-    border-radius: 14px;
+  .filter-chip {
+    padding: 6px 14px;
+    background: rgba(255,255,255,0.04);
     border: 1px solid var(--line);
-    background: rgba(255,255,255,0.03);
+    border-radius: 999px;
+    color: var(--text-dim);
+    font-size: 13px;
     cursor: pointer;
-    transition: transform .12s, background .2s;
+    font-family: 'Jua', sans-serif;
+    transition: all .15s;
   }
-  .quick:hover { background: rgba(255,255,255,0.06); }
-  .quick:active { transform: scale(0.98); }
-  .quick .icn {
-    font-size: 22px; margin-bottom: 6px;
+  .filter-chip:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+  .filter-chip.active {
+    background: var(--accent);
+    color: #002a22;
+    border-color: transparent;
+    font-weight: 600;
   }
-  .quick .ttl {
-    font-family: 'Jua', sans-serif; font-size: 14px;
-  }
-  .quick .desc {
-    color: var(--text-dim); font-size: 11px; margin-top: 2px;
-  }
+  .filter-chip.active[data-f="sci"] { background: var(--t-sci); color: white; }
+  .filter-chip.active[data-f="rok"] { background: var(--t-rok); color: #1a1d28; }
+  .filter-chip.active[data-f="pap"] { background: var(--t-pap); color: #2a230a; }
 
-  /* 타입 가이드 (가위바위보) */
-  .type-guide {
-    border-radius: 16px;
-    border: 1px solid var(--line);
-    background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
-    padding: 14px 16px;
-  }
-  .type-ring {
+  /* 카드 그리드 */
+  .grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-top: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
   }
-  .type-cell {
-    text-align: center;
-    padding: 10px 6px;
-    border-radius: 12px;
-    border: 1px solid var(--line);
+  .card-wrap {
+    position: relative;
   }
-  .type-cell .ico { font-size: 26px; }
-  .type-cell .nm { font-family: 'Jua', sans-serif; margin-top: 2px; font-size: 13px; }
-  .type-cell.sci { background: linear-gradient(180deg, var(--t-sci-bg), transparent); border-color: rgba(255,77,109,0.3); }
-  .type-cell.rok { background: linear-gradient(180deg, var(--t-rok-bg), transparent); border-color: rgba(201,207,217,0.2); }
-  .type-cell.pap { background: linear-gradient(180deg, var(--t-pap-bg), transparent); border-color: rgba(255,209,102,0.3); }
-  .type-rule {
-    margin-top: 10px; font-size: 12px; color: var(--text-dim); line-height: 1.6;
+  .card-wrap:hover .card-actions { opacity: 1; }
+  .card-actions {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: flex;
+    gap: 4px;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity .15s;
   }
-  .type-rule b { color: var(--text); }
+  .card-actions button {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: none;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+  }
+  .card-actions button:hover { transform: scale(1.1); }
+  .card-actions .edit:hover { background: var(--accent); color: #002a22; }
+  .card-actions .dup:hover { background: var(--accent-2); color: #002a22; }
+  .card-actions .del:hover { background: var(--bad); }
 
-  /* ============ 카드 ============ */
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
+  /* 카드 자체 (게임과 동일한 스타일) */
   .card {
     position: relative;
     aspect-ratio: 2 / 3;
@@ -419,13 +287,10 @@
     cursor: pointer;
     background: var(--bg-2);
     border: 1.5px solid var(--line);
-    box-shadow: var(--shadow-card);
-    transition: transform .15s ease, box-shadow .2s;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    transition: transform .15s, box-shadow .2s;
   }
-  .card:active { transform: scale(0.97); }
-  .card:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(0,0,0,0.55); }
-
-  /* 카드 배경 (이미지 자리) */
+  .card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(0,0,0,0.5); }
   .card .art {
     position: absolute;
     inset: 0;
@@ -433,7 +298,6 @@
     background-position: center;
     background-repeat: no-repeat;
     background-color: var(--bg-3);
-    /* 사용자가 카드 이미지 추가시: style="background-image:url(...)" 만 넣으면 됨 */
   }
   .card[data-fit="contain"] .art {
     background-size: contain;
@@ -445,8 +309,6 @@
   .card[data-frame="full"] {
     border-color: rgba(255,209,102,0.35);
   }
-  /* 이미지가 없을 때 보여줄 placeholder */
-  .card .art:empty::after,
   .card .art:not([style])::after {
     content: attr(data-emoji);
     position: absolute;
@@ -454,15 +316,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 48px;
+    font-size: 52px;
     filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
   }
-  /* 속성별 카드 배경 그라데이션 (이미지 없을 때) */
   .card[data-type="sci"] .art { background: linear-gradient(160deg, #5a1c2c 0%, #2a0d18 60%, #1a0810 100%); }
   .card[data-type="rok"] .art { background: linear-gradient(160deg, #3a4055 0%, #1c2030 60%, #0e1018 100%); }
   .card[data-type="pap"] .art { background: linear-gradient(160deg, #6b5520 0%, #2a230a 60%, #1a1505 100%); }
-
-  /* 카드 프레임 / 상단 정보 */
   .card .frame {
     position: absolute;
     inset: 0;
@@ -470,8 +329,7 @@
     flex-direction: column;
     justify-content: space-between;
     padding: 6px 7px;
-    background:
-      linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 25%, transparent 70%, rgba(0,0,0,0.85) 100%);
+    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 25%, transparent 70%, rgba(0,0,0,0.85) 100%);
     pointer-events: none;
   }
   .card .top {
@@ -498,9 +356,7 @@
     border-radius: 999px;
     border: 1px solid rgba(255,255,255,0.18);
   }
-  .card .bot {
-    text-align: center;
-  }
+  .card .bot { text-align: center; }
   .card .name {
     font-family: 'Jua', sans-serif;
     font-size: 12px;
@@ -521,1976 +377,591 @@
     border-radius: 50%;
     box-shadow: 0 0 4px currentColor;
   }
-  .card[data-rarity="r"] .rarity span { background: var(--r-r); }
-  .card[data-rarity="sr"] .rarity span { background: var(--r-sr); }
-  .card[data-rarity="ssr"] .rarity span { background: var(--r-ssr); }
-
-  /* 홀로 효과 */
-  .card[data-rarity="sr"]::before,
-  .card[data-rarity="ssr"]::before {
-    content: '';
+  .card[data-rarity="r"] .rarity span { background: var(--r-r); color: var(--r-r); }
+  .card[data-rarity="sr"] .rarity span { background: var(--r-sr); color: var(--r-sr); }
+  .card[data-rarity="ssr"] .rarity span { background: var(--r-ssr); color: var(--r-ssr); }
+  /* 카드 ID (어드민에서만 표시) */
+  .card .id-tag {
     position: absolute;
-    inset: 0;
-    background: linear-gradient(115deg,
-      transparent 30%,
-      rgba(255,255,255,0.25) 50%,
-      transparent 70%);
-    transform: translateX(-100%);
-    animation: shine 3.5s infinite;
-    pointer-events: none;
-  }
-  .card[data-rarity="ssr"]::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: conic-gradient(from 0deg,
-      transparent, rgba(255,209,102,0.15), transparent,
-      rgba(255,77,109,0.15), transparent,
-      rgba(124,92,255,0.15), transparent);
-    mix-blend-mode: screen;
-    pointer-events: none;
-  }
-  @keyframes shine {
-    0% { transform: translateX(-100%); }
-    50%, 100% { transform: translateX(100%); }
-  }
-
-  /* 잠긴 카드 (미보유) */
-  .card.locked .art { filter: grayscale(1) brightness(0.3); }
-  .card.locked .frame { background: rgba(0,0,0,0.5); }
-  .card.locked .name, .card.locked .hp, .card.locked .rarity { opacity: 0.35; }
-  .card.locked::after {
-    content: '?';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 38px;
-    color: rgba(255,255,255,0.4);
-  }
-
-  /* ============ 컬렉션 페이지 ============ */
-  .collection-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  .stat {
-    text-align: center;
-    padding: 10px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-  }
-  .stat .v { font-family: 'Bagel Fat One', sans-serif; font-size: 20px; }
-  .stat .l { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
-  .stat.sci .v { color: var(--t-sci); }
-  .stat.rok .v { color: var(--t-rok-2); }
-  .stat.pap .v { color: var(--t-pap); }
-
-  .filter-row {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 12px;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding-bottom: 4px;
-  }
-  .filter-row::-webkit-scrollbar { display: none; }
-  .filter {
-    flex-shrink: 0;
-    padding: 6px 12px;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    background: rgba(255,255,255,0.04);
+    top: 4px;
+    left: 4px;
+    background: rgba(0,0,0,0.7);
     color: var(--text-dim);
-    font-size: 13px;
-    cursor: pointer;
-    font-family: 'Jua', sans-serif;
-  }
-  .filter.active {
-    background: linear-gradient(135deg, #7c5cff, #ff4d6d);
-    color: white;
-    border-color: transparent;
-  }
-
-  /* ============ 덱 페이지 ============ */
-  .deck-slot {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-    margin-bottom: 14px;
-  }
-  .slot {
-    aspect-ratio: 2 / 3;
-    border-radius: 8px;
-    border: 1.5px dashed rgba(255,255,255,0.2);
-    background: rgba(255,255,255,0.02);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: var(--text-mute);
-  }
-  .slot.filled {
-    border-style: solid;
-    border-color: var(--line);
-    padding: 0;
-    overflow: hidden;
-    position: relative;
-  }
-  .deck-info {
-    padding: 12px 14px;
-    border-radius: 14px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--line);
-    margin-bottom: 14px;
-  }
-  .deck-info .row {
-    display: flex; justify-content: space-between; font-size: 13px;
-    padding: 4px 0;
-  }
-  .deck-info .row .l { color: var(--text-dim); }
-  .deck-info .row .v { font-family: 'Jua', sans-serif; }
-
-  /* ============ 배틀 페이지 ============ */
-  .battle-stage {
-    position: relative;
-    height: 380px;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--line);
-    background:
-      radial-gradient(circle at 50% 30%, rgba(255,77,109,0.15), transparent 50%),
-      radial-gradient(circle at 50% 70%, rgba(124,92,255,0.15), transparent 50%),
-      linear-gradient(180deg, #1a1f3d 0%, #0b0f1e 100%);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 0;
-  }
-  .battle-stage::before {
-    content: '';
-    position: absolute;
-    left: 0; right: 0; top: 50%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  }
-  .battle-side {
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    width: 100%;
-  }
-  .battle-side .label {
-    font-family: 'Jua', sans-serif;
-    font-size: 13px;
-    color: var(--text-dim);
-  }
-  .battle-card {
-    width: 100px;
-    aspect-ratio: 2 / 3;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--bg-3), var(--bg-2));
-    border: 1.5px solid var(--line);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 38px;
-  }
-  .battle-card.opp {
-    background: linear-gradient(135deg, #2a1855, #1a1f44);
-  }
-  .vs-mark {
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 40px;
-    background: linear-gradient(135deg, #ff4d6d, #7c5cff);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    line-height: 1;
-  }
-  .hp-bar {
-    width: 100px; height: 6px; border-radius: 3px;
-    background: rgba(255,255,255,0.1);
-    overflow: hidden;
-  }
-  .hp-bar > div {
-    height: 100%;
-    width: 78%;
-    background: linear-gradient(90deg, var(--good), #facc15);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 2px 5px;
     border-radius: 3px;
+    z-index: 2;
   }
-  .battle-actions {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-top: 14px;
-  }
-  .action-btn {
-    padding: 14px 8px;
-    border-radius: 14px;
-    border: 1px solid var(--line);
-    background: rgba(255,255,255,0.04);
-    color: var(--text);
-    cursor: pointer;
-    font-family: 'Jua', sans-serif;
-    font-size: 14px;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    transition: transform .12s, background .2s;
-  }
-  .action-btn:active { transform: scale(0.96); }
-  .action-btn .ico { font-size: 26px; }
-  .action-btn[data-type="sci"]:hover { background: var(--t-sci-bg); border-color: var(--t-sci); }
-  .action-btn[data-type="rok"]:hover { background: var(--t-rok-bg); border-color: var(--t-rok-2); }
-  .action-btn[data-type="pap"]:hover { background: var(--t-pap-bg); border-color: var(--t-pap); }
 
-  .battle-log {
-    margin-top: 14px;
-    padding: 12px;
-    border-radius: 12px;
-    border: 1px solid var(--line);
-    background: rgba(0,0,0,0.25);
-    font-size: 13px;
+  /* 빈 상태 */
+  .empty {
+    text-align: center;
+    padding: 80px 20px;
     color: var(--text-dim);
-    min-height: 60px;
-    line-height: 1.6;
   }
-  .battle-log .turn {
-    color: var(--text);
-    font-family: 'Jua', sans-serif;
-  }
+  .empty .ico { font-size: 64px; margin-bottom: 16px; opacity: 0.6; }
+  .empty .ttl { font-family: 'Jua', sans-serif; font-size: 20px; color: var(--text); margin-bottom: 8px; }
+  .empty .desc { font-size: 14px; margin-bottom: 20px; }
 
-  /* ============ 하단 탭 네비 ============ */
-  .tabbar {
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    height: 72px;
-    background: rgba(11, 15, 30, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid var(--line);
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    padding: 8px 8px 12px;
-    gap: 4px;
-  }
-  .tab {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    border-radius: 12px;
-    cursor: pointer;
-    color: var(--text-mute);
-    font-size: 11px;
-    font-family: 'Jua', sans-serif;
-    transition: color .2s, background .2s;
-  }
-  .tab .ico {
-    font-size: 22px;
-    transition: transform .2s;
-  }
-  .tab.active {
-    color: var(--text);
-    background: linear-gradient(180deg, rgba(124,92,255,0.15), rgba(124,92,255,0.05));
-  }
-  .tab.active .ico { transform: translateY(-2px); }
-
-  /* ============ 모달 (카드 상세 / 팩 오픈 결과) ============ */
+  /* ============ 모달 (편집기) ============ */
   .modal {
-    position: absolute;
+    position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(8px);
-    z-index: 250;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+    z-index: 100;
     display: none;
     align-items: center;
     justify-content: center;
     padding: 24px;
+    animation: fadeIn .25s ease;
   }
-  .modal.active { display: flex; animation: modalFade .25s ease; }
-  @keyframes modalFade { from { opacity: 0; } to { opacity: 1; } }
-  .modal-inner {
-    width: 100%;
-    max-width: 320px;
-    background: var(--bg-1);
-    border-radius: 22px;
-    border: 1px solid var(--line);
-    padding: 20px;
-    text-align: center;
-    animation: modalPop .35s cubic-bezier(.18,.89,.43,1.18);
-  }
-  @keyframes modalPop { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal.active { display: flex; }
   .modal-card {
-    width: 160px;
+    background: var(--bg-1);
+    border: 1px solid var(--line-strong);
+    border-radius: 18px;
+    max-width: 720px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: pop .3s cubic-bezier(.18,.89,.43,1.18);
+    scrollbar-width: thin;
+  }
+  @keyframes pop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-header h2 {
+    margin: 0;
+    font-family: 'Jua', sans-serif;
+    font-size: 18px;
+  }
+  .modal-close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+  /* 편집기: 좌우 분할 */
+  .editor-body {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 24px;
+    padding: 24px;
+  }
+  @media (max-width: 640px) {
+    .editor-body {
+      grid-template-columns: 1fr;
+    }
+  }
+  .editor-left {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .preview-card {
+    width: 100%;
     aspect-ratio: 2 / 3;
-    margin: 0 auto 14px;
-    border-radius: 16px;
     position: relative;
+    border-radius: var(--radius-card);
     overflow: hidden;
     border: 2px solid var(--line);
+    background: var(--bg-3);
   }
-  .modal h3 {
-    margin: 0 0 4px;
-    font-family: 'Jua', sans-serif;
-    font-size: 20px;
-  }
-  .modal .desc {
-    font-size: 13px;
-    color: var(--text-dim);
-    line-height: 1.6;
-    margin-bottom: 14px;
-  }
-  .modal-stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    margin-bottom: 14px;
-  }
-  .ms {
-    padding: 8px 6px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--line);
-  }
-  .ms .l { font-size: 10px; color: var(--text-mute); }
-  .ms .v { font-family: 'Jua', sans-serif; font-size: 15px; margin-top: 2px; }
-
-  /* ============ 팩 오픈 시퀀스 ============ */
-  .open-modal {
-    padding: 0;
-    background: rgba(5, 7, 18, 0.96);
-  }
-  .open-modal.active { display: flex; }
-
-  /* 배경 광선 */
-  .open-rays {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(0,0,0,0.6) 70%);
-    opacity: 0;
-    transition: opacity 0.4s;
-  }
-  .open-rays.show { opacity: 1; }
-  .open-rays.rare {
-    background:
-      radial-gradient(circle at 50% 45%, rgba(98,210,255,0.4) 0%, transparent 50%),
-      conic-gradient(from 0deg at 50% 45%,
-        transparent 0deg, rgba(98,210,255,0.25) 10deg, transparent 30deg,
-        transparent 60deg, rgba(98,210,255,0.25) 70deg, transparent 90deg,
-        transparent 120deg, rgba(98,210,255,0.25) 130deg, transparent 150deg,
-        transparent 180deg, rgba(98,210,255,0.25) 190deg, transparent 210deg,
-        transparent 240deg, rgba(98,210,255,0.25) 250deg, transparent 270deg,
-        transparent 300deg, rgba(98,210,255,0.25) 310deg, transparent 330deg);
-    animation: rayRotate 8s linear infinite;
-  }
-  .open-rays.sr {
-    background:
-      radial-gradient(circle at 50% 45%, rgba(192,132,252,0.5) 0%, transparent 55%),
-      conic-gradient(from 0deg at 50% 45%,
-        rgba(192,132,252,0.3), transparent 8deg, rgba(192,132,252,0.3) 16deg,
-        transparent 24deg, rgba(192,132,252,0.3) 32deg, transparent 40deg,
-        rgba(192,132,252,0.3) 48deg, transparent 56deg, rgba(192,132,252,0.3) 64deg,
-        transparent 72deg);
-    background-size: 100% 100%, 100% 100%;
-    animation: rayRotate 6s linear infinite;
-  }
-  .open-rays.ssr {
-    background:
-      radial-gradient(circle at 50% 45%, rgba(255,209,102,0.6) 0%, transparent 60%),
-      conic-gradient(from 0deg at 50% 45%,
-        #ff4d6d, #ffd166, #4ade80, #62d2ff, #c084fc, #ff4d6d);
-    opacity: 0.35;
-    animation: rayRotate 4s linear infinite;
-  }
-  @keyframes rayRotate { to { transform: rotate(360deg); } }
-
-  /* 스파클 파티클 레이어 */
-  .sparkle-layer {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
-  }
-  .sparkle {
-    position: absolute;
-    width: 6px; height: 6px;
-    background: radial-gradient(circle, white 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-    animation: sparkBurst 1.2s ease-out forwards;
-  }
-  .sparkle.gold { background: radial-gradient(circle, #ffd166 0%, transparent 70%); }
-  .sparkle.purple { background: radial-gradient(circle, #c084fc 0%, transparent 70%); }
-  .sparkle.cyan { background: radial-gradient(circle, #62d2ff 0%, transparent 70%); }
-  @keyframes sparkBurst {
-    0% { transform: translate(0, 0) scale(0); opacity: 1; }
-    50% { opacity: 1; }
-    100% { transform: translate(var(--tx), var(--ty)) scale(1.5); opacity: 0; }
-  }
-
-  /* 무대 */
-  .open-stage {
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    padding: 24px 20px;
-  }
-  .open-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .open-counter {
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 20px;
-    color: white;
-    background: rgba(255,255,255,0.08);
-    padding: 6px 14px;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-  }
-  .skip-btn {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid var(--line);
-    color: var(--text-dim);
-    padding: 6px 14px;
-    border-radius: 999px;
-    font-family: 'Jua', sans-serif;
-    font-size: 12px;
-    letter-spacing: 1px;
-    cursor: pointer;
-  }
-  .skip-btn:hover { color: white; background: rgba(255,255,255,0.12); }
-
-  /* 카드 영역 */
-  .open-card-area {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    perspective: 1200px;
-    cursor: pointer;
-  }
-  .open-card {
-    position: relative;
-    width: 220px;
-    aspect-ratio: 2 / 3;
-    transform-style: preserve-3d;
-    transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: cardEnter 0.5s ease both;
-  }
-  @keyframes cardEnter {
-    from { transform: scale(0.7) translateY(40px); opacity: 0; }
-    to { transform: scale(1) translateY(0); opacity: 1; }
-  }
-  .open-card.flipped { transform: rotateY(180deg); }
-  .open-card.flipped.ssr { animation: ssrShake 0.6s ease-out 0.9s; }
-  .open-card.flipped.sr  { animation: srPulse 0.6s ease-out 0.9s; }
-  @keyframes ssrShake {
-    0%, 100% { transform: rotateY(180deg) translateX(0); }
-    20% { transform: rotateY(180deg) translateX(-6px) scale(1.04); }
-    40% { transform: rotateY(180deg) translateX(6px) scale(1.04); }
-    60% { transform: rotateY(180deg) translateX(-4px) scale(1.04); }
-    80% { transform: rotateY(180deg) translateX(4px) scale(1.04); }
-  }
-  @keyframes srPulse {
-    0% { transform: rotateY(180deg) scale(1); }
-    50% { transform: rotateY(180deg) scale(1.05); }
-    100% { transform: rotateY(180deg) scale(1); }
-  }
-  .open-card.exit { animation: cardExit 0.4s ease both; }
-  @keyframes cardExit {
-    to { transform: rotateY(180deg) translateX(-150%) scale(0.6); opacity: 0; }
-  }
-
-  .card-side {
-    position: absolute;
-    inset: 0;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    border-radius: 18px;
-    overflow: hidden;
-  }
-  .card-front {
-    transform: rotateY(180deg);
-    border: 2px solid rgba(255,255,255,0.15);
-    box-shadow: 0 25px 60px rgba(0,0,0,0.6);
-  }
-
-  /* 카드 뒷면 디자인 */
-  .card-back {
-    background:
-      radial-gradient(circle at 50% 50%, #2a1a55 0%, #0d0825 100%);
-    border: 2px solid #4c2dac;
-    box-shadow:
-      0 25px 60px rgba(0,0,0,0.6),
-      inset 0 0 60px rgba(124,92,255,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .card-back::before {
-    content: '';
-    position: absolute;
-    inset: 12px;
-    border: 1.5px solid rgba(255,209,102,0.4);
-    border-radius: 10px;
-    background-image:
-      linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%),
-      linear-gradient(-45deg, rgba(255,255,255,0.03) 25%, transparent 25%);
-    background-size: 12px 12px;
-  }
-  .back-pattern {
-    position: relative;
-    z-index: 1;
-    text-align: center;
-    color: white;
-  }
-  .back-star {
-    font-size: 60px;
-    background: linear-gradient(135deg, #ffd166, #ff4d6d);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    filter: drop-shadow(0 0 12px rgba(255,209,102,0.6));
-    animation: starGlow 2s ease-in-out infinite;
-  }
-  @keyframes starGlow {
-    0%, 100% { filter: drop-shadow(0 0 12px rgba(255,209,102,0.6)); transform: scale(1); }
-    50% { filter: drop-shadow(0 0 20px rgba(255,209,102,0.9)); transform: scale(1.05); }
-  }
-  .back-label {
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 22px;
-    letter-spacing: 3px;
-    margin-top: 4px;
-    background: linear-gradient(180deg, #fff, #c4b5fd);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .back-sub {
-    font-family: 'Jua', sans-serif;
-    font-size: 11px;
-    letter-spacing: 4px;
-    color: rgba(255,255,255,0.5);
-    margin-top: 2px;
-  }
-
-  /* 카드 앞면 (실제 카드를 큰 사이즈로) */
-  .card-front .big-card {
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 12px;
-  }
-  .card-front .big-art {
+  .preview-card .art {
     position: absolute;
     inset: 0;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
   }
-  .card-front[data-fit="contain"] .big-art {
+  .preview-card[data-fit="contain"] .art {
     background-size: contain;
     background-color: #05070f;
   }
-  .card-front[data-frame="full"] .big-frame {
+  .preview-card[data-frame="full"] .frame {
     display: none;
   }
-  .card-front .big-art::after {
+  .preview-card .art:not([style])::after {
     content: attr(data-emoji);
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 100px;
-    filter: drop-shadow(0 6px 16px rgba(0,0,0,0.4));
+    font-size: 80px;
+    filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5));
   }
-  .card-front .big-art[style]::after { display: none; }
-  .card-front[data-type="sci"] .big-art { background: linear-gradient(160deg, #5a1c2c, #2a0d18 60%, #1a0810); }
-  .card-front[data-type="rok"] .big-art { background: linear-gradient(160deg, #3a4055, #1c2030 60%, #0e1018); }
-  .card-front[data-type="pap"] .big-art { background: linear-gradient(160deg, #6b5520, #2a230a 60%, #1a1505); }
-  .card-front .big-frame {
+  .preview-card[data-type="sci"] .art { background: linear-gradient(160deg, #5a1c2c 0%, #2a0d18 60%, #1a0810 100%); }
+  .preview-card[data-type="rok"] .art { background: linear-gradient(160deg, #3a4055 0%, #1c2030 60%, #0e1018 100%); }
+  .preview-card[data-type="pap"] .art { background: linear-gradient(160deg, #6b5520 0%, #2a230a 60%, #1a1505 100%); }
+  .preview-card .frame {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 22%, transparent 72%, rgba(0,0,0,0.85) 100%);
-    padding: 14px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 25%, transparent 70%, rgba(0,0,0,0.85) 100%);
   }
-  .card-front .big-top {
+  .preview-card .top {
     display: flex; justify-content: space-between; align-items: center;
   }
-  .card-front .big-badge {
-    width: 36px; height: 36px;
+  .preview-card .type-badge {
+    width: 28px; height: 28px;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    border: 2px solid rgba(255,255,255,0.6);
+    font-size: 15px;
+    border: 1.5px solid rgba(255,255,255,0.6);
     background: rgba(0,0,0,0.4);
   }
-  .card-front[data-type="sci"] .big-badge { background: var(--t-sci); }
-  .card-front[data-type="rok"] .big-badge { background: var(--t-rok); }
-  .card-front[data-type="pap"] .big-badge { background: var(--t-pap); color: #2a230a; }
-  .card-front .big-hp {
+  .preview-card[data-type="sci"] .type-badge { background: var(--t-sci); }
+  .preview-card[data-type="rok"] .type-badge { background: var(--t-rok); }
+  .preview-card[data-type="pap"] .type-badge { background: var(--t-pap); color: #2a230a; }
+  .preview-card .hp {
     font-family: 'Jua', sans-serif;
-    font-size: 16px;
+    font-size: 13px;
     background: rgba(0,0,0,0.6);
-    padding: 4px 12px;
+    padding: 3px 10px;
     border-radius: 999px;
     border: 1px solid rgba(255,255,255,0.2);
   }
-  .card-front .big-bot { text-align: center; }
-  .card-front .big-name {
-    font-family: 'Jua', sans-serif;
-    font-size: 18px;
-    color: white;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-    margin-bottom: 4px;
-  }
-  .card-front .big-rarity {
-    display: inline-flex;
-    gap: 3px;
-  }
-  .card-front .big-rarity span {
-    width: 9px; height: 9px;
-    background: var(--r-c);
-    border-radius: 50%;
-    box-shadow: 0 0 6px currentColor;
-  }
-  .card-front[data-rarity="r"] .big-rarity span { background: var(--r-r); color: var(--r-r); }
-  .card-front[data-rarity="sr"] .big-rarity span { background: var(--r-sr); color: var(--r-sr); }
-  .card-front[data-rarity="ssr"] .big-rarity span { background: var(--r-ssr); color: var(--r-ssr); }
-
-  /* 홀로 효과 (큰 카드) */
-  .card-front[data-rarity="sr"]::before,
-  .card-front[data-rarity="ssr"]::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
-    transform: translateX(-100%);
-    animation: shine 2.5s 0.9s infinite;
-    pointer-events: none;
-    z-index: 2;
-  }
-  .card-front[data-rarity="ssr"]::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: conic-gradient(from 0deg,
-      transparent, rgba(255,209,102,0.25), transparent,
-      rgba(255,77,109,0.25), transparent,
-      rgba(124,92,255,0.25), transparent,
-      rgba(98,210,255,0.25), transparent);
-    mix-blend-mode: screen;
-    animation: rayRotate 4s linear infinite;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  /* 하단: 안내 / 다음 버튼 */
-  .open-bottom {
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .tap-hint {
-    color: var(--text-dim);
+  .preview-card .bot { text-align: center; }
+  .preview-card .name {
     font-family: 'Jua', sans-serif;
     font-size: 14px;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  }
+  .preview-card .rarity {
+    display: inline-flex;
+    gap: 2px;
+    margin-top: 3px;
+  }
+  .preview-card .rarity span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--r-c);
+    box-shadow: 0 0 5px currentColor;
+  }
+  .preview-card[data-rarity="r"] .rarity span { background: var(--r-r); color: var(--r-r); }
+  .preview-card[data-rarity="sr"] .rarity span { background: var(--r-sr); color: var(--r-sr); }
+  .preview-card[data-rarity="ssr"] .rarity span { background: var(--r-ssr); color: var(--r-ssr); }
+
+  .preview-label {
+    text-align: center;
+    color: var(--text-mute);
+    font-size: 11px;
+    font-family: 'Jua', sans-serif;
     letter-spacing: 1px;
-    animation: tapPulse 1.4s ease-in-out infinite;
-  }
-  @keyframes tapPulse {
-    0%, 100% { opacity: 0.6; transform: translateY(0); }
-    50% { opacity: 1; transform: translateY(-3px); }
-  }
-  .next-btn {
-    animation: nextSlide 0.4s ease both;
-    width: 200px;
-  }
-  @keyframes nextSlide {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
   }
 
-  /* 최종 요약 */
-  .open-summary {
-    display: none;
-    position: absolute;
-    inset: 0;
-    z-index: 3;
+  /* 이미지 업로드 버튼 */
+  .upload-controls {
+    display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 24px;
-    background: rgba(5, 7, 18, 0.95);
-    animation: fadeUp 0.4s ease both;
+    gap: 6px;
   }
-  .open-summary.active { display: flex; }
-  .summary-title {
+  .upload-btn {
+    width: 100%;
+    padding: 8px;
+    background: rgba(0,212,170,0.1);
+    border: 1px dashed rgba(0,212,170,0.4);
+    border-radius: 8px;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: 'Jua', sans-serif;
+    font-size: 12px;
     text-align: center;
-    margin-bottom: 18px;
+    transition: all .15s;
   }
-  .summary-title .st-main {
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 28px;
-    background: linear-gradient(135deg, #ffd166, #ff4d6d, #c084fc);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  .upload-btn:hover { background: rgba(0,212,170,0.18); }
+  .upload-btn.has-image {
+    background: rgba(255,255,255,0.04);
+    border-style: solid;
+    border-color: var(--line);
+    color: var(--text-dim);
   }
-  .summary-title .st-sub {
+  .clear-btn {
+    background: none;
+    border: none;
+    color: var(--bad);
+    font-size: 11px;
+    cursor: pointer;
+    padding: 4px;
+    font-family: 'Jua', sans-serif;
+  }
+  .clear-btn:hover { text-decoration: underline; }
+
+  /* 우측 폼 */
+  .editor-right {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .form-group label {
+    display: block;
+    font-family: 'Jua', sans-serif;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  .form-group label .val {
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    margin-left: 6px;
+  }
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: all .15s;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus {
+    border-color: var(--accent);
+    background: rgba(0,212,170,0.05);
+  }
+  .form-group textarea {
+    resize: vertical;
+    min-height: 60px;
+    line-height: 1.5;
+  }
+  .form-group input[type="range"] {
+    padding: 0;
+    accent-color: var(--accent);
+  }
+
+  .pill-group {
+    display: flex;
+    gap: 6px;
+  }
+  .pill {
+    flex: 1;
+    padding: 8px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--text-dim);
+    cursor: pointer;
+    text-align: center;
+    font-family: 'Jua', sans-serif;
+    font-size: 13px;
+    transition: all .15s;
+  }
+  .pill:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+  .pill.active {
+    background: var(--accent);
+    border-color: transparent;
+    color: #002a22;
+    font-weight: 600;
+  }
+  .pill[data-type="sci"].active { background: var(--t-sci); color: white; }
+  .pill[data-type="rok"].active { background: var(--t-rok); color: #1a1d28; }
+  .pill[data-type="pap"].active { background: var(--t-pap); color: #2a230a; }
+  .pill[data-rarity="c"].active   { background: linear-gradient(135deg, #6b7280, #9ca3af); color: white; }
+  .pill[data-rarity="r"].active   { background: linear-gradient(135deg, #0ea5e9, #62d2ff); color: white; }
+  .pill[data-rarity="sr"].active  { background: linear-gradient(135deg, #9333ea, #c084fc); color: white; }
+  .pill[data-rarity="ssr"].active { background: linear-gradient(135deg, #f59e0b, #ffd166); color: #2a1c00; }
+
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+  }
+  .modal-footer .btn { min-width: 96px; justify-content: center; }
+
+  /* 작은 confirm dialog */
+  .confirm-card { max-width: 360px; }
+  .confirm-body {
+    padding: 20px 24px;
+  }
+  .confirm-body h3 {
+    margin: 0 0 8px;
+    font-family: 'Jua', sans-serif;
+    font-size: 16px;
+  }
+  .confirm-body p {
+    margin: 0;
     color: var(--text-dim);
     font-size: 13px;
-    margin-top: 4px;
-  }
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-    width: 100%;
-    max-width: 360px;
-  }
-  .summary-grid .card {
-    animation: revealCard .5s ease both;
-  }
-  .summary-grid .card:nth-child(1) { animation-delay: 0.0s; }
-  .summary-grid .card:nth-child(2) { animation-delay: 0.08s; }
-  .summary-grid .card:nth-child(3) { animation-delay: 0.16s; }
-  .summary-grid .card:nth-child(4) { animation-delay: 0.24s; }
-  .summary-grid .card:nth-child(5) { animation-delay: 0.32s; }
-  @keyframes revealCard {
-    from { transform: rotateY(180deg) scale(0.7); opacity: 0; }
-    to { transform: rotateY(0) scale(1); opacity: 1; }
+    line-height: 1.6;
   }
 
-  /* Toast */
+  /* 토스트 */
   .toast {
-    position: absolute;
-    top: 70px; left: 50%;
-    transform: translateX(-50%) translateY(-20px);
-    background: rgba(0,0,0,0.85);
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(0,0,0,0.92);
     backdrop-filter: blur(10px);
     color: white;
-    padding: 10px 18px;
-    border-radius: 999px;
-    font-size: 13px;
-    border: 1px solid var(--line);
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    border: 1px solid var(--line-strong);
     opacity: 0;
     transition: all .3s;
     pointer-events: none;
     z-index: 1000;
     font-family: 'Jua', sans-serif;
+    max-width: 90%;
   }
   .toast.show {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+  .toast.success { border-color: rgba(74,222,128,0.5); }
+  .toast.error   { border-color: rgba(239,68,68,0.5); }
 
-  /* ============ 새 홈: 메인 팩 (Hero V2) ============ */
-  .hero-pack-v2 {
-    position: relative;
-    border-radius: 24px;
-    padding: 24px 20px 20px;
+  /* 안내 박스 */
+  .info-box {
+    background: rgba(0,212,170,0.05);
+    border: 1px solid rgba(0,212,170,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
     margin-bottom: 16px;
-    background:
-      radial-gradient(600px 300px at 80% 0%, rgba(255,209,102,0.18), transparent 60%),
-      radial-gradient(600px 300px at 20% 100%, rgba(124,92,255,0.30), transparent 60%),
-      linear-gradient(160deg, #1a1f44 0%, #2a1855 50%, #1a0d3a 100%);
-    border: 1px solid rgba(255,255,255,0.1);
-    overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-  }
-  .hero-pack-v2::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
-    background-size: 16px 16px;
-    pointer-events: none;
-    opacity: 0.4;
-  }
-  .hp-glow {
-    position: absolute;
-    top: -100px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(255,209,102,0.25), transparent 60%);
-    pointer-events: none;
-    animation: heroGlow 4s ease-in-out infinite;
-  }
-  @keyframes heroGlow {
-    0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
-    50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
-  }
-  .hp-header {
-    position: relative;
-    text-align: center;
-    margin-bottom: 8px;
-  }
-  .hp-season {
-    display: inline-block;
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: #ffd166;
-    background: rgba(255,209,102,0.1);
-    border: 1px solid rgba(255,209,102,0.3);
-    padding: 3px 12px;
-    border-radius: 999px;
-    margin-bottom: 8px;
-  }
-  .hp-title {
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 32px;
-    line-height: 1;
-    background: linear-gradient(180deg, #fff 30%, #ffd166 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-    text-shadow: 0 4px 20px rgba(255,209,102,0.3);
-  }
-  .hp-sub {
-    color: var(--text-dim);
-    font-size: 12px;
-    font-family: 'Jua', sans-serif;
-  }
-
-  /* 팩 무대 (3D 둥둥) */
-  .hp-pack-stage {
-    position: relative;
-    height: 260px;
-    margin: 8px auto;
-    width: 180px;
-    perspective: 1000px;
-  }
-  .hp-pack-3d {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    animation: heroPackFloat 5s ease-in-out infinite;
-  }
-  @keyframes heroPackFloat {
-    0%, 100% { transform: rotateY(-15deg) rotateX(5deg) translateY(0); }
-    50%      { transform: rotateY(15deg) rotateX(-3deg) translateY(-12px); }
-  }
-  .hp-pack-face {
-    position: absolute;
-    inset: 0;
-    border-radius: 18px;
-    background:
-      radial-gradient(circle at 30% 20%, rgba(255,255,255,0.3), transparent 60%),
-      linear-gradient(135deg, #ff4d6d 0%, #7c5cff 50%, #62d2ff 100%);
-    box-shadow:
-      0 30px 60px rgba(124,92,255,0.5),
-      0 0 0 2px rgba(255,255,255,0.15) inset,
-      0 4px 0 rgba(255,255,255,0.4) inset;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
-    color: white;
-  }
-  .hp-pack-face::before {
-    content: '';
-    position: absolute;
-    top: 10px; left: 10px; right: 10px; bottom: 10px;
-    border: 2px dashed rgba(255,255,255,0.4);
-    border-radius: 13px;
-  }
-  .hp-pf-title {
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 38px;
-    line-height: 0.92;
-    text-align: center;
-    text-shadow: 0 3px 0 rgba(0,0,0,0.25);
-    letter-spacing: 1.5px;
-  }
-  .hp-pf-stars {
-    font-size: 18px;
-    margin-top: 10px;
-    letter-spacing: 4px;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-  }
-  .hp-pf-sub {
-    margin-top: 8px;
-    font-family: 'Jua', sans-serif;
-    font-size: 11px;
-    letter-spacing: 3px;
-    opacity: 0.9;
-  }
-  /* 떠다니는 장식 */
-  .hp-floater {
-    position: absolute;
-    font-size: 24px;
-    opacity: 0.5;
-    pointer-events: none;
-    animation: floaterFloat 4s ease-in-out infinite;
-  }
-  .hp-floater.f1 { top: 10%; left: -10%; animation-delay: 0s; }
-  .hp-floater.f2 { top: 40%; right: -15%; animation-delay: 1.3s; font-size: 20px; }
-  .hp-floater.f3 { bottom: 15%; left: -5%; animation-delay: 2.6s; font-size: 18px; }
-  @keyframes floaterFloat {
-    0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
-    50% { transform: translateY(-20px) rotate(15deg); opacity: 0.8; }
-  }
-
-  /* 확률 표시 */
-  .hp-rates {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin: 16px 0 14px;
-  }
-  .rate-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    background: rgba(0,0,0,0.3);
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    font-size: 11px;
-    color: var(--text-dim);
-    font-family: 'Jua', sans-serif;
-  }
-  .rate-pill .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    box-shadow: 0 0 4px currentColor;
-  }
-
-  /* 팩 액션 버튼 */
-  .hp-actions {
-    display: grid;
-    grid-template-columns: 1fr 1.4fr;
-    gap: 10px;
-  }
-  .hp-actions .btn {
-    padding: 14px 16px;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-  }
-  .hp-btn-main {
-    font-family: 'Jua', sans-serif;
-    font-size: 15px;
-  }
-  .hp-btn-sub {
-    font-size: 11px;
-    opacity: 0.8;
-    font-family: 'Jua', sans-serif;
-  }
-  .hp-free {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-  }
-  .hp-free:hover { background: rgba(255,255,255,0.14); }
-  .hp-gem {
-    box-shadow: 0 12px 30px rgba(124,92,255,0.5);
-  }
-
-  /* 무료 팩 배너 (10승 달성시) */
-  .free-pack-banner {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-    margin-bottom: 14px;
-    background: linear-gradient(135deg, rgba(255,209,102,0.18), rgba(255,77,109,0.15));
-    border: 1px solid rgba(255,209,102,0.4);
-    border-radius: 16px;
-    animation: bannerGlow 2s ease-in-out infinite;
-  }
-  @keyframes bannerGlow {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255,209,102,0); }
-    50%      { box-shadow: 0 0 0 8px rgba(255,209,102,0.15); }
-  }
-  .fpb-icon { font-size: 32px; flex-shrink: 0; }
-  .fpb-content { flex: 1; }
-  .fpb-title {
-    font-family: 'Jua', sans-serif;
-    font-size: 15px;
-    margin-bottom: 2px;
-  }
-  .fpb-sub {
-    font-size: 12px;
-    color: var(--text-dim);
-  }
-
-  /* 빠른 메뉴 (간소화 - 2열) */
-  .quick-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-
-  /* ============ 진행률 카드 ============ */
-  .progress-card {
-    background: linear-gradient(135deg, rgba(255,209,102,0.08), rgba(255,77,109,0.08));
-    border: 1px solid rgba(255,209,102,0.2);
-    border-radius: 16px;
-    padding: 14px 16px;
-    margin-bottom: 14px;
-  }
-  .progress-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  .progress-label {
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-bottom: 4px;
-  }
-  .progress-stat {
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 22px;
-    line-height: 1;
-  }
-  .progress-stat b {
-    background: linear-gradient(135deg, #ffd166, #ff4d6d);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  .progress-stat .muted-stat {
-    color: var(--text-mute);
-    font-size: 14px;
-    font-family: 'Jua', sans-serif;
-    margin-left: 4px;
-  }
-  .claim-btn {
-    padding: 8px 14px;
     font-size: 13px;
-    animation: claimPulse 1.5s ease-in-out infinite;
-  }
-  @keyframes claimPulse {
-    0%, 100% { box-shadow: 0 4px 14px rgba(124,92,255,0.4); }
-    50% { box-shadow: 0 4px 22px rgba(255,209,102,0.6); }
-  }
-  .progress-bar {
-    height: 8px;
-    background: rgba(0,0,0,0.3);
-    border-radius: 999px;
-    overflow: hidden;
-    margin-bottom: 8px;
-  }
-  .progress-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #ffd166, #ff4d6d);
-    border-radius: 999px;
-    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 0 8px rgba(255,209,102,0.5);
-  }
-  .progress-stats {
+    color: var(--text-dim);
     display: flex;
     gap: 10px;
-    font-size: 11px;
-    color: var(--text-dim);
+    align-items: flex-start;
   }
-  .ps b { font-family: 'Jua', sans-serif; color: var(--text); margin-right: 2px; }
-  .ps.win b { color: var(--good); }
-  .ps.lose b { color: var(--bad); }
-  .ps.tie b { color: var(--text-dim); }
-  .ps.pack b { color: var(--warn); }
+  .info-box .icn { font-size: 16px; flex-shrink: 0; }
+  .info-box b { color: var(--text); }
 
-  /* ============ 모드 탭 ============ */
-  .mode-tabs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 14px;
-    padding: 4px;
-    background: rgba(0,0,0,0.25);
-    border-radius: 12px;
-    border: 1px solid var(--line);
-  }
-  .mode-tab {
-    padding: 9px 12px;
-    background: transparent;
-    border: none;
-    color: var(--text-dim);
-    font-family: 'Jua', sans-serif;
-    font-size: 13px;
-    cursor: pointer;
-    border-radius: 8px;
-    transition: all .2s;
-  }
-  .mode-tab:hover { color: var(--text); }
-  .mode-tab.active {
-    background: linear-gradient(135deg, #7c5cff, #ff4d6d);
-    color: white;
-    box-shadow: 0 4px 10px rgba(124,92,255,0.3);
-  }
-
-  /* ============ 출전 카드 선택 (피커) ============ */
-  .fighter-picker {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding: 4px 4px 12px;
-    scrollbar-width: thin;
-    margin-bottom: 12px;
-  }
-  .fighter-picker::-webkit-scrollbar { height: 4px; }
-  .fighter-picker::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
-  .fighter-picker .card {
-    flex: 0 0 100px;
-    width: 100px;
-    transition: all .2s;
-  }
-  .fighter-picker .card.selected {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(255,77,109,0.4);
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-  .fighter-picker-empty {
-    width: 100%;
-    text-align: center;
-    padding: 30px 16px;
-    color: var(--text-dim);
-    font-size: 13px;
-    border: 1px dashed var(--line);
-    border-radius: 12px;
-  }
-  .big-btn {
-    width: 100%;
-    padding: 14px;
-    font-size: 16px;
-  }
-  .big-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    background: rgba(255,255,255,0.06);
-    box-shadow: none;
-  }
-  .center { text-align: center; }
-
-  /* ============ 매칭 검색 화면 ============ */
-  .search-stage {
-    text-align: center;
-    padding: 32px 20px;
-  }
-  .search-ring {
-    width: 160px; height: 160px;
-    border-radius: 50%;
-    margin: 0 auto 20px;
-    position: relative;
-    background: radial-gradient(circle, rgba(124,92,255,0.15), transparent 70%);
-  }
-  .search-ring::before, .search-ring::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    border: 2px solid transparent;
-    border-top-color: var(--accent);
-    animation: searchSpin 1.5s linear infinite;
-  }
-  .search-ring::after {
+  /* 드래그앤드롭 활성화 */
+  body.dragging::before {
+    content: '이미지를 드롭하면 새 카드를 추가합니다';
+    position: fixed;
     inset: 12px;
-    border-top-color: #ff4d6d;
-    animation-duration: 2s;
-    animation-direction: reverse;
-  }
-  @keyframes searchSpin { to { transform: rotate(360deg); } }
-  .search-card-mini {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 80px; aspect-ratio: 2 / 3;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--bg-3), var(--bg-2));
-    border: 1.5px solid var(--line);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 38px;
-    overflow: hidden;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-  .search-card-mini.contain { background-size: contain; background-color: #05070f; }
-  .search-title {
-    font-family: 'Jua', sans-serif;
-    font-size: 18px;
-    margin-bottom: 4px;
-  }
-  .search-sub {
-    color: var(--text-dim);
-    font-size: 12px;
-    margin-bottom: 24px;
-  }
-  .cancel-btn {
-    background: rgba(239,68,68,0.1);
-    border-color: rgba(239,68,68,0.3);
-    color: #fca5a5;
-    min-width: 120px;
-  }
-  .cancel-btn:hover { background: rgba(239,68,68,0.2); }
-
-  /* ============ 매칭 플레이 화면 ============ */
-  .match-stage {
-    background: radial-gradient(circle at 50% 50%, rgba(124,92,255,0.1), transparent 70%);
-    border-radius: 18px;
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    border: 1px solid var(--line);
-    margin-bottom: 14px;
-  }
-  .match-side {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .match-side.opp { flex-direction: row; }
-  .match-side.me { flex-direction: row-reverse; }
-  .player-info {
-    flex: 1;
-    text-align: left;
-  }
-  .match-side.me .player-info { text-align: right; }
-  .player-name {
-    font-family: 'Jua', sans-serif;
-    font-size: 14px;
-    margin-bottom: 2px;
-  }
-  .player-rarity {
-    display: inline-flex;
-    gap: 2px;
-  }
-  .player-rarity span {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--r-c);
-    box-shadow: 0 0 4px currentColor;
-  }
-  .player-rarity[data-rarity="r"] span { background: var(--r-r); color: var(--r-r); }
-  .player-rarity[data-rarity="sr"] span { background: var(--r-sr); color: var(--r-sr); }
-  .player-rarity[data-rarity="ssr"] span { background: var(--r-ssr); color: var(--r-ssr); }
-
-  .match-card {
-    width: 90px;
-    aspect-ratio: 2 / 3;
-    border-radius: 10px;
-    overflow: hidden;
-    position: relative;
-    border: 1.5px solid var(--line);
-    background: var(--bg-3);
-    flex-shrink: 0;
-  }
-  .match-card .art {
-    position: absolute; inset: 0;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-  }
-  .match-card[data-fit="contain"] .art { background-size: contain; background-color: #05070f; }
-  .match-card[data-frame="full"] .frame { display: none; }
-  .match-card[data-type="sci"] .art { background: linear-gradient(160deg, #5a1c2c 0%, #2a0d18 60%, #1a0810 100%); }
-  .match-card[data-type="rok"] .art { background: linear-gradient(160deg, #3a4055 0%, #1c2030 60%, #0e1018 100%); }
-  .match-card[data-type="pap"] .art { background: linear-gradient(160deg, #6b5520 0%, #2a230a 60%, #1a1505 100%); }
-  .match-card .art:not([style])::after {
-    content: attr(data-emoji);
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 36px;
-  }
-  .match-card .frame {
-    position: absolute; inset: 0;
-    padding: 4px 6px;
-    display: flex; flex-direction: column; justify-content: space-between;
-    background: linear-gradient(180deg, rgba(0,0,0,0.55) 0%, transparent 30%, transparent 65%, rgba(0,0,0,0.85) 100%);
-  }
-  .match-card .top { display: flex; justify-content: space-between; align-items: center; }
-  .match-card .type-badge {
-    width: 18px; height: 18px;
-    border-radius: 50%; font-size: 10px;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,0.4);
-  }
-  .match-card[data-type="sci"] .type-badge { background: var(--t-sci); }
-  .match-card[data-type="rok"] .type-badge { background: var(--t-rok); }
-  .match-card[data-type="pap"] .type-badge { background: var(--t-pap); color: #2a230a; }
-  .match-card .hp {
-    font-family: 'Jua', sans-serif;
-    font-size: 9px;
-    background: rgba(0,0,0,0.5);
-    padding: 1px 5px;
-    border-radius: 999px;
-  }
-  .match-card .bot .name {
-    font-family: 'Jua', sans-serif;
-    font-size: 10px;
-    color: white;
-    text-align: center;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .hand-display {
-    width: 48px;
-    height: 48px;
-    background: rgba(0,0,0,0.4);
-    border: 1.5px solid var(--line);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    flex-shrink: 0;
-    transition: all .3s;
-  }
-  .hand-display.revealed {
-    border-color: var(--accent);
-    background: rgba(124,92,255,0.15);
-    transform: scale(1.1);
-  }
-  .hand-display.waiting {
-    animation: handBlink 1s ease-in-out infinite;
-  }
-  @keyframes handBlink {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 1; }
-  }
-
-  .match-vs {
-    text-align: center;
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 18px;
-    background: linear-gradient(135deg, #ff4d6d, #7c5cff);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    letter-spacing: 2px;
-  }
-
-  .match-status {
-    text-align: center;
-    font-family: 'Jua', sans-serif;
-    font-size: 13px;
-    color: var(--text-dim);
-    margin-bottom: 12px;
-    min-height: 20px;
-  }
-
-  .hand-buttons {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-  }
-  .hand-btn {
-    padding: 14px 8px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--line);
-    color: var(--text);
-    border-radius: 14px;
-    font-family: 'Jua', sans-serif;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; gap: 4px;
-    transition: all .15s;
-  }
-  .hand-btn:active { transform: scale(0.96); }
-  .hand-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-  .hand-btn .ico { font-size: 28px; }
-  .hand-btn[data-type="sci"]:hover:not(:disabled) { background: var(--t-sci-bg); border-color: var(--t-sci); }
-  .hand-btn[data-type="rok"]:hover:not(:disabled) { background: var(--t-rok-bg); border-color: var(--t-rok-2); }
-  .hand-btn[data-type="pap"]:hover:not(:disabled) { background: var(--t-pap-bg); border-color: var(--t-pap); }
-  .hand-btn.selected {
-    background: linear-gradient(135deg, #7c5cff, #ff4d6d);
-    border-color: transparent;
-    color: white;
-  }
-
-  /* ============ 결과 화면 ============ */
-  .result-stage {
-    text-align: center;
-    padding: 24px 20px;
-    background: radial-gradient(circle at 50% 30%, rgba(255,209,102,0.15), transparent 70%);
-    border-radius: 18px;
-    border: 1px solid var(--line);
-    animation: resultAppear .5s ease both;
-  }
-  @keyframes resultAppear {
-    from { opacity: 0; transform: scale(0.92); }
-    to { opacity: 1; transform: scale(1); }
-  }
-  .result-emoji {
-    font-size: 64px;
-    margin-bottom: 4px;
-    animation: emojiBounce .8s cubic-bezier(.18,.89,.43,1.18);
-  }
-  @keyframes emojiBounce {
-    0% { transform: scale(0) rotate(-180deg); }
-    60% { transform: scale(1.15) rotate(0deg); }
-    100% { transform: scale(1) rotate(0deg); }
-  }
-  .result-title {
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 28px;
-    margin-bottom: 6px;
-  }
-  .result-title.win { background: linear-gradient(135deg, #4ade80, #62d2ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .result-title.lose { color: #ef4444; }
-  .result-title.tie { color: var(--text-dim); }
-  .result-title.star {
-    background: linear-gradient(135deg, #ffd166, #c084fc);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
-  .result-desc {
-    color: var(--text-dim);
-    font-size: 13px;
-    margin-bottom: 20px;
-    line-height: 1.5;
-  }
-  .result-cards {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 20px;
-  }
-  .rc-side {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-  .rc-label { font-family: 'Jua', sans-serif; font-size: 12px; color: var(--text-dim); }
-  .rc-hand {
-    font-size: 48px;
-    width: 80px; height: 80px;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(255,255,255,0.05);
-    border-radius: 12px;
-    border: 1.5px solid var(--line);
-  }
-  .rc-rarity {
-    font-size: 12px;
-    color: var(--text-mute);
-    font-family: 'Jua', sans-serif;
-  }
-  .rc-rarity.winner { color: var(--warn); font-weight: bold; }
-  .rc-vs {
-    font-family: 'Bagel Fat One', sans-serif;
-    font-size: 16px;
-    color: var(--text-mute);
-  }
-  .result-actions {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 8px;
-  }
-
-  /* Firebase 미설정 화면 */
-  .firebase-setup {
-    text-align: center;
-    padding: 40px 20px;
-    border: 1px dashed var(--line);
+    border: 3px dashed var(--accent);
     border-radius: 16px;
-    background: rgba(255,255,255,0.02);
-  }
-  .firebase-setup .fs-icon { font-size: 48px; margin-bottom: 12px; }
-  .firebase-setup .fs-title {
+    background: rgba(0,212,170,0.1);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-family: 'Jua', sans-serif;
     font-size: 18px;
-    margin-bottom: 12px;
-  }
-  .firebase-setup .fs-desc {
-    color: var(--text-dim);
-    font-size: 13px;
-    line-height: 1.7;
-    margin-bottom: 20px;
+    color: var(--accent);
+    pointer-events: none;
   }
 </style>
 </head>
 <body>
 
-<div class="title-screen" id="titleScreen" onclick="enterGame()" role="button" aria-label="게임 시작">
-  <div class="title-tap">TAP TO START</div>
-</div>
-
-<div class="app" id="app">
-
-  <!-- 상단 헤더 -->
-  <header class="topbar">
+<!-- 상단 헤더 -->
+<div class="topbar">
+  <div class="topbar-inner">
     <div class="brand">
-      <span class="com-badge">COM</span>
-      <span class="brand-main">올스타 카드 배틀</span>
+      <span class="brand-tool">🛠 ADMIN</span>
+      <span class="brand-name">COM 올스타 · <b>카드 운영 도구</b></span>
     </div>
-    <div class="currency">
-      <div class="chip trophy-chip" onclick="goto('battle')" title="승리 진행률">
-        <span class="dot trophy"></span><span id="winsCount">0</span><span class="slash">/10</span>
-      </div>
-      <div class="chip"><span class="dot gem"></span><span id="gemCount">280</span></div>
-      <div class="chip"><span class="dot coin"></span><span id="coinCount">1,240</span></div>
-    </div>
-  </header>
-
-  <!-- 컨텐츠 -->
-  <main class="content">
-
-    <!-- ============ 홈 페이지 ============ -->
-    <section class="page active" data-page="home">
-      <!-- 메인 팩 (홈의 주인공) -->
-      <div class="hero-pack-v2">
-        <div class="hp-glow"></div>
-        <div class="hp-header">
-          <div class="hp-season">SEASON 01</div>
-          <div class="hp-title">올스타 팩</div>
-          <div class="hp-sub">5장 보장 · 매일 무료 1팩</div>
-        </div>
-
-        <div class="hp-pack-stage">
-          <div class="hp-pack-3d">
-            <div class="hp-pack-face">
-              <div class="hp-pf-title">ALL<br>STAR</div>
-              <div class="hp-pf-stars">★ ★ ★</div>
-              <div class="hp-pf-sub">COM</div>
-            </div>
-          </div>
-          <!-- 주변 떠다니는 카드 미리보기 -->
-          <div class="hp-floater f1">🃏</div>
-          <div class="hp-floater f2">⭐</div>
-          <div class="hp-floater f3">✨</div>
-        </div>
-
-        <div class="hp-rates">
-          <div class="rate-pill"><span class="dot" style="background:var(--r-c)"></span>C 50%</div>
-          <div class="rate-pill"><span class="dot" style="background:var(--r-r)"></span>R 38%</div>
-          <div class="rate-pill"><span class="dot" style="background:var(--r-sr)"></span>SR 9.5%</div>
-          <div class="rate-pill"><span class="dot" style="background:var(--r-ssr)"></span>SSR 2.5%</div>
-        </div>
-
-        <div class="hp-actions">
-          <button class="btn hp-free" onclick="openPack(true)">
-            <div class="hp-btn-main">무료 오픈</div>
-            <div class="hp-btn-sub" id="freePackInfo">하루 1회</div>
-          </button>
-          <button class="btn primary hp-gem" onclick="openPack(false)">
-            <div class="hp-btn-main">팩 열기</div>
-            <div class="hp-btn-sub">💎 50</div>
-          </button>
-        </div>
-      </div>
-
-      <!-- 무료 팩 알림 (10승 달성시 노출) -->
-      <div class="free-pack-banner" id="freePackBanner" style="display:none">
-        <div class="fpb-icon">🎁</div>
-        <div class="fpb-content">
-          <div class="fpb-title">무료 팩이 도착했어요!</div>
-          <div class="fpb-sub">10승 달성 보상</div>
-        </div>
-        <button class="btn primary" onclick="claimFreePack()">받기</button>
-      </div>
-
-      <!-- 빠른 메뉴 (간소화) -->
-      <div class="quick-grid">
-        <div class="quick" onclick="goto('battle')">
-          <div class="icn">⚔️</div>
-          <div class="ttl">대전</div>
-          <div class="desc"><span id="quickWins">0</span>승 · 10승마다 무료 팩</div>
-        </div>
-        <div class="quick" onclick="goto('collection')">
-          <div class="icn">📚</div>
-          <div class="ttl">컬렉션</div>
-          <div class="desc"><span id="quickOwned">0</span> / <span id="quickTotal">0</span> 수집</div>
-        </div>
-      </div>
-
-      <div style="height: 20px;"></div>
-    </section>
-
-    <!-- ============ 컬렉션 페이지 ============ -->
-    <section class="page" data-page="collection">
-      <div class="section-title"><span class="bar"></span>나의 컬렉션</div>
-
-      <div class="collection-stats">
-        <div class="stat sci">
-          <div class="v" id="statSci">3/8</div>
-          <div class="l">✌️ 가위</div>
-        </div>
-        <div class="stat rok">
-          <div class="v" id="statRok">4/8</div>
-          <div class="l">✊ 바위</div>
-        </div>
-        <div class="stat pap">
-          <div class="v" id="statPap">2/8</div>
-          <div class="l">✋ 보</div>
-        </div>
-      </div>
-
-      <div class="filter-row">
-        <div class="filter active" data-filter="all">전체</div>
-        <div class="filter" data-filter="sci">✌️ 가위</div>
-        <div class="filter" data-filter="rok">✊ 바위</div>
-        <div class="filter" data-filter="pap">✋ 보</div>
-        <div class="filter" data-filter="owned">보유</div>
-        <div class="filter" data-filter="locked">미보유</div>
-      </div>
-
-      <div class="card-grid" id="collectionGrid">
-        <!-- JS로 채워짐 -->
-      </div>
-
-      <div style="height: 30px;"></div>
-    </section>
-
-    <!-- ============ 덱 페이지 ============ -->
-    <section class="page" data-page="deck">
-      <div class="section-title"><span class="bar"></span>나의 덱</div>
-
-      <div class="deck-info">
-        <div class="row"><span class="l">덱 이름</span><span class="v">스타터 덱</span></div>
-        <div class="row"><span class="l">카드 수</span><span class="v" id="deckCount">0 / 5</span></div>
-        <div class="row"><span class="l">속성 구성</span><span class="v" id="deckBalance">-</span></div>
-      </div>
-
-      <div class="deck-slot" id="deckSlots">
-        <div class="slot">＋</div>
-        <div class="slot">＋</div>
-        <div class="slot">＋</div>
-        <div class="slot">＋</div>
-        <div class="slot">＋</div>
-      </div>
-
-      <div class="section-title"><span class="bar"></span>보유 카드</div>
-      <div class="muted" style="margin-bottom: 10px;">카드를 탭해서 덱에 추가하세요.</div>
-      <div class="card-grid" id="deckCardPool">
-        <!-- JS로 채워짐 -->
-      </div>
-      <div style="height: 30px;"></div>
-    </section>
-
-    <!-- ============ 배틀 페이지 ============ -->
-    <section class="page" data-page="battle">
-      <!-- 진행률 -->
-      <div class="progress-card" id="progressCard">
-        <div class="progress-top">
-          <div>
-            <div class="progress-label">🏆 다음 무료 팩까지</div>
-            <div class="progress-stat"><b id="progressWins">0</b><span class="muted-stat">/ 10승</span></div>
-          </div>
-          <button class="btn primary claim-btn" id="claimBtn" onclick="claimFreePack()" style="display:none;">
-            🎁 무료 팩 받기
-          </button>
-        </div>
-        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="progress-stats">
-          <span class="ps win"><b id="statWins">0</b> 승</span>
-          <span class="ps lose"><b id="statLosses">0</b> 패</span>
-          <span class="ps tie"><b id="statTies">0</b> 무</span>
-          <span class="ps pack"><b id="statPacks">0</b> 받음</span>
-        </div>
-      </div>
-
-      <!-- 모드 탭 -->
-      <div class="mode-tabs">
-        <button class="mode-tab active" data-mode="online" onclick="setBattleMode('online')">
-          🌐 온라인 매칭
-        </button>
-        <button class="mode-tab" data-mode="cpu" onclick="setBattleMode('cpu')">
-          🤖 CPU 연습
-        </button>
-      </div>
-
-      <!-- ====== 온라인 매칭 모드 ====== -->
-      <div class="battle-mode" id="modeOnline">
-        <!-- IDLE 상태 -->
-        <div class="online-state" id="onlineIdle">
-          <div class="section-title" style="margin-top:8px"><span class="bar"></span>출전 카드 선택</div>
-          <div class="muted" style="margin-bottom:10px">대전에서 사용할 카드를 골라주세요. (희귀도가 높으면 같은 손에서 유리해요)</div>
-          <div class="fighter-picker" id="fighterPicker">
-            <!-- JS로 카드 목록 채움 -->
-          </div>
-          <button class="btn primary big-btn" id="startMatchBtn" onclick="startOnlineMatch()" disabled>
-            ⚔️ 매칭 시작
-          </button>
-          <div class="muted center" style="margin-top:10px" id="onlineStatus">
-            온라인 대전 준비 완료
-          </div>
-        </div>
-
-        <!-- SEARCHING 상태 -->
-        <div class="online-state" id="onlineSearching" style="display:none">
-          <div class="search-stage">
-            <div class="search-ring">
-              <div class="search-card-mini" id="searchMyCard">🃏</div>
-            </div>
-            <div class="search-title">상대를 찾는 중...</div>
-            <div class="search-sub" id="searchSub">전 세계 플레이어를 검색하고 있어요</div>
-            <button class="btn cancel-btn" onclick="cancelMatchmaking()">취소</button>
-          </div>
-        </div>
-
-        <!-- PLAYING 상태 -->
-        <div class="online-state" id="onlinePlaying" style="display:none">
-          <div class="match-stage">
-            <!-- 상대 -->
-            <div class="match-side opp">
-              <div class="player-info">
-                <div class="player-name" id="oppName">상대</div>
-                <div class="player-rarity" id="oppRarity"></div>
-              </div>
-              <div class="match-card opp-card" id="oppMatchCard">
-                <div class="art" data-emoji="❓"></div>
-                <div class="frame">
-                  <div class="top">
-                    <div class="type-badge" id="oppBadge">❓</div>
-                    <div class="hp" id="oppHp">HP -</div>
-                  </div>
-                  <div class="bot"><div class="name" id="oppCardName">대기 중...</div></div>
-                </div>
-              </div>
-              <div class="hand-display" id="oppHandDisplay">❓</div>
-            </div>
-
-            <div class="match-vs">VS</div>
-
-            <!-- 나 -->
-            <div class="match-side me">
-              <div class="hand-display" id="myHandDisplay">?</div>
-              <div class="match-card my-card" id="myMatchCard">
-                <!-- JS로 채움 -->
-              </div>
-              <div class="player-info">
-                <div class="player-name" id="myName">나</div>
-                <div class="player-rarity" id="myRarity"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="match-status" id="matchStatus">손을 내세요</div>
-
-          <div class="hand-buttons" id="handButtons">
-            <button class="hand-btn" data-type="sci" onclick="submitOnlineHand('sci')">
-              <div class="ico">✌️</div>가위
-            </button>
-            <button class="hand-btn" data-type="rok" onclick="submitOnlineHand('rok')">
-              <div class="ico">✊</div>바위
-            </button>
-            <button class="hand-btn" data-type="pap" onclick="submitOnlineHand('pap')">
-              <div class="ico">✋</div>보
-            </button>
-          </div>
-        </div>
-
-        <!-- RESULT 상태 -->
-        <div class="online-state" id="onlineResult" style="display:none">
-          <div class="result-stage">
-            <div class="result-emoji" id="resultEmoji">🎉</div>
-            <div class="result-title" id="resultTitle">승리!</div>
-            <div class="result-desc" id="resultDesc">상대를 이겼습니다</div>
-            <div class="result-cards">
-              <div class="rc-side">
-                <div class="rc-label">나</div>
-                <div class="rc-hand" id="resultMyHand">✊</div>
-                <div class="rc-rarity" id="resultMyRarity">★</div>
-              </div>
-              <div class="rc-vs">vs</div>
-              <div class="rc-side">
-                <div class="rc-label">상대</div>
-                <div class="rc-hand" id="resultOppHand">✌️</div>
-                <div class="rc-rarity" id="resultOppRarity">★</div>
-              </div>
-            </div>
-            <div class="result-actions">
-              <button class="btn" onclick="leaveOnlineMatch()">나가기</button>
-              <button class="btn primary" onclick="rematchOnline()">한 번 더</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Firebase 미설정 시 (네트워크 오류 등) -->
-        <div class="online-state" id="onlineNoFirebase" style="display:none">
-          <div class="firebase-setup">
-            <div class="fs-icon">⚠️</div>
-            <div class="fs-title">서버에 연결할 수 없어요</div>
-            <div class="fs-desc">
-              네트워크 상태를 확인하거나<br>
-              잠시 후 다시 시도해주세요.
-            </div>
-            <button class="btn primary" onclick="location.reload()">새로고침</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ====== CPU 연습 모드 ====== -->
-      <div class="battle-mode" id="modeCpu" style="display:none">
-        <div class="battle-stage">
-          <!-- 상대 -->
-          <div class="battle-side">
-            <div class="label">CPU · LV.3 AI</div>
-            <div class="battle-card opp">❓</div>
-            <div class="hp-bar"><div style="width:100%"></div></div>
-          </div>
-
-          <!-- VS -->
-          <div class="vs-mark">VS</div>
-
-          <!-- 나 -->
-          <div class="battle-side">
-            <div class="hp-bar"><div style="width:100%"></div></div>
-            <div class="battle-card">✊</div>
-            <div class="label">나</div>
-          </div>
-        </div>
-
-        <div class="section-title"><span class="bar"></span>손짓 선택</div>
-        <div class="battle-actions">
-          <button class="action-btn" data-type="sci" onclick="playRPS('sci')">
-            <div class="ico">✌️</div>가위
-          </button>
-          <button class="action-btn" data-type="rok" onclick="playRPS('rok')">
-            <div class="ico">✊</div>바위
-          </button>
-          <button class="action-btn" data-type="pap" onclick="playRPS('pap')">
-            <div class="ico">✋</div>보
-          </button>
-        </div>
-
-        <div class="battle-log" id="battleLog">
-          <span class="turn">— 연습 모드입니다. 승수는 카운트되지 않아요 —</span>
-        </div>
-      </div>
-
-      <div style="height: 30px;"></div>
-    </section>
-
-  </main>
-
-  <!-- 하단 탭 -->
-  <nav class="tabbar">
-    <div class="tab active" data-tab="home" onclick="goto('home')">
-      <div class="ico">🏠</div>홈
-    </div>
-    <div class="tab" data-tab="collection" onclick="goto('collection')">
-      <div class="ico">📚</div>컬렉션
-    </div>
-    <div class="tab" data-tab="deck" onclick="goto('deck')">
-      <div class="ico">🃏</div>덱
-    </div>
-    <div class="tab" data-tab="battle" onclick="goto('battle')">
-      <div class="ico">⚔️</div>배틀
-    </div>
-  </nav>
-
-  <!-- 카드 상세 모달 -->
-  <div class="modal" id="cardModal" onclick="if(event.target===this) closeModal('cardModal')">
-    <div class="modal-inner">
-      <div class="modal-card" id="modalCard"></div>
-      <h3 id="modalName">카드 이름</h3>
-      <div class="desc" id="modalDesc">카드 설명이 여기 들어갑니다.</div>
-      <div class="modal-stats">
-        <div class="ms"><div class="l">속성</div><div class="v" id="modalType">-</div></div>
-        <div class="ms"><div class="l">HP</div><div class="v" id="modalHp">-</div></div>
-        <div class="ms"><div class="l">희귀도</div><div class="v" id="modalRarity">-</div></div>
-      </div>
-      <button class="btn primary" style="width:100%" onclick="closeModal('cardModal')">닫기</button>
+    <div class="header-stats">
+      <div class="h-chip" data-t="total"><span class="l">TOTAL</span><span class="v" id="hTotal">0</span></div>
+      <div class="h-chip" data-t="sci"><span class="l">✌️</span><span class="v" id="hSci">0</span></div>
+      <div class="h-chip" data-t="rok"><span class="l">✊</span><span class="v" id="hRok">0</span></div>
+      <div class="h-chip" data-t="pap"><span class="l">✋</span><span class="v" id="hPap">0</span></div>
     </div>
   </div>
-
-  <!-- 팩 오픈 시퀀스 모달 -->
-  <div class="modal open-modal" id="packModal">
-    <!-- 배경 광선 (희귀도에 따라 변경) -->
-    <div class="open-rays" id="openRays"></div>
-    <!-- 스파클 파티클 -->
-    <div class="sparkle-layer" id="sparkleLayer"></div>
-
-    <div class="open-stage">
-      <!-- 상단: 카운터 + 스킵 -->
-      <div class="open-top">
-        <div class="open-counter"><span id="openIdx">1</span> / 5</div>
-        <button class="skip-btn" onclick="skipAll()">SKIP ▶▶</button>
-      </div>
-
-      <!-- 카드 -->
-      <div class="open-card-area" onclick="handleCardTap()">
-        <div class="open-card" id="openCard">
-          <!-- 카드 뒷면 -->
-          <div class="card-side card-back">
-            <div class="back-pattern">
-              <div class="back-star">★</div>
-              <div class="back-label">COM</div>
-              <div class="back-sub">ALL STAR</div>
-            </div>
-          </div>
-          <!-- 카드 앞면 (JS로 채움) -->
-          <div class="card-side card-front" id="cardFront"></div>
-        </div>
-      </div>
-
-      <!-- 안내 텍스트 / 다음 버튼 -->
-      <div class="open-bottom">
-        <div class="tap-hint" id="tapHint">탭하여 뒤집기</div>
-        <button class="btn primary next-btn" id="nextBtn" onclick="nextCard()" style="display:none;">
-          <span id="nextLabel">다음 카드</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- 최종 요약 화면 -->
-    <div class="open-summary" id="openSummary">
-      <div class="summary-title">
-        <div class="st-main">🎉 5장 획득!</div>
-        <div class="st-sub" id="summarySub">새 카드를 컬렉션에서 확인하세요</div>
-      </div>
-      <div class="summary-grid" id="summaryGrid"></div>
-      <button class="btn primary" style="width:100%; margin-top:14px" onclick="closeOpenModal()">확인</button>
-    </div>
-  </div>
-
-  <!-- 닉네임 설정 모달 -->
-  <div class="modal" id="nameModal" onclick="if(event.target===this) closeModal('nameModal')">
-    <div class="modal-inner" style="max-width:320px;">
-      <h3 style="margin:0 0 8px; font-family:'Jua', sans-serif;">닉네임 설정</h3>
-      <div class="muted" style="margin-bottom:12px; font-size:13px;">상대방에게 보일 닉네임이에요</div>
-      <input id="nameInput" maxlength="12" placeholder="닉네임 입력"
-             style="width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--line); border-radius:10px; padding:10px 12px; color:var(--text); font-family:'Jua', sans-serif; font-size:15px; outline:none; text-align:center;">
-      <div style="display:flex; gap:8px; margin-top:12px;">
-        <button class="btn" style="flex:1" onclick="closeModal('nameModal')">취소</button>
-        <button class="btn primary" style="flex:2" onclick="saveName()">저장</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toast -->
-  <div class="toast" id="toast"></div>
 </div>
+
+<main>
+  <!-- 안내 -->
+  <div class="info-box" id="connStatus">
+    <span class="icn">☁️</span>
+    <div>
+      <b>운영자 전용</b> · 카드 데이터는 Firebase에 저장되어 모든 플레이어에게 실시간 동기화돼요.<br>
+      <span id="connText" style="color:var(--text-mute)">연결 중...</span>
+    </div>
+  </div>
+
+  <!-- 툴바 -->
+  <div class="toolbar">
+    <button class="btn primary" onclick="openEditor()">
+      <span class="ico">＋</span> 새 카드 추가
+    </button>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="카드 이름이나 설명으로 검색..." oninput="renderGrid()">
+    </div>
+    <button class="btn" onclick="exportCards()">
+      <span class="ico">💾</span> 내보내기
+    </button>
+    <button class="btn" onclick="document.getElementById('importInput').click()">
+      <span class="ico">📂</span> 불러오기
+    </button>
+    <input type="file" id="importInput" accept=".json,application/json" hidden onchange="importCards(event)">
+    <button class="btn danger" onclick="confirmResetSeed()">
+      <span class="ico">🔄</span> 초기화
+    </button>
+  </div>
+
+  <!-- 필터 -->
+  <div class="filters">
+    <div class="filter-chip active" data-f="all" onclick="setFilter('all')">전체</div>
+    <div class="filter-chip" data-f="sci" onclick="setFilter('sci')">✌️ 가위</div>
+    <div class="filter-chip" data-f="rok" onclick="setFilter('rok')">✊ 바위</div>
+    <div class="filter-chip" data-f="pap" onclick="setFilter('pap')">✋ 보</div>
+    <span style="width:1px; height:24px; background:var(--line); margin:0 6px; align-self:center;"></span>
+    <div class="filter-chip" data-f="c" onclick="setFilter('c')">C</div>
+    <div class="filter-chip" data-f="r" onclick="setFilter('r')">R</div>
+    <div class="filter-chip" data-f="sr" onclick="setFilter('sr')">SR</div>
+    <div class="filter-chip" data-f="ssr" onclick="setFilter('ssr')">SSR</div>
+  </div>
+
+  <!-- 그리드 -->
+  <div id="cardArea"></div>
+</main>
+
+<!-- 편집기 모달 -->
+<div class="modal" id="editorModal" onclick="if(event.target===this) closeEditor()">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2 id="editorTitle">새 카드 추가</h2>
+      <button class="modal-close" onclick="closeEditor()">✕</button>
+    </div>
+    <div class="editor-body">
+      <!-- 좌측: 미리보기 -->
+      <div class="editor-left">
+        <div class="preview-card" id="previewCard">
+          <div class="art" id="previewArt" data-emoji="🃏"></div>
+          <div class="frame">
+            <div class="top">
+              <div class="type-badge" id="previewBadge">✌️</div>
+              <div class="hp" id="previewHp">HP 100</div>
+            </div>
+            <div class="bot">
+              <div class="name" id="previewName">카드 이름</div>
+              <div class="rarity" id="previewRarity"><span></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-label">실시간 미리보기</div>
+        <div class="upload-controls">
+          <button class="upload-btn" id="uploadBtn" onclick="document.getElementById('imageInput').click()">
+            📷 이미지 업로드
+          </button>
+          <button class="clear-btn" id="clearImgBtn" onclick="clearUploadImage()" style="display:none;">
+            이미지 제거
+          </button>
+        </div>
+        <input type="file" id="imageInput" accept="image/*" hidden onchange="handleImageUpload(event)">
+      </div>
+
+      <!-- 우측: 폼 -->
+      <div class="editor-right">
+        <div class="form-group">
+          <label>카드 이름</label>
+          <input id="editName" placeholder="예: 가위병정" maxlength="20" oninput="updatePreview()">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>속성</label>
+            <div class="pill-group" id="typeGroup">
+              <div class="pill" data-type="sci" onclick="selectType('sci')">✌️ 가위</div>
+              <div class="pill" data-type="rok" onclick="selectType('rok')">✊ 바위</div>
+              <div class="pill" data-type="pap" onclick="selectType('pap')">✋ 보</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>희귀도</label>
+            <div class="pill-group" id="rarityGroup">
+              <div class="pill" data-rarity="c"   onclick="selectRarity('c')">C</div>
+              <div class="pill" data-rarity="r"   onclick="selectRarity('r')">R</div>
+              <div class="pill" data-rarity="sr"  onclick="selectRarity('sr')">SR</div>
+              <div class="pill" data-rarity="ssr" onclick="selectRarity('ssr')">SSR</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>HP <span class="val" id="hpDisplay">100</span></label>
+            <input type="range" id="editHp" min="20" max="200" step="10" value="100" oninput="updateHp(this.value)">
+          </div>
+          <div class="form-group">
+            <label>이모지 (이미지 없을 때)</label>
+            <input id="editEmoji" placeholder="예: ✂️" maxlength="4" oninput="updatePreview()">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>이미지 표시 방식</label>
+            <div class="pill-group" id="frameModeGroup">
+              <div class="pill" data-frame="art" onclick="selectFrameMode('art')">게임 프레임</div>
+              <div class="pill" data-frame="full" onclick="selectFrameMode('full')">완성 카드</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>이미지 맞춤</label>
+            <div class="pill-group" id="imageFitGroup">
+              <div class="pill" data-fit="cover" onclick="selectImageFit('cover')">채우기</div>
+              <div class="pill" data-fit="contain" onclick="selectImageFit('contain')">전체보기</div>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>카드 설명</label>
+          <textarea id="editDesc" placeholder="이 카드의 특징이나 스토리를 입력하세요" maxlength="120"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeEditor()">취소</button>
+      <button class="btn primary" onclick="saveCard()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 확인 다이얼로그 -->
+<div class="modal" id="confirmDialog">
+  <div class="modal-card confirm-card">
+    <div class="confirm-body">
+      <h3 id="confirmTitle">확인</h3>
+      <p id="confirmMsg">정말 진행하시겠습니까?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="confirmCancel">취소</button>
+      <button class="btn primary" id="confirmOK">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
 
 <script>
 /* ============================================================
-   Firebase 초기화 (Firestore)
+   COM 올스타 — 운영자 도구 (Firestore)
    ============================================================ */
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCZdrY0QEdeyjo_djOoAGF0QvF84dmlVWc",
@@ -2501,22 +972,9 @@ const FIREBASE_CONFIG = {
   appId: "1:749606419198:web:4b507053183fefd40f43af"
 };
 
-let firebaseDB = null;
-let firebaseReady = false;
-try {
-  firebase.initializeApp(FIREBASE_CONFIG);
-  firebaseDB = firebase.firestore();
-  firebaseReady = true;
-} catch(e) {
-  console.error('Firebase 초기화 실패', e);
-}
+firebase.initializeApp(FIREBASE_CONFIG);
+const db = firebase.firestore();
 
-/* ============================================================
-   카드 데이터 (Firestore에서 실시간 동기화)
-   ============================================================ */
-const LOCAL_CARDS_CACHE = 'com_allstar_cards_cache_v2';
-
-// 폴백용 최소 시드 (Firestore 비어있을 때 처음 한 번만 사용)
 const SEED_CARDS = [
   { id: 'sci01', name: '가위병정',     type: 'sci', hp: 60,  rarity: 'c',  image: '', emoji: '✂️', desc: '재빠른 일격.' },
   { id: 'sci02', name: '쌍칼냥이',     type: 'sci', hp: 70,  rarity: 'r',  image: '', emoji: '🐱', desc: '두 자루의 칼을 휘두르는 고양이.' },
@@ -2532,83 +990,51 @@ const SEED_CARDS = [
   { id: 'pap05', name: '구름의여신',   type: 'pap', hp: 130, rarity: 'ssr',image: '', emoji: '☁️', desc: '구름을 부려 바위를 봉인.' }
 ];
 
-// 캐시 로딩 (Firestore 응답 전에 잠깐 표시할 용도)
-let CARDS = [];
-try {
-  const cached = localStorage.getItem(LOCAL_CARDS_CACHE);
-  if (cached) CARDS = JSON.parse(cached) || [];
-} catch(e) {}
-
-function saveCardsCache() {
-  try { localStorage.setItem(LOCAL_CARDS_CACHE, JSON.stringify(CARDS)); } catch(e) {}
-}
-
-/* 보유 상태 (실제 게임에서는 서버/스토리지) */
-let owned = new Set(CARDS.filter(c => ['c','r'].includes(c.rarity)).map(c => c.id));
-let deck = []; // 카드 id 배열
-let currentFilter = 'all';
-
-/* CARDS 변경 후 owned/deck 정리 (없는 카드 ID 제거) */
-function cleanupOwnedDeck() {
-  const validIds = new Set(CARDS.map(c => c.id));
-  owned = new Set([...owned].filter(id => validIds.has(id)));
-  deck = deck.filter(id => validIds.has(id));
-}
-
-const TYPE_NAME = { sci: '✌️ 가위', rok: '✊ 바위', pap: '✋ 보' };
 const TYPE_EMOJI = { sci: '✌️', rok: '✊', pap: '✋' };
-const RARITY_NAME = { c: 'C', r: 'R', sr: 'SR', ssr: 'SSR' };
 
-function enterGame() {
-  const title = document.getElementById('titleScreen');
-  if (title) title.classList.add('hidden');
-}
+let CARDS = [];
+let cardsLoaded = false;
+let currentFilter = 'all';
+let editingId = null;
+let pendingImage = '';
+let pendingType = 'sci';
+let pendingRarity = 'c';
+let pendingFrameMode = 'art';       // art: 게임 UI 프레임 생성 / full: 업로드한 완성 카드 그대로 표시
+let pendingImageFit = 'cover';      // cover: 꽉 채움 / contain: 잘림 없이 전체보기
 
-function escapeHTML(s) {
-  return String(s || '').replace(/[&<>"']/g, m => ({
-    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
-  }[m]));
-}
-function getFrameMode(card) {
-  return card.frameMode || (card.imageFit === 'contain' ? 'full' : 'art');
-}
-function getImageFit(card) {
-  const frameMode = getFrameMode(card);
-  return card.imageFit || (frameMode === 'full' ? 'contain' : 'cover');
-}
-function artStyle(card) {
-  return card.image ? `style="background-image:url('${card.image}')"` : '';
+/* ============ Firestore 실시간 구독 ============ */
+function setConnStatus(text, color = 'var(--text-mute)') {
+  const el = document.getElementById('connText');
+  if (el) { el.textContent = text; el.style.color = color; }
 }
 
-/* ============================================================
-   페이지 전환
-   ============================================================ */
-function goto(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.dataset.page === name));
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-  if (name === 'collection') renderCollection();
-  if (name === 'deck') renderDeck();
-  if (name === 'home') updateHomeStats();
-  if (name === 'battle') {
-    const mode = document.querySelector('.mode-tab.active')?.dataset.mode || 'online';
-    setBattleMode(mode);
-  }
+function subscribeToCards() {
+  setConnStatus('Firebase에 연결 중...');
+  db.collection('cards').onSnapshot(snap => {
+    CARDS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    cardsLoaded = true;
+    setConnStatus(`✓ 연결됨 · ${CARDS.length}장 동기화`, 'var(--accent)');
+    renderGrid();
+  }, err => {
+    console.error('Firestore 구독 실패', err);
+    setConnStatus('⚠ 연결 실패 — 보안 규칙을 확인하세요', '#fca5a5');
+    cardsLoaded = true;
+    renderGrid();
+  });
 }
+subscribeToCards();
 
-/* ============================================================
-   카드 렌더링
-   ============================================================ */
-function cardHTML(card, opts = {}) {
-  const isOwned = owned.has(card.id);
-  const locked = !isOwned && !opts.forceReveal;
+/* ============ 카드 HTML 생성 ============ */
+function cardHTML(card) {
   const rarityDots = { c: 1, r: 2, sr: 3, ssr: 4 }[card.rarity] || 1;
   const rarityHTML = Array.from({length: rarityDots}, () => '<span></span>').join('');
-  const frameMode = getFrameMode(card);
-  const imageFit = getImageFit(card);
-
+  const frameMode = card.frameMode || (card.imageFit === 'contain' ? 'full' : 'art');
+  const imageFit = card.imageFit || (frameMode === 'full' ? 'contain' : 'cover');
+  const artStyle = card.image ? `style="background-image:url('${card.image}')"` : '';
   return `
-    <div class="card ${locked ? 'locked' : ''}" data-type="${card.type}" data-rarity="${card.rarity}" data-id="${card.id}" data-frame="${frameMode}" data-fit="${imageFit}">
-      <div class="art" data-emoji="${escapeHTML(card.emoji || '🃏')}" ${artStyle(card)}></div>
+    <div class="card" data-type="${card.type}" data-rarity="${card.rarity}" data-id="${card.id}" data-frame="${frameMode}" data-fit="${imageFit}">
+      <div class="id-tag">${card.id}</div>
+      <div class="art" data-emoji="${escapeHTML(card.emoji || '🃏')}" ${artStyle}></div>
       <div class="frame">
         <div class="top">
           <div class="type-badge">${TYPE_EMOJI[card.type]}</div>
@@ -2622,941 +1048,554 @@ function cardHTML(card, opts = {}) {
     </div>
   `;
 }
-
-function renderCollection() {
-  const grid = document.getElementById('collectionGrid');
-  let list = CARDS;
-  if (currentFilter === 'sci' || currentFilter === 'rok' || currentFilter === 'pap') {
-    list = CARDS.filter(c => c.type === currentFilter);
-  } else if (currentFilter === 'owned') {
-    list = CARDS.filter(c => owned.has(c.id));
-  } else if (currentFilter === 'locked') {
-    list = CARDS.filter(c => !owned.has(c.id));
-  }
-  grid.innerHTML = list.map(c => cardHTML(c)).join('');
-  grid.querySelectorAll('.card').forEach(el => {
-    el.addEventListener('click', () => {
-      const id = el.dataset.id;
-      const card = CARDS.find(c => c.id === id);
-      openCardModal(card);
-    });
-  });
-
-  // 통계 업데이트
-  const total = { sci: 0, rok: 0, pap: 0 };
-  const have  = { sci: 0, rok: 0, pap: 0 };
-  CARDS.forEach(c => { total[c.type]++; if (owned.has(c.id)) have[c.type]++; });
-  document.getElementById('statSci').textContent = `${have.sci}/${total.sci}`;
-  document.getElementById('statRok').textContent = `${have.rok}/${total.rok}`;
-  document.getElementById('statPap').textContent = `${have.pap}/${total.pap}`;
+function escapeHTML(s) {
+  return (s || '').replace(/[&<>"']/g, m => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[m]));
 }
 
-document.querySelectorAll('.filter').forEach(f => {
-  f.addEventListener('click', () => {
-    document.querySelectorAll('.filter').forEach(x => x.classList.remove('active'));
-    f.classList.add('active');
-    currentFilter = f.dataset.filter;
-    renderCollection();
+/* ============ 그리드 렌더 ============ */
+function renderGrid() {
+  // 통계
+  const counts = { sci: 0, rok: 0, pap: 0 };
+  CARDS.forEach(c => { if (counts[c.type] !== undefined) counts[c.type]++; });
+  document.getElementById('hTotal').textContent = CARDS.length;
+  document.getElementById('hSci').textContent = counts.sci;
+  document.getElementById('hRok').textContent = counts.rok;
+  document.getElementById('hPap').textContent = counts.pap;
+
+  const area = document.getElementById('cardArea');
+
+  // 로딩 중
+  if (!cardsLoaded) {
+    area.innerHTML = `<div class="empty"><div class="ico">⏳</div><div class="ttl">데이터 로딩 중...</div></div>`;
+    return;
+  }
+
+  // 필터 + 검색
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  let list = CARDS.slice();
+  if (['sci','rok','pap'].includes(currentFilter)) {
+    list = list.filter(c => c.type === currentFilter);
+  } else if (['c','r','sr','ssr'].includes(currentFilter)) {
+    list = list.filter(c => c.rarity === currentFilter);
+  }
+  if (q) {
+    list = list.filter(c =>
+      (c.name || '').toLowerCase().includes(q) ||
+      (c.desc || '').toLowerCase().includes(q) ||
+      (c.id || '').toLowerCase().includes(q)
+    );
+  }
+
+  const typeOrder = { sci: 0, rok: 1, pap: 2 };
+  const rOrder = { c: 0, r: 1, sr: 2, ssr: 3 };
+  list.sort((a, b) =>
+    (typeOrder[a.type] ?? 9) - (typeOrder[b.type] ?? 9) ||
+    rOrder[b.rarity] - rOrder[a.rarity] ||
+    a.name.localeCompare(b.name)
+  );
+
+  if (list.length === 0) {
+    if (CARDS.length === 0) {
+      area.innerHTML = `
+        <div class="empty">
+          <div class="ico">🃏</div>
+          <div class="ttl">Firestore에 카드가 없어요</div>
+          <div class="desc">새 카드를 추가하거나 기본 12장으로 초기화하세요</div>
+          <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+            <button class="btn primary" onclick="openEditor()">＋ 첫 카드 만들기</button>
+            <button class="btn" onclick="seedCards()">🌱 기본 카드 12장 추가</button>
+          </div>
+        </div>`;
+    } else {
+      area.innerHTML = `
+        <div class="empty">
+          <div class="ico">🔍</div>
+          <div class="ttl">검색 결과 없음</div>
+          <div class="desc">다른 키워드나 필터로 시도해보세요</div>
+        </div>`;
+    }
+    return;
+  }
+
+  area.innerHTML = `<div class="grid">${list.map(c => `
+    <div class="card-wrap">
+      <div class="card-actions">
+        <button class="edit" onclick="openEditor('${c.id}')" title="편집">✎</button>
+        <button class="dup" onclick="duplicateCard('${c.id}')" title="복제">⎘</button>
+        <button class="del" onclick="confirmDelete('${c.id}')" title="삭제">🗑</button>
+      </div>
+      ${cardHTML(c)}
+    </div>
+  `).join('')}</div>`;
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(el =>
+    el.classList.toggle('active', el.dataset.f === f));
+  renderGrid();
+}
+
+/* ============ 편집기 ============ */
+function openEditor(id) {
+  editingId = id || null;
+  pendingImage = '';
+  pendingType = 'sci';
+  pendingRarity = 'c';
+  pendingFrameMode = 'art';
+  pendingImageFit = 'cover';
+
+  if (id) {
+    const c = CARDS.find(x => x.id === id);
+    if (!c) return;
+    document.getElementById('editorTitle').textContent = `카드 편집 · ${c.id}`;
+    document.getElementById('editName').value = c.name || '';
+    document.getElementById('editEmoji').value = c.emoji || '';
+    document.getElementById('editDesc').value = c.desc || '';
+    document.getElementById('editHp').value = c.hp || 100;
+    pendingType = c.type || 'sci';
+    pendingRarity = c.rarity || 'c';
+    pendingImage = c.image || '';
+    pendingFrameMode = c.frameMode || (c.imageFit === 'contain' ? 'full' : 'art');
+    pendingImageFit = c.imageFit || (pendingFrameMode === 'full' ? 'contain' : 'cover');
+  } else {
+    document.getElementById('editorTitle').textContent = '새 카드 추가';
+    document.getElementById('editName').value = '';
+    document.getElementById('editEmoji').value = '';
+    document.getElementById('editDesc').value = '';
+    document.getElementById('editHp').value = 100;
+  }
+  // 이미지 미리보기/버튼 상태 동기화
+  if (pendingImage) {
+    document.getElementById('uploadBtn').classList.add('has-image');
+    document.getElementById('uploadBtn').textContent = '📷 이미지 변경';
+    document.getElementById('clearImgBtn').style.display = 'block';
+  } else {
+    document.getElementById('uploadBtn').classList.remove('has-image');
+    document.getElementById('uploadBtn').textContent = '📷 이미지 업로드';
+    document.getElementById('clearImgBtn').style.display = 'none';
+  }
+  updateTypePills();
+  updateRarityPills();
+  updateImageModePills();
+  updatePreview();
+  updateHp(document.getElementById('editHp').value);
+  document.getElementById('editorModal').classList.add('active');
+  setTimeout(() => document.getElementById('editName').focus(), 100);
+}
+function closeEditor() {
+  document.getElementById('editorModal').classList.remove('active');
+}
+
+function selectType(t) { pendingType = t; updateTypePills(); updatePreview(); }
+function selectRarity(r) { pendingRarity = r; updateRarityPills(); updatePreview(); }
+function selectFrameMode(mode) {
+  pendingFrameMode = mode;
+  if (mode === 'full' && pendingImageFit === 'cover') pendingImageFit = 'contain';
+  updateImageModePills();
+  updatePreview();
+}
+function selectImageFit(fit) {
+  pendingImageFit = fit;
+  updateImageModePills();
+  updatePreview();
+}
+function updateTypePills() {
+  document.querySelectorAll('#typeGroup .pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.type === pendingType));
+}
+function updateRarityPills() {
+  document.querySelectorAll('#rarityGroup .pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.rarity === pendingRarity));
+}
+function updateImageModePills() {
+  document.querySelectorAll('#frameModeGroup .pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.frame === pendingFrameMode));
+  document.querySelectorAll('#imageFitGroup .pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.fit === pendingImageFit));
+}
+function updateHp(v) {
+  document.getElementById('hpDisplay').textContent = v;
+  document.getElementById('previewHp').textContent = 'HP ' + v;
+}
+
+function updatePreview() {
+  const name = document.getElementById('editName').value.trim() || '카드 이름';
+  const emoji = document.getElementById('editEmoji').value.trim() || '🃏';
+  const card = document.getElementById('previewCard');
+  card.dataset.type = pendingType;
+  card.dataset.rarity = pendingRarity;
+  card.dataset.frame = pendingFrameMode;
+  card.dataset.fit = pendingImageFit;
+  document.getElementById('previewName').textContent = name;
+  document.getElementById('previewBadge').textContent = TYPE_EMOJI[pendingType];
+  const art = document.getElementById('previewArt');
+  art.dataset.emoji = emoji;
+  if (pendingImage) {
+    art.style.backgroundImage = `url('${pendingImage}')`;
+  } else {
+    art.removeAttribute('style');
+  }
+  const rarityDots = { c: 1, r: 2, sr: 3, ssr: 4 }[pendingRarity];
+  document.getElementById('previewRarity').innerHTML =
+    Array.from({length: rarityDots}, () => '<span></span>').join('');
+}
+
+/* ============ 이미지 업로드 ============ */
+function handleImageUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    toast('이미지 파일만 업로드 가능해요', 'error');
+    return;
+  }
+  resizeImage(file, 640, 960, 0.82).then(result => {
+    pendingImage = result.dataUrl || result;
+    // 세로형 완성 카드(대략 2:3)로 보이면 자동으로 잘림 없는 전체보기 모드를 선택합니다.
+    if (result.aspect && result.aspect > 0.58 && result.aspect < 0.75) {
+      pendingFrameMode = 'full';
+      pendingImageFit = 'contain';
+    }
+    document.getElementById('uploadBtn').classList.add('has-image');
+    document.getElementById('uploadBtn').textContent = '📷 이미지 변경';
+    document.getElementById('clearImgBtn').style.display = 'block';
+    updateImageModePills();
+    updatePreview();
+  }).catch(err => {
+    toast('이미지 처리 실패', 'error');
+    console.error(err);
   });
+  event.target.value = '';
+}
+function clearUploadImage() {
+  pendingImage = '';
+  document.getElementById('uploadBtn').classList.remove('has-image');
+  document.getElementById('uploadBtn').textContent = '📷 이미지 업로드';
+  document.getElementById('clearImgBtn').style.display = 'none';
+  updatePreview();
+}
+function resizeImage(file, maxW, maxH, quality) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const originalAspect = img.naturalWidth / img.naturalHeight;
+        let w = img.naturalWidth, h = img.naturalHeight;
+        const ratio = Math.min(maxW / w, maxH / h, 1);
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#05070f';
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        try {
+          let q = quality;
+          let dataUrl = canvas.toDataURL('image/webp', q);
+          // Firestore 문서 한도에 걸리지 않도록 850KB 이하를 목표로 압축합니다.
+          while (dataUrl.length > 850000 && q > 0.5) {
+            q -= 0.08;
+            dataUrl = canvas.toDataURL('image/webp', q);
+          }
+          resolve({ dataUrl, aspect: originalAspect, width: w, height: h });
+        } catch(err) { reject(err); }
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ============ Firestore CRUD ============ */
+function newCardId() {
+  return 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+
+async function saveCard() {
+  const name = document.getElementById('editName').value.trim();
+  const emoji = document.getElementById('editEmoji').value.trim();
+  const desc = document.getElementById('editDesc').value.trim();
+  const hp = parseInt(document.getElementById('editHp').value);
+  if (!name) { toast('카드 이름을 입력하세요', 'error'); return; }
+  if (!emoji && !pendingImage) { toast('이미지나 이모지 중 하나는 필요해요', 'error'); return; }
+
+  const data = {
+    name, hp, type: pendingType, rarity: pendingRarity,
+    emoji: emoji || '🃏',
+    image: pendingImage || '',
+    imageFit: pendingImageFit,
+    frameMode: pendingFrameMode,
+    desc: desc || '-',
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  try {
+    if (editingId) {
+      await db.collection('cards').doc(editingId).update(data);
+    } else {
+      data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection('cards').doc(newCardId()).set(data);
+    }
+    toast(editingId ? '✓ 카드가 수정되었어요' : '✓ 새 카드가 추가되었어요', 'success');
+    closeEditor();
+    // renderGrid는 onSnapshot이 자동 호출
+  } catch(e) {
+    console.error(e);
+    toast('저장 실패: ' + e.message, 'error');
+  }
+}
+
+async function duplicateCard(id) {
+  const c = CARDS.find(x => x.id === id);
+  if (!c) return;
+  const { id: _omitId, ...rest } = c;
+  const copy = { ...rest, name: c.name + ' (복제)' };
+  try {
+    await db.collection('cards').doc(newCardId()).set({
+      ...copy,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    toast('⎘ 카드가 복제되었어요', 'success');
+  } catch(e) {
+    toast('복제 실패: ' + e.message, 'error');
+  }
+}
+
+function confirmDelete(id) {
+  const card = CARDS.find(c => c.id === id);
+  if (!card) return;
+  showConfirm(
+    '카드 삭제',
+    `"${escapeHTML(card.name)}" 카드를 삭제할까요?<br>이 작업은 모든 플레이어에게 즉시 반영됩니다.`,
+    async () => {
+      try {
+        await db.collection('cards').doc(id).delete();
+        toast('🗑 카드가 삭제되었어요', 'success');
+      } catch(e) {
+        toast('삭제 실패: ' + e.message, 'error');
+      }
+    },
+    '삭제'
+  );
+}
+
+function confirmResetSeed() {
+  showConfirm(
+    '기본 카드로 초기화',
+    `현재 <b>${CARDS.length}장</b>의 카드를 모두 지우고 기본 12장으로 되돌립니다.<br><b style="color:#fca5a5">이 작업은 되돌릴 수 없어요.</b><br>먼저 <b>내보내기</b>로 백업하는 것을 권장해요.`,
+    async () => {
+      try {
+        // 일괄 처리 (batch)
+        const batch = db.batch();
+        CARDS.forEach(c => batch.delete(db.collection('cards').doc(c.id)));
+        SEED_CARDS.forEach(c => {
+          const { id, ...data } = c;
+          batch.set(db.collection('cards').doc(id), {
+            ...data,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        });
+        await batch.commit();
+        toast('🔄 기본 카드로 초기화되었어요', 'success');
+      } catch(e) {
+        toast('초기화 실패: ' + e.message, 'error');
+      }
+    },
+    '초기화'
+  );
+}
+
+async function seedCards() {
+  try {
+    const batch = db.batch();
+    SEED_CARDS.forEach(c => {
+      const { id, ...data } = c;
+      batch.set(db.collection('cards').doc(id), {
+        ...data,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    });
+    await batch.commit();
+    toast('🌱 기본 카드 12장이 추가되었어요', 'success');
+  } catch(e) {
+    toast('시드 추가 실패: ' + e.message, 'error');
+  }
+}
+
+/* ============ 내보내기 / 불러오기 ============ */
+function exportCards() {
+  const data = JSON.stringify(CARDS, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const today = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `com-allstar-cards-${today}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast(`💾 ${CARDS.length}장 내보냈어요`, 'success');
+}
+
+function importCards(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error('JSON 배열 형식이 아닙니다');
+      const valid = data.filter(c =>
+        c && typeof c === 'object' && c.id && c.name &&
+        ['sci','rok','pap'].includes(c.type) &&
+        ['c','r','sr','ssr'].includes(c.rarity));
+      if (valid.length === 0) throw new Error('유효한 카드가 없습니다');
+
+      showConfirm(
+        `${valid.length}장의 카드를 발견했어요`,
+        `<b>덮어쓰기</b>: 현재 카드 모두 지우고 교체<br><b>합치기</b>: 기존 카드 유지 + 같은 ID는 새 것으로 교체<br><span style="color:var(--text-mute)">변경사항은 모든 플레이어에게 즉시 반영됩니다</span>`,
+        async () => {
+          try {
+            const batch = db.batch();
+            CARDS.forEach(c => batch.delete(db.collection('cards').doc(c.id)));
+            valid.forEach(c => {
+              const { id, ...data } = c;
+              batch.set(db.collection('cards').doc(id), {
+                ...data,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+            });
+            await batch.commit();
+            toast(`📂 ${valid.length}장 불러왔어요 (덮어쓰기)`, 'success');
+          } catch(e) { toast('실패: ' + e.message, 'error'); }
+        },
+        '덮어쓰기',
+        async () => {
+          try {
+            const batch = db.batch();
+            valid.forEach(c => {
+              const { id, ...data } = c;
+              batch.set(db.collection('cards').doc(id), {
+                ...data,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+              }, { merge: true });
+            });
+            await batch.commit();
+            toast(`📂 ${valid.length}장 합쳤어요`, 'success');
+          } catch(e) { toast('실패: ' + e.message, 'error'); }
+        },
+        '합치기'
+      );
+    } catch (err) {
+      toast('❌ 파일을 읽을 수 없어요: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+/* ============ 확인 다이얼로그 ============ */
+let confirmOKCallback = null;
+let confirmCancelCallback = null;
+function showConfirm(title, msg, onOK, okLabel = '확인', onCancel = null, cancelLabel = '취소') {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').innerHTML = msg;
+  document.getElementById('confirmOK').textContent = okLabel;
+  document.getElementById('confirmCancel').textContent = cancelLabel;
+  confirmOKCallback = onOK;
+  confirmCancelCallback = onCancel;
+  document.getElementById('confirmDialog').classList.add('active');
+}
+document.getElementById('confirmOK').addEventListener('click', () => {
+  document.getElementById('confirmDialog').classList.remove('active');
+  if (confirmOKCallback) { const cb = confirmOKCallback; confirmOKCallback = null; cb(); }
+});
+document.getElementById('confirmCancel').addEventListener('click', () => {
+  document.getElementById('confirmDialog').classList.remove('active');
+  if (confirmCancelCallback) { const cb = confirmCancelCallback; confirmCancelCallback = null; cb(); }
+});
+document.getElementById('confirmDialog').addEventListener('click', e => {
+  if (e.target.id === 'confirmDialog') {
+    document.getElementById('confirmDialog').classList.remove('active');
+    confirmOKCallback = null;
+    confirmCancelCallback = null;
+  }
 });
 
-/* ============================================================
-   덱 빌드
-   ============================================================ */
-function renderDeck() {
-  cleanupOwnedDeck(); // 혹시 모를 잔존 ID 정리
-  const slots = document.getElementById('deckSlots');
-  let html = '';
-  for (let i = 0; i < 5; i++) {
-    if (deck[i]) {
-      const card = CARDS.find(c => c.id === deck[i]);
-      if (card) {
-        html += `<div class="slot filled" onclick="removeFromDeck(${i})">${cardHTML(card, {forceReveal:true})}</div>`;
-      } else {
-        html += `<div class="slot">＋</div>`;
-      }
-    } else {
-      html += `<div class="slot">＋</div>`;
-    }
-  }
-  slots.innerHTML = html;
-
-  // 보유 카드 풀
-  const pool = document.getElementById('deckCardPool');
-  const ownedCards = CARDS.filter(c => owned.has(c.id));
-  pool.innerHTML = ownedCards.map(c => cardHTML(c)).join('');
-  pool.querySelectorAll('.card').forEach(el => {
-    el.addEventListener('click', () => addToDeck(el.dataset.id));
-  });
-
-  // 덱 정보
-  document.getElementById('deckCount').textContent = `${deck.length} / 5`;
-  const bal = { sci: 0, rok: 0, pap: 0 };
-  deck.forEach(id => { const c = CARDS.find(x => x.id === id); if (c) bal[c.type]++; });
-  document.getElementById('deckBalance').textContent =
-    `✌️${bal.sci} ✊${bal.rok} ✋${bal.pap}`;
-}
-
-function addToDeck(id) {
-  if (deck.includes(id)) { toast('이미 덱에 있어요'); return; }
-  if (deck.length >= 5) { toast('덱이 가득 찼어요'); return; }
-  deck.push(id);
-  renderDeck();
-}
-function removeFromDeck(idx) {
-  deck.splice(idx, 1);
-  renderDeck();
-}
-
-/* ============================================================
-   카드 상세 모달
-   ============================================================ */
-function openCardModal(card) {
-  const modalCard = document.getElementById('modalCard');
-  modalCard.innerHTML = cardHTML(card, {forceReveal:true}).replace('class="card ', 'class="card modal-card-inner ');
-  // 카드 모달의 속성/표시 모드 동기화
-  const isOwned = owned.has(card.id);
-  modalCard.dataset.type = card.type;
-  modalCard.dataset.rarity = card.rarity;
-  modalCard.dataset.frame = getFrameMode(card);
-  modalCard.dataset.fit = getImageFit(card);
-  if (!isOwned) modalCard.classList.add('locked');
-  else modalCard.classList.remove('locked');
-
-  document.getElementById('modalName').textContent = card.name + (isOwned ? '' : ' (미보유)');
-  document.getElementById('modalDesc').textContent = card.desc;
-  document.getElementById('modalType').textContent = TYPE_NAME[card.type];
-  document.getElementById('modalHp').textContent = card.hp;
-  document.getElementById('modalRarity').textContent = RARITY_NAME[card.rarity];
-  document.getElementById('cardModal').classList.add('active');
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('active');
-}
-
-/* ============================================================
-   팩 오픈 - 한 장씩 뒤집기 시퀀스
-   ============================================================ */
-let packCards = [];
-let packIndex = 0;
-let isFlipping = false;
-
-function openPack(isFree) {
-  if (CARDS.length === 0) {
-    toast('등록된 카드가 없어요. ⚙️에서 카드를 추가하세요');
-    return;
-  }
-  if (!isFree) {
-    const gem = parseInt(document.getElementById('gemCount').textContent.replace(/,/g,''));
-    if (gem < 50) { toast('잼이 부족해요'); return; }
-    document.getElementById('gemCount').textContent = (gem - 50).toString();
-  }
-  // 랜덤 5장 (희귀도 가중치)
-  const pool = [];
-  CARDS.forEach(c => {
-    const w = { c: 50, r: 20, sr: 8, ssr: 2 }[c.rarity];
-    for (let i = 0; i < w; i++) pool.push(c);
-  });
-  packCards = [];
-  for (let i = 0; i < 5; i++) {
-    packCards.push(pool[Math.floor(Math.random() * pool.length)]);
-  }
-  packIndex = 0;
-
-  // 모달 열고 첫 카드 표시
-  document.getElementById('packModal').classList.add('active');
-  document.getElementById('openSummary').classList.remove('active');
-  showCardAt(0);
-}
-
-function showCardAt(idx) {
-  const card = packCards[idx];
-  document.getElementById('openIdx').textContent = idx + 1;
-  document.getElementById('tapHint').style.display = 'block';
-  document.getElementById('nextBtn').style.display = 'none';
-
-  const openCard = document.getElementById('openCard');
-  openCard.classList.remove('flipped', 'exit', 'sr', 'ssr');
-  // 새 카드 등장 애니메이션 재시작
-  openCard.style.animation = 'none';
-  openCard.offsetHeight; // reflow
-  openCard.style.animation = '';
-
-  // 앞면 채우기
-  const front = document.getElementById('cardFront');
-  front.dataset.type = card.type;
-  front.dataset.rarity = card.rarity;
-  front.dataset.frame = getFrameMode(card);
-  front.dataset.fit = getImageFit(card);
-  const rarityDots = { c: 1, r: 2, sr: 3, ssr: 4 }[card.rarity];
-  const rarityHTML = Array.from({length: rarityDots}, () => '<span></span>').join('');
-  front.innerHTML = `
-    <div class="big-art" data-emoji="${escapeHTML(card.emoji || '🃏')}" ${artStyle(card)}></div>
-    <div class="big-frame">
-      <div class="big-top">
-        <div class="big-badge">${TYPE_EMOJI[card.type]}</div>
-        <div class="big-hp">HP ${card.hp}</div>
-      </div>
-      <div class="big-bot">
-        <div class="big-name">${escapeHTML(card.name)}</div>
-        <div class="big-rarity">${rarityHTML}</div>
-      </div>
-    </div>
-  `;
-
-  // 배경 광선 리셋 (희귀도에 맞춰 미리 준비)
-  const rays = document.getElementById('openRays');
-  rays.className = 'open-rays';
-  if (card.rarity === 'r')   rays.classList.add('rare');
-  if (card.rarity === 'sr')  rays.classList.add('sr');
-  if (card.rarity === 'ssr') rays.classList.add('ssr');
-
-  isFlipping = false;
-}
-
-function handleCardTap() {
-  if (isFlipping) return;
-  const openCard = document.getElementById('openCard');
-
-  if (!openCard.classList.contains('flipped')) {
-    // 뒤집기
-    isFlipping = true;
-    openCard.classList.add('flipped');
-    const card = packCards[packIndex];
-
-    // 광선 효과 (R 이상)
-    if (['r','sr','ssr'].includes(card.rarity)) {
-      setTimeout(() => {
-        document.getElementById('openRays').classList.add('show');
-      }, 400);
-    }
-
-    // 카드 등급별 추가 클래스 (흔들림/펄스)
-    if (card.rarity === 'sr')  openCard.classList.add('sr');
-    if (card.rarity === 'ssr') openCard.classList.add('ssr');
-
-    // 스파클 파티클 (SR 이상)
-    if (card.rarity === 'sr' || card.rarity === 'ssr') {
-      setTimeout(() => burstSparkles(card.rarity === 'ssr' ? 'gold' : 'purple', card.rarity === 'ssr' ? 24 : 14), 850);
-    }
-
-    // 다음 버튼 표시
-    setTimeout(() => {
-      document.getElementById('tapHint').style.display = 'none';
-      document.getElementById('nextBtn').style.display = 'inline-block';
-      const isLast = packIndex >= packCards.length - 1;
-      document.getElementById('nextLabel').textContent = isLast ? '결과 보기' : '다음 카드';
-      isFlipping = false;
-    }, 1100);
-  } else {
-    // 이미 뒤집힌 상태에서 탭하면 다음으로
-    nextCard();
-  }
-}
-
-function nextCard() {
-  if (isFlipping) return;
-  if (packIndex >= packCards.length - 1) {
-    showSummary();
-    return;
-  }
-  isFlipping = true;
-  const openCard = document.getElementById('openCard');
-  openCard.classList.add('exit');
-  document.getElementById('openRays').classList.remove('show');
-
-  setTimeout(() => {
-    packIndex++;
-    showCardAt(packIndex);
-  }, 400);
-}
-
-function skipAll() {
-  // 모든 카드 보유 추가하고 바로 요약
-  showSummary();
-}
-
-function showSummary() {
-  // 카드를 컬렉션에 추가
-  packCards.forEach(c => owned.add(c.id));
-
-  // 요약 그리드 채우기
-  const grid = document.getElementById('summaryGrid');
-  grid.innerHTML = packCards.map(c => cardHTML(c, {forceReveal:true})).join('');
-  grid.querySelectorAll('.card').forEach(el => {
-    el.addEventListener('click', () => {
-      const card = CARDS.find(x => x.id === el.dataset.id);
-      openCardModal(card);
-    });
-  });
-
-  // 최고 등급에 따른 서브타이틀
-  const order = { c: 0, r: 1, sr: 2, ssr: 3 };
-  const best = packCards.reduce((b, c) => order[c.rarity] > order[b] ? c.rarity : b, 'c');
-  const subTexts = {
-    c:   '새 카드를 컬렉션에서 확인하세요',
-    r:   '✨ 레어 카드 등장!',
-    sr:  '💜 슈퍼 레어 등장! 운이 좋네요',
-    ssr: '🔥 SSR 획득! 전설의 카드입니다!'
-  };
-  document.getElementById('summarySub').textContent = subTexts[best];
-
-  document.getElementById('openSummary').classList.add('active');
-}
-
-function closeOpenModal() {
-  document.getElementById('packModal').classList.remove('active');
-}
-
-/* 스파클 파티클 생성 */
-function burstSparkles(color, count) {
-  const layer = document.getElementById('sparkleLayer');
-  const rect = document.getElementById('openCard').getBoundingClientRect();
-  const appRect = document.getElementById('app').getBoundingClientRect();
-  const cx = rect.left - appRect.left + rect.width / 2;
-  const cy = rect.top - appRect.top + rect.height / 2;
-
-  for (let i = 0; i < count; i++) {
-    const s = document.createElement('div');
-    s.className = 'sparkle ' + color;
-    const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
-    const dist = 80 + Math.random() * 120;
-    s.style.setProperty('--tx', Math.cos(angle) * dist + 'px');
-    s.style.setProperty('--ty', Math.sin(angle) * dist + 'px');
-    s.style.left = cx + 'px';
-    s.style.top = cy + 'px';
-    s.style.animationDelay = (Math.random() * 0.2) + 's';
-    layer.appendChild(s);
-    setTimeout(() => s.remove(), 1500);
-  }
-}
-
-/* ============================================================
-   배틀 (간단한 가위바위보)
-   ============================================================ */
-let myHP = 100, oppHP = 100;
-const TYPES = ['sci', 'rok', 'pap'];
-const TYPE_WIN = { sci: 'pap', rok: 'sci', pap: 'rok' }; // 내가 sci면 pap을 이김
-
-function playRPS(mine) {
-  if (myHP <= 0 || oppHP <= 0) {
-    myHP = 100; oppHP = 100;
-    updateHPBars();
-    document.getElementById('battleLog').innerHTML = '<span class="turn">— 새 라운드 시작 —</span>';
-    return;
-  }
-  const opp = TYPES[Math.floor(Math.random()*3)];
-  let result, dmgMe = 0, dmgOpp = 0;
-  if (mine === opp) { result = '무승부!'; }
-  else if (TYPE_WIN[mine] === opp) { result = '🎉 승리!'; dmgOpp = 30; }
-  else { result = '😖 패배...'; dmgMe = 30; }
-
-  oppHP = Math.max(0, oppHP - dmgOpp);
-  myHP = Math.max(0, myHP - dmgMe);
-
-  const log = document.getElementById('battleLog');
-  let msg = `<span class="turn">나 ${TYPE_EMOJI[mine]} vs ${TYPE_EMOJI[opp]} 상대</span> → ${result}`;
-  if (dmgOpp) msg += ` (상대 -${dmgOpp})`;
-  if (dmgMe)  msg += ` (나 -${dmgMe})`;
-  if (oppHP === 0) msg += '<br><b style="color:var(--good)">🏆 최종 승리! 손짓을 다시 눌러 재시작</b>';
-  if (myHP === 0)  msg += '<br><b style="color:var(--bad)">💔 패배... 손짓을 다시 눌러 재시작</b>';
-  log.innerHTML = msg;
-
-  // 카드 표시 업데이트
-  document.querySelectorAll('.battle-card').forEach((el, i) => {
-    if (i === 0) el.textContent = TYPE_EMOJI[opp];
-    if (i === 1) el.textContent = TYPE_EMOJI[mine];
-  });
-  updateHPBars();
-}
-function updateHPBars() {
-  const bars = document.querySelectorAll('.hp-bar > div');
-  bars[0].style.width = (oppHP) + '%';
-  bars[1].style.width = (myHP) + '%';
-}
-
-/* ============================================================
-   Toast
-   ============================================================ */
+/* ============ 토스트 ============ */
 let toastTimer;
-function toast(msg) {
+function toast(msg, kind = '') {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.classList.add('show');
+  t.className = 'toast show ' + kind;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
 }
 
-/* 초기 렌더 (캐시 기반 우선 표시) */
-renderCollection();
-renderDeck();
+/* ============ 전역 드래그앤드롭 ============ */
+let dragCounter = 0;
+window.addEventListener('dragenter', e => {
+  if (e.dataTransfer && Array.from(e.dataTransfer.items || []).some(i => i.kind === 'file')) {
+    dragCounter++;
+    document.body.classList.add('dragging');
+  }
+});
+window.addEventListener('dragleave', e => {
+  dragCounter--;
+  if (dragCounter <= 0) {
+    dragCounter = 0;
+    document.body.classList.remove('dragging');
+  }
+});
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => {
+  e.preventDefault();
+  dragCounter = 0;
+  document.body.classList.remove('dragging');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    // 새 카드 만들고 이미지 자동 채우기
+    resizeImage(file, 500, 700, 0.85).then(dataUrl => {
+      openEditor();
+      pendingImage = dataUrl;
+      document.getElementById('uploadBtn').classList.add('has-image');
+      document.getElementById('uploadBtn').textContent = '📷 이미지 변경';
+      document.getElementById('clearImgBtn').style.display = 'block';
+      updatePreview();
+    });
+  }
+});
 
-/* ============================================================
-   Firestore 실시간 카드 구독
-   - 운영툴에서 카드 등록/수정/삭제하면 즉시 반영
-   - 어느 브라우저든 동일한 데이터 공유
-   ============================================================ */
-if (firebaseReady) {
-  firebaseDB.collection('cards').onSnapshot(snap => {
-    const fresh = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    CARDS = fresh;
-    saveCardsCache();
-    cleanupOwnedDeck();
-    // 현재 활성 페이지 다시 그리기
-    const active = document.querySelector('.page.active')?.dataset.page;
-    if (active === 'collection') renderCollection();
-    if (active === 'deck') renderDeck();
-    if (active === 'home') updateHomeStats();
-    if (active === 'battle') {
-      const mode = document.querySelector('.mode-tab.active')?.dataset.mode;
-      if (mode === 'online' && onlineState === 'idle') renderOnlineIdle();
+/* ============ 단축키 ============ */
+document.addEventListener('keydown', e => {
+  // Esc: 모달 닫기
+  if (e.key === 'Escape') {
+    if (document.getElementById('editorModal').classList.contains('active')) closeEditor();
+    if (document.getElementById('confirmDialog').classList.contains('active')) {
+      document.getElementById('confirmDialog').classList.remove('active');
+      confirmOKCallback = null;
+      confirmCancelCallback = null;
     }
-  }, err => {
-    console.error('Firestore cards 구독 실패', err);
-    toast('카드 데이터 동기화 실패 — 캐시 사용 중');
-  });
-}
-
-function updateHomeStats() {
-  const ownedCount = CARDS.filter(c => owned.has(c.id)).length;
-  const totalCount = CARDS.length;
-  const winsEl = document.getElementById('quickWins');
-  const ownedEl = document.getElementById('quickOwned');
-  const totalEl = document.getElementById('quickTotal');
-  if (winsEl) winsEl.textContent = playerState.wins;
-  if (ownedEl) ownedEl.textContent = ownedCount;
-  if (totalEl) totalEl.textContent = totalCount;
-  // 무료 팩 배너
-  const banner = document.getElementById('freePackBanner');
-  if (banner) banner.style.display = availableFreePacks() > 0 ? '' : 'none';
-}
-
-/* ============================================================
-   플레이어 상태 (승수, 무료 팩 등)
-   ============================================================ */
-const PLAYER_STATE_KEY = 'com_allstar_player_v1';
-const PLAYER_ID_KEY = 'com_allstar_player_id';
-const PLAYER_NAME_KEY = 'com_allstar_player_name';
-const WINS_PER_PACK = 10;
-
-function loadPlayerState() {
-  try {
-    const raw = localStorage.getItem(PLAYER_STATE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
-  return null;
-}
-function savePlayerState() {
-  try { localStorage.setItem(PLAYER_STATE_KEY, JSON.stringify(playerState)); } catch(e) {}
-}
-let playerState = loadPlayerState() || { wins: 0, losses: 0, ties: 0, claimedPacks: 0 };
-
-function getPlayerId() {
-  let id = localStorage.getItem(PLAYER_ID_KEY);
-  if (!id) {
-    id = 'p_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
-    localStorage.setItem(PLAYER_ID_KEY, id);
   }
-  return id;
-}
-function getPlayerName() {
-  let n = localStorage.getItem(PLAYER_NAME_KEY);
-  if (!n) {
-    n = '플레이어' + Math.floor(Math.random()*9000 + 1000);
-    localStorage.setItem(PLAYER_NAME_KEY, n);
+  // N: 새 카드 추가 (입력 중 아닐 때만)
+  if (e.key.toLowerCase() === 'n' && !e.ctrlKey && !e.metaKey) {
+    const tag = (document.activeElement || {}).tagName;
+    if (tag !== 'INPUT' && tag !== 'TEXTAREA' &&
+        !document.getElementById('editorModal').classList.contains('active')) {
+      openEditor();
+    }
   }
-  return n;
-}
-let myPlayerId = getPlayerId();
-let myPlayerName = getPlayerName();
-
-function availableFreePacks() {
-  return Math.floor(playerState.wins / WINS_PER_PACK) - playerState.claimedPacks;
-}
-
-function updateProgressUI() {
-  // 헤더 트로피 칩
-  const total = playerState.wins;
-  const cycle = total % WINS_PER_PACK;
-  const ready = availableFreePacks() > 0;
-  document.getElementById('winsCount').textContent = ready ? '🎁' : cycle;
-  document.getElementById('progressWins').textContent = cycle;
-  document.getElementById('progressFill').style.width = (cycle / WINS_PER_PACK * 100) + '%';
-  document.getElementById('statWins').textContent = playerState.wins;
-  document.getElementById('statLosses').textContent = playerState.losses;
-  document.getElementById('statTies').textContent = playerState.ties;
-  document.getElementById('statPacks').textContent = playerState.claimedPacks;
-  document.querySelector('.trophy-chip').classList.toggle('ready', ready);
-  document.getElementById('claimBtn').style.display = ready ? '' : 'none';
-  // 홈 통계도 갱신
-  if (document.getElementById('quickWins')) updateHomeStats();
-}
-updateProgressUI();
-
-function claimFreePack() {
-  if (availableFreePacks() <= 0) return;
-  playerState.claimedPacks++;
-  savePlayerState();
-  updateProgressUI();
-  openPack(true); // 무료 팩 열기 (잼 차감 없음)
-}
-
-/* 닉네임 설정 */
-function openNameModal() {
-  document.getElementById('nameInput').value = myPlayerName;
-  document.getElementById('nameModal').classList.add('active');
-}
-function saveName() {
-  const v = document.getElementById('nameInput').value.trim();
-  if (!v) { toast('닉네임을 입력하세요'); return; }
-  myPlayerName = v;
-  localStorage.setItem(PLAYER_NAME_KEY, v);
-  closeModal('nameModal');
-  toast('닉네임 변경: ' + v);
-}
-
-/* ============================================================
-   배틀 모드 전환
-   ============================================================ */
-function setBattleMode(mode) {
-  document.querySelectorAll('.mode-tab').forEach(t =>
-    t.classList.toggle('active', t.dataset.mode === mode));
-  document.getElementById('modeOnline').style.display = mode === 'online' ? '' : 'none';
-  document.getElementById('modeCpu').style.display = mode === 'cpu' ? '' : 'none';
-  if (mode === 'online') {
-    renderOnlineIdle();
-  }
-}
-
-/* ============================================================
-   온라인 매칭 — 상태 머신
-   ============================================================ */
-let selectedFighter = null;    // 출전 카드
-let onlineState = 'idle';      // idle / searching / playing / result
-let queueRef = null;
-let queueListener = null;
-let matchRef = null;
-let matchListener = null;
-let myRole = null;             // 'p1' or 'p2'
-let oppRole = null;
-let currentMatchData = null;
-let matchResolved = false;     // 중복 결과 처리 방지
-
-function setOnlineState(state) {
-  onlineState = state;
-  ['Idle','Searching','Playing','Result','NoFirebase'].forEach(s => {
-    document.getElementById('online' + s).style.display = 'none';
-  });
-  if (!firebaseReady && state === 'idle') {
-    document.getElementById('onlineNoFirebase').style.display = '';
-    return;
-  }
-  const targetMap = { idle: 'Idle', searching: 'Searching', playing: 'Playing', result: 'Result' };
-  document.getElementById('online' + targetMap[state]).style.display = '';
-}
-
-function renderOnlineIdle() {
-  setOnlineState('idle');
-  if (!firebaseReady) return;
-
-  // 출전 카드 피커 (보유 카드 중에서)
-  const ownedCards = CARDS.filter(c => owned.has(c.id));
-  const picker = document.getElementById('fighterPicker');
-  if (ownedCards.length === 0) {
-    picker.innerHTML = `<div class="fighter-picker-empty">보유한 카드가 없어요. 먼저 팩을 열어보세요!</div>`;
-    document.getElementById('startMatchBtn').disabled = true;
-    return;
-  }
-
-  // 기본 선택: 가장 희귀도 높은 카드
-  if (!selectedFighter || !ownedCards.find(c => c.id === selectedFighter.id)) {
-    const rOrder = { c: 0, r: 1, sr: 2, ssr: 3 };
-    selectedFighter = [...ownedCards].sort((a, b) => rOrder[b.rarity] - rOrder[a.rarity])[0];
-  }
-
-  picker.innerHTML = ownedCards.map(c => cardHTML(c, {forceReveal:true})).join('');
-  picker.querySelectorAll('.card').forEach(el => {
-    if (el.dataset.id === selectedFighter.id) el.classList.add('selected');
-    el.addEventListener('click', () => {
-      const c = CARDS.find(x => x.id === el.dataset.id);
-      selectedFighter = c;
-      picker.querySelectorAll('.card').forEach(x => x.classList.remove('selected'));
-      el.classList.add('selected');
-    });
-  });
-
-  document.getElementById('startMatchBtn').disabled = false;
-  document.getElementById('onlineStatus').textContent =
-    `${myPlayerName} · 온라인 대전 준비 완료 (닉네임 변경하려면 탭)`;
-  document.getElementById('onlineStatus').onclick = openNameModal;
-  document.getElementById('onlineStatus').style.cursor = 'pointer';
-}
-
-/* 카드 정보를 Firebase로 보낼 때 (이미지는 큰 경우 생략 가능) */
-function cardForNet(card) {
-  return {
-    id: card.id,
-    name: card.name,
-    type: card.type,
-    hp: card.hp,
-    rarity: card.rarity,
-    emoji: card.emoji || '🃏',
-    image: card.image || '',   // 데이터URL이 너무 크면 비울 수도 있음
-    imageFit: getImageFit(card),
-    frameMode: getFrameMode(card)
-  };
-}
-
-async function startOnlineMatch() {
-  if (!firebaseReady) { toast('Firebase 설정이 필요해요'); return; }
-  if (!selectedFighter) { toast('출전 카드를 선택하세요'); return; }
-
-  setOnlineState('searching');
-  // 검색 화면에 내 카드 표시
-  const mini = document.getElementById('searchMyCard');
-  mini.classList.toggle('contain', getImageFit(selectedFighter) === 'contain');
-  if (selectedFighter.image) {
-    mini.style.backgroundImage = `url('${selectedFighter.image}')`;
-    mini.textContent = '';
-  } else {
-    mini.style.removeProperty('background-image');
-    mini.textContent = selectedFighter.emoji || '🃏';
-  }
-
-  try {
-    // 1) 대기열에 등록 (Firestore)
-    queueRef = firebaseDB.collection('queue').doc(myPlayerId);
-    await queueRef.set({
-      name: myPlayerName,
-      card: cardForNet(selectedFighter),
-      ts: firebase.firestore.FieldValue.serverTimestamp()
-    });
-
-    // 2) 대기열 감시 (상대 찾기)
-    queueListener = firebaseDB.collection('queue').onSnapshot(snap => {
-      if (onlineState !== 'searching') return;
-      const others = snap.docs
-        .filter(d => d.id !== myPlayerId)
-        .map(d => ({ id: d.id, ...d.data() }));
-      if (others.length === 0) return; // 계속 대기
-
-      // 가장 오래 기다린 사람과 매칭 (ts 기준)
-      others.sort((a, b) => (a.ts?.toMillis?.() || 0) - (b.ts?.toMillis?.() || 0));
-      const opponent = others[0];
-
-      // 결정적 매치 ID (양쪽이 같은 ID 계산)
-      const matchId = [myPlayerId, opponent.id].sort().join('_');
-      const role = myPlayerId < opponent.id ? 'p1' : 'p2';
-      const oRole = role === 'p1' ? 'p2' : 'p1';
-
-      // 큐 감시 종료
-      if (queueListener) { queueListener(); queueListener = null; }
-
-      setupMatch(matchId, role, oRole, opponent);
-    }, err => {
-      console.error('queue 구독 실패', err);
-      toast('매칭 실패: ' + err.message);
-      cleanupMatchmaking();
-      setOnlineState('idle');
-    });
-  } catch(e) {
-    toast('매칭 실패: ' + e.message);
-    cleanupMatchmaking();
-    setOnlineState('idle');
-  }
-}
-
-async function setupMatch(matchId, role, oRole, opponentData) {
-  myRole = role;
-  oppRole = oRole;
-  matchResolved = false;
-  matchRef = firebaseDB.collection('matches').doc(matchId);
-
-  // 내 정보 기록 (merge로 상대 데이터 보존)
-  await matchRef.set({
-    [role]: {
-      id: myPlayerId,
-      name: myPlayerName,
-      card: cardForNet(selectedFighter),
-      hand: null,
-      joined: true
-    },
-    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-  }, { merge: true });
-
-  // 큐에서 제거
-  if (queueRef) {
-    try { await queueRef.delete(); } catch(e) {}
-    queueRef = null;
-  }
-
-  // UI: 플레이 상태로
-  setOnlineState('playing');
-  renderMatchUI(opponentData);
-
-  // 매치 감시 (Firestore onSnapshot)
-  matchListener = matchRef.onSnapshot(snap => {
-    const m = snap.data();
-    if (!m) return;
-    currentMatchData = m;
-    handleMatchUpdate(m);
-  }, err => {
-    console.error('match 구독 실패', err);
-  });
-}
-
-function renderMatchUI(opponentData) {
-  // 상대 카드
-  const oppCard = opponentData.card;
-  document.getElementById('oppName').textContent = opponentData.name;
-  document.getElementById('oppCardName').textContent = oppCard.name;
-  document.getElementById('oppHp').textContent = 'HP ' + oppCard.hp;
-  document.getElementById('oppBadge').textContent = TYPE_EMOJI[oppCard.type];
-  const oppMatchCard = document.getElementById('oppMatchCard');
-  oppMatchCard.dataset.type = oppCard.type;
-  oppMatchCard.dataset.frame = getFrameMode(oppCard);
-  oppMatchCard.dataset.fit = getImageFit(oppCard);
-  const oppArt = oppMatchCard.querySelector('.art');
-  oppArt.dataset.emoji = oppCard.emoji || '🃏';
-  if (oppCard.image) oppArt.style.backgroundImage = `url('${oppCard.image}')`;
-  else oppArt.style.removeProperty('background-image');
-  const oppRarityDots = { c:1, r:2, sr:3, ssr:4 }[oppCard.rarity];
-  const oppRarity = document.getElementById('oppRarity');
-  oppRarity.innerHTML = Array.from({length: oppRarityDots}, () => '<span></span>').join('');
-  oppRarity.dataset.rarity = oppCard.rarity;
-
-  // 내 카드
-  document.getElementById('myName').textContent = myPlayerName;
-  const myCardDiv = document.getElementById('myMatchCard');
-  myCardDiv.dataset.type = selectedFighter.type;
-  myCardDiv.dataset.frame = getFrameMode(selectedFighter);
-  myCardDiv.dataset.fit = getImageFit(selectedFighter);
-  myCardDiv.innerHTML = `
-    <div class="art" data-emoji="${escapeHTML(selectedFighter.emoji || '🃏')}" ${artStyle(selectedFighter)}></div>
-    <div class="frame">
-      <div class="top">
-        <div class="type-badge">${TYPE_EMOJI[selectedFighter.type]}</div>
-        <div class="hp">HP ${selectedFighter.hp}</div>
-      </div>
-      <div class="bot"><div class="name">${escapeHTML(selectedFighter.name)}</div></div>
-    </div>
-  `;
-  const myRarityDots = { c:1, r:2, sr:3, ssr:4 }[selectedFighter.rarity];
-  const myRarity = document.getElementById('myRarity');
-  myRarity.innerHTML = Array.from({length: myRarityDots}, () => '<span></span>').join('');
-  myRarity.dataset.rarity = selectedFighter.rarity;
-
-  // 초기 손짓 표시 리셋
-  document.getElementById('myHandDisplay').textContent = '?';
-  document.getElementById('myHandDisplay').className = 'hand-display';
-  document.getElementById('oppHandDisplay').textContent = '❓';
-  document.getElementById('oppHandDisplay').className = 'hand-display';
-  document.getElementById('matchStatus').textContent = '손을 내세요';
-  document.querySelectorAll('.hand-btn').forEach(b => {
-    b.disabled = false;
-    b.classList.remove('selected');
-  });
-}
-
-function handleMatchUpdate(m) {
-  const me = m[myRole];
-  const opp = m[oppRole];
-  if (!me || !opp) return;
-
-  if (opp.left) {
-    toast('상대가 나갔어요');
-    showResultUI('opp_left', me, opp);
-    return;
-  }
-
-  // 내 손짓 상태 표시
-  if (me.hand) {
-    document.querySelectorAll('.hand-btn').forEach(b => b.disabled = true);
-  }
-
-  // 상대 손짓 대기 표시 (값은 공개하지 않음, 했는지만)
-  if (opp.hand && !me.hand) {
-    document.getElementById('matchStatus').textContent = '상대가 손을 냈어요! 손을 내세요';
-    document.getElementById('oppHandDisplay').className = 'hand-display waiting';
-  } else if (me.hand && !opp.hand) {
-    document.getElementById('matchStatus').textContent = '상대가 선택 중...';
-    document.getElementById('oppHandDisplay').className = 'hand-display waiting';
-  }
-
-  // 둘 다 손 냈으면 결과 처리
-  if (me.hand && opp.hand && !matchResolved) {
-    matchResolved = true;
-    // 손 공개 애니메이션
-    document.getElementById('myHandDisplay').textContent = TYPE_EMOJI[me.hand];
-    document.getElementById('myHandDisplay').className = 'hand-display revealed';
-    document.getElementById('oppHandDisplay').textContent = TYPE_EMOJI[opp.hand];
-    document.getElementById('oppHandDisplay').className = 'hand-display revealed';
-    document.getElementById('matchStatus').textContent = '결과 계산 중...';
-
-    setTimeout(() => resolveOnlineMatch(me, opp), 1100);
-  }
-}
-
-async function submitOnlineHand(hand) {
-  if (!matchRef || !myRole) return;
-  // 이미 냈으면 무시
-  if (currentMatchData && currentMatchData[myRole]?.hand) return;
-  document.querySelectorAll('.hand-btn').forEach(b => {
-    b.disabled = true;
-    if (b.dataset.type === hand) b.classList.add('selected');
-  });
-  document.getElementById('myHandDisplay').textContent = TYPE_EMOJI[hand];
-  // Firestore: 중첩 필드 업데이트
-  await matchRef.update({ [`${myRole}.hand`]: hand });
-}
-
-const TYPE_WIN_MAP = { sci: 'pap', rok: 'sci', pap: 'rok' };
-const RARITY_VAL = { c: 1, r: 2, sr: 3, ssr: 4 };
-
-function resolveOnlineMatch(me, opp) {
-  const myH = me.hand, oH = opp.hand;
-  const myR = RARITY_VAL[me.card.rarity];
-  const oR = RARITY_VAL[opp.card.rarity];
-
-  let result;
-  if (myH === oH) {
-    if (myR > oR) result = 'star_win';
-    else if (myR < oR) result = 'star_lose';
-    else result = 'tie';
-  } else if (TYPE_WIN_MAP[myH] === oH) {
-    result = 'win';
-  } else {
-    result = 'lose';
-  }
-
-  // 통계 갱신
-  if (result === 'win' || result === 'star_win') {
-    playerState.wins++;
-  } else if (result === 'lose' || result === 'star_lose') {
-    playerState.losses++;
-  } else {
-    playerState.ties++;
-  }
-  savePlayerState();
-  updateProgressUI();
-
-  showResultUI(result, me, opp);
-}
-
-function showResultUI(result, me, opp) {
-  const emoji = document.getElementById('resultEmoji');
-  const title = document.getElementById('resultTitle');
-  const desc = document.getElementById('resultDesc');
-  const myRC = document.getElementById('resultMyRarity');
-  const oppRC = document.getElementById('resultOppRarity');
-
-  document.getElementById('resultMyHand').textContent = TYPE_EMOJI[me?.hand] || '❓';
-  document.getElementById('resultOppHand').textContent = TYPE_EMOJI[opp?.hand] || '❓';
-  myRC.textContent = '★'.repeat(RARITY_VAL[me?.card?.rarity] || 1);
-  oppRC.textContent = '★'.repeat(RARITY_VAL[opp?.card?.rarity] || 1);
-  myRC.classList.remove('winner');
-  oppRC.classList.remove('winner');
-
-  title.className = 'result-title';
-  switch(result) {
-    case 'win':
-      emoji.textContent = '🎉';
-      title.textContent = '승리!';
-      title.classList.add('win');
-      desc.innerHTML = `손짓 상성으로 이겼어요!<br><b style="color:var(--good)">+1승</b> (다음 무료 팩까지 ${WINS_PER_PACK - (playerState.wins % WINS_PER_PACK)}승)`;
-      break;
-    case 'star_win':
-      emoji.textContent = '✨';
-      title.textContent = '별빛 승리!';
-      title.classList.add('star');
-      desc.innerHTML = `같은 손이지만 카드 등급이 더 높아 이겼어요<br><b style="color:var(--warn)">+1승</b> (다음 무료 팩까지 ${WINS_PER_PACK - (playerState.wins % WINS_PER_PACK)}승)`;
-      myRC.classList.add('winner');
-      break;
-    case 'lose':
-      emoji.textContent = '😖';
-      title.textContent = '패배';
-      title.classList.add('lose');
-      desc.textContent = '다음엔 더 좋은 손을 노려보세요';
-      break;
-    case 'star_lose':
-      emoji.textContent = '💫';
-      title.textContent = '별빛 패배';
-      title.classList.add('lose');
-      desc.innerHTML = '같은 손이었지만 상대 카드가 더 빛났어요<br>더 좋은 카드를 모아보세요!';
-      oppRC.classList.add('winner');
-      break;
-    case 'tie':
-      emoji.textContent = '🤝';
-      title.textContent = '완벽한 무승부';
-      title.classList.add('tie');
-      desc.textContent = '같은 손, 같은 등급. 진정한 호각입니다';
-      break;
-    case 'opp_left':
-      emoji.textContent = '👋';
-      title.textContent = '상대 퇴장';
-      title.classList.add('tie');
-      desc.textContent = '상대가 매치를 떠났어요';
-      break;
-  }
-
-  cleanupMatchListeners();
-  setOnlineState('result');
-}
-
-async function cleanupMatchmaking() {
-  if (queueListener) {
-    queueListener(); // Firestore unsubscribe
-    queueListener = null;
-  }
-  if (queueRef) {
-    try { await queueRef.delete(); } catch(e) {}
-    queueRef = null;
-  }
-}
-function cleanupMatchListeners() {
-  if (matchListener) {
-    matchListener(); // Firestore unsubscribe
-    matchListener = null;
-  }
-}
-async function cleanupMatch() {
-  cleanupMatchListeners();
-  if (matchRef && myRole) {
-    try { await matchRef.update({ [`${myRole}.left`]: true }); } catch(e) {}
-  }
-  matchRef = null;
-  myRole = null;
-  oppRole = null;
-  currentMatchData = null;
-}
-
-async function cancelMatchmaking() {
-  await cleanupMatchmaking();
-  setOnlineState('idle');
-  toast('매칭을 취소했어요');
-}
-
-async function leaveOnlineMatch() {
-  await cleanupMatch();
-  renderOnlineIdle();
-}
-
-async function rematchOnline() {
-  await cleanupMatch();
-  startOnlineMatch();
-}
-
-// 페이지 떠날 때 정리
-window.addEventListener('beforeunload', () => {
-  if (queueRef) queueRef.delete();
-  if (matchRef && myRole) matchRef.update({ [`${myRole}.left`]: true });
 });
 
-/* 닉네임 input은 엔터로 저장 */
-document.getElementById('nameInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') saveName();
-});
+/* 초기 상태 (Firestore onSnapshot이 카드 로딩 후 렌더링 트리거) */
+renderGrid();
 </script>
 </body>
 </html>
