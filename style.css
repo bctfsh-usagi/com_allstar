@@ -2297,3 +2297,325 @@ button {
     font-size: clamp(46px, 12vw, 64px);
   }
 }
+/* ===================================================================
+   AD DIRECTOR MOBILE FIX v2.2
+   iPhone Safari / 모바일 뷰포트 대응
+   - 기능/JS/HTML 변경 없음
+   - 하단 네비 잘림 해결
+   - 남은 시간/확률/스킵 버튼 다시 보이게 압축
+   =================================================================== */
+
+/* iOS Safari 실제 화면 높이 대응 */
+html,
+body {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  min-height: 100vh;
+}
+
+@supports (height: 100dvh) {
+  #app {
+    height: 100dvh;
+    min-height: 100dvh;
+  }
+}
+
+@supports (height: 100svh) {
+  #app {
+    height: 100svh;
+    min-height: 100svh;
+  }
+}
+
+/* 허브 화면: 모바일에서 한 화면 안에 CTA/하단바까지 들어오게 재배치 */
+#hub-screen {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important;
+  overflow: hidden !important;
+}
+
+/* 상단바 살짝 압축 */
+#hub-screen .top-bar {
+  min-height: 74px !important;
+  margin: max(10px, calc(env(safe-area-inset-top) + 6px)) 18px 0 !important;
+  padding: 12px 22px !important;
+  border-radius: 28px !important;
+}
+
+#hub-screen .stat-block .lbl {
+  font-size: 10px !important;
+  letter-spacing: 4px !important;
+}
+
+#hub-screen .stat-block .val {
+  font-size: 29px !important;
+}
+
+#hub-screen #hub-collection::before {
+  font-size: 18px !important;
+  margin-right: 8px !important;
+}
+
+/* 본문 전체를 위로 살짝 당기고 간격 압축 */
+#hub-screen .hub-body {
+  justify-content: flex-start !important;
+  gap: 7px !important;
+  padding: 22px 20px 0 !important;
+  transform: none !important;
+}
+
+/* 타이틀 크기 조정 */
+#hub-screen .hub-title {
+  font-size: clamp(38px, 10.5vw, 54px) !important;
+  line-height: .88 !important;
+  margin: 0 !important;
+}
+
+#hub-screen .hub-title::before {
+  margin-bottom: 7px !important;
+  font-size: 12px !important;
+  letter-spacing: 10px !important;
+}
+
+#hub-screen .hub-title::after {
+  margin-top: 9px !important;
+  font-size: 11px !important;
+  letter-spacing: 7px !important;
+}
+
+/* 팩+받침대 영역 압축 */
+#hub-screen .gacha-pack-wrap {
+  width: min(74vw, 330px) !important;
+  margin-top: 4px !important;
+  padding: 4px 0 74px !important;
+}
+
+/* 받침대 높이 줄여서 아래 CTA 공간 확보 */
+#hub-screen .gacha-pack-wrap::before {
+  bottom: 8px !important;
+  width: min(88vw, 410px) !important;
+  height: 108px !important;
+}
+
+#hub-screen .gacha-pack-wrap::after {
+  bottom: 76px !important;
+  width: min(76vw, 350px) !important;
+  height: 20px !important;
+}
+
+/* 카드팩 사이즈 조정 */
+#hub-screen .gacha-pack {
+  width: min(52vw, 238px) !important;
+}
+
+/* 남은 시간/READY 영역 복구 */
+#hub-screen .cooldown-display {
+  display: flex !important;
+  position: relative !important;
+  z-index: 6 !important;
+  min-height: auto !important;
+  margin-top: -36px !important;
+  gap: 1px !important;
+}
+
+#hub-screen .cooldown-status {
+  display: block !important;
+  font-size: clamp(13px, 3.7vw, 17px) !important;
+  line-height: 1 !important;
+  letter-spacing: clamp(3px, 1vw, 6px) !important;
+}
+
+#hub-screen .cooldown-time {
+  display: block !important;
+  font-size: clamp(42px, 11.5vw, 60px) !important;
+  line-height: .9 !important;
+  letter-spacing: 2px !important;
+}
+
+/* 확률칩 */
+#hub-screen .probability-info {
+  display: flex !important;
+  position: relative !important;
+  z-index: 6 !important;
+  gap: 8px !important;
+  margin-top: 5px !important;
+}
+
+#hub-screen .probability-info span {
+  min-width: 74px !important;
+  padding: 7px 9px !important;
+  font-size: 12px !important;
+}
+
+/* 스킵 버튼 */
+#hub-screen .btn-secondary {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  z-index: 6 !important;
+  min-height: 42px !important;
+  padding: 0 20px !important;
+  margin-top: 4px !important;
+  font-size: 13px !important;
+}
+
+/* 하단 네비: 홈 인디케이터 위로 올리고 잘림 방지 */
+#hub-screen .bottom-nav {
+  position: absolute !important;
+  z-index: 20 !important;
+  left: 18px !important;
+  right: 18px !important;
+  bottom: max(26px, calc(env(safe-area-inset-bottom) + 18px)) !important;
+  height: 74px !important;
+  padding: 0 !important;
+  border-radius: 24px !important;
+  overflow: visible !important;
+}
+
+#hub-screen .bottom-nav::before {
+  inset: -18px -18px -34px !important;
+}
+
+#hub-screen .bottom-nav::after {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 9px !important;
+  font-size: 13px !important;
+}
+
+#hub-screen .nav-btn {
+  height: 100% !important;
+  padding: 0 10px !important;
+  font-size: clamp(15px, 4.1vw, 19px) !important;
+  letter-spacing: 1px !important;
+  gap: 4px !important;
+}
+
+#hub-screen .nav-btn:first-child {
+  border-radius: 24px 0 0 24px !important;
+}
+
+#hub-screen .nav-btn.battle {
+  border-radius: 0 24px 24px 0 !important;
+}
+
+#hub-screen .nav-btn .icon {
+  font-size: 21px !important;
+}
+
+/* 높이가 작은 아이폰 대응 */
+@media (max-height: 760px) {
+  #hub-screen .top-bar {
+    min-height: 66px !important;
+    padding: 10px 20px !important;
+  }
+
+  #hub-screen .stat-block .val {
+    font-size: 26px !important;
+  }
+
+  #hub-screen .hub-body {
+    gap: 5px !important;
+    padding-top: 14px !important;
+  }
+
+  #hub-screen .hub-title {
+    font-size: clamp(34px, 9.4vw, 45px) !important;
+  }
+
+  #hub-screen .hub-title::before {
+    margin-bottom: 5px !important;
+    font-size: 11px !important;
+  }
+
+  #hub-screen .hub-title::after {
+    margin-top: 7px !important;
+    font-size: 10px !important;
+  }
+
+  #hub-screen .gacha-pack-wrap {
+    width: min(70vw, 300px) !important;
+    padding-bottom: 62px !important;
+  }
+
+  #hub-screen .gacha-pack {
+    width: min(47vw, 206px) !important;
+  }
+
+  #hub-screen .gacha-pack-wrap::before {
+    height: 92px !important;
+  }
+
+  #hub-screen .gacha-pack-wrap::after {
+    bottom: 62px !important;
+  }
+
+  #hub-screen .cooldown-display {
+    margin-top: -31px !important;
+  }
+
+  #hub-screen .cooldown-time {
+    font-size: clamp(36px, 10vw, 50px) !important;
+  }
+
+  #hub-screen .probability-info span {
+    min-width: 68px !important;
+    padding: 6px 8px !important;
+    font-size: 11px !important;
+  }
+
+  #hub-screen .btn-secondary {
+    min-height: 38px !important;
+    font-size: 12px !important;
+  }
+
+  #hub-screen .bottom-nav {
+    height: 68px !important;
+    bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px)) !important;
+  }
+}
+
+/* 아주 좁은 화면 대응 */
+@media (max-width: 380px) {
+  #hub-screen .top-bar {
+    left: auto !important;
+    right: auto !important;
+    margin-left: 14px !important;
+    margin-right: 14px !important;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+
+  #hub-screen .hub-title {
+    font-size: clamp(32px, 9.8vw, 44px) !important;
+  }
+
+  #hub-screen .gacha-pack {
+    width: min(49vw, 210px) !important;
+  }
+
+  #hub-screen .probability-info {
+    gap: 6px !important;
+  }
+
+  #hub-screen .probability-info span {
+    min-width: 64px !important;
+    font-size: 11px !important;
+  }
+
+  #hub-screen .bottom-nav {
+    left: 14px !important;
+    right: 14px !important;
+  }
+
+  #hub-screen .nav-btn {
+    font-size: 14px !important;
+  }
+}
