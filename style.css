@@ -4765,3 +4765,294 @@ body {
     left: 20px !important;
   }
 }
+/* ===================================================================
+   AD BATTLE FLOW POLISH v1.0
+   카드 선택 / 배틀 / 결과 화면 정리
+   기능/HTML/JS 변경 없음
+   =================================================================== */
+
+/* ---------------------------------------------------
+   1) 카드 선택 화면
+   --------------------------------------------------- */
+
+#select-screen {
+  padding: 0 20px max(28px, env(safe-area-inset-bottom)) !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(94, 145, 225, .26) 0%, transparent 38%),
+    radial-gradient(ellipse at 50% 58%, rgba(255, 126, 42, .10) 0%, transparent 42%),
+    linear-gradient(180deg, #0c1d42 0%, #071127 48%, #030817 100%) !important;
+}
+
+#select-screen .top-bar {
+  margin-top: max(32px, calc(env(safe-area-inset-top) + 18px)) !important;
+  min-height: 76px !important;
+}
+
+#select-screen .back-btn {
+  top: max(48px, calc(env(safe-area-inset-top) + 34px)) !important;
+  left: 22px !important;
+  width: 42px !important;
+  height: 42px !important;
+  z-index: 30 !important;
+}
+
+#select-screen .select-title {
+  margin-top: 18px !important;
+  font-family: var(--ad-font-display, 'Cinzel', serif) !important;
+  font-size: clamp(28px, 7.6vw, 40px) !important;
+  line-height: 1 !important;
+  color: #ffdc73 !important;
+  letter-spacing: 2px !important;
+  text-shadow: 0 0 18px rgba(255, 198, 78, .28) !important;
+}
+
+#select-screen .select-subtitle {
+  margin-top: 8px !important;
+  margin-bottom: 20px !important;
+  font-size: 14px !important;
+  color: rgba(210, 222, 255, .72) !important;
+}
+
+/* 선택 카드 그리드 */
+#select-screen .collection-grid,
+#select-screen #sel-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+  padding: 8px 0 32px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+}
+
+#select-screen .collection-grid::-webkit-scrollbar,
+#select-screen #sel-grid::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* 카드가 1장뿐이면 중앙 배치 */
+#select-screen #sel-grid:has(.col-card:only-child),
+#select-screen .collection-grid:has(.col-card:only-child) {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+}
+
+#select-screen #sel-grid:has(.col-card:only-child) .col-card,
+#select-screen .collection-grid:has(.col-card:only-child) .col-card {
+  width: min(62vw, 260px) !important;
+  flex: 0 0 auto !important;
+}
+
+/* 선택 카드 크기/비율 안정화 */
+#select-screen .col-card {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 2 / 3 !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  border-width: 2px !important;
+  box-shadow:
+    0 18px 36px rgba(0,0,0,.38),
+    0 0 26px rgba(255, 220, 115, .16) !important;
+}
+
+/* ---------------------------------------------------
+   2) 배틀 화면
+   --------------------------------------------------- */
+
+#battle-screen {
+  padding: 0 22px max(26px, env(safe-area-inset-bottom)) !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(ellipse at 50% 47%, rgba(115, 66, 255, .24) 0%, transparent 42%),
+    radial-gradient(ellipse at 50% 72%, rgba(255, 106, 0, .10) 0%, transparent 42%),
+    linear-gradient(180deg, #071127 0%, #050b1f 52%, #030817 100%) !important;
+}
+
+#battle-screen .top-bar {
+  margin-top: max(32px, calc(env(safe-area-inset-top) + 18px)) !important;
+  min-height: 78px !important;
+}
+
+#battle-screen .battle-arena {
+  padding: 20px 0 8px !important;
+  justify-content: space-between !important;
+}
+
+#battle-screen .player-zone .label {
+  font-family: var(--ad-font-ui, 'Noto Sans KR', sans-serif) !important;
+  font-size: 15px !important;
+  letter-spacing: 5px !important;
+  font-weight: 900 !important;
+  color: rgba(220, 228, 255, .76) !important;
+}
+
+#battle-screen .player-zone.me .label {
+  color: #ffdc73 !important;
+}
+
+#battle-screen .battle-card {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  background: rgba(7, 17, 39, .85) !important;
+  box-shadow:
+    0 20px 42px rgba(0,0,0,.44),
+    0 0 34px rgba(255, 198, 78, .18) !important;
+}
+
+/* 상대 카드 */
+#battle-screen .player-zone.enemy .battle-card,
+#battle-screen #enemy-card {
+  width: min(34vw, 150px) !important;
+  aspect-ratio: 2 / 3 !important;
+  border: 2.5px solid rgba(255, 220, 115, .74) !important;
+}
+
+/* 내 카드 */
+#battle-screen .player-zone.me .battle-card,
+#battle-screen #my-card {
+  width: min(42vw, 180px) !important;
+  aspect-ratio: 2 / 3 !important;
+  border: 2.5px solid rgba(255, 220, 115, .88) !important;
+}
+
+/* VS */
+#battle-screen .vs-banner {
+  font-family: var(--ad-font-display, 'Cinzel', serif) !important;
+  font-size: clamp(38px, 10vw, 56px) !important;
+  color: #ff7a1a !important;
+  text-shadow:
+    0 0 20px rgba(255, 106, 0, .82),
+    0 0 48px rgba(255, 106, 0, .30) !important;
+  margin: 8px 0 !important;
+}
+
+/* 가위바위보 공개 */
+#battle-screen .rps-reveal {
+  z-index: 40 !important;
+}
+
+#battle-screen .rps-emoji {
+  width: 76px !important;
+  height: 76px !important;
+  font-size: 50px !important;
+  background:
+    radial-gradient(circle, rgba(255, 220, 115, .38), rgba(255, 106, 0, .12), transparent 70%) !important;
+}
+
+/* ---------------------------------------------------
+   3) 결과 화면
+   --------------------------------------------------- */
+
+#result-screen {
+  padding: 0 24px max(30px, env(safe-area-inset-bottom)) !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(ellipse at 50% 36%, rgba(255, 106, 0, .20) 0%, transparent 34%),
+    radial-gradient(ellipse at 50% 62%, rgba(255, 220, 115, .08) 0%, transparent 42%),
+    linear-gradient(180deg, #050711 0%, #07030a 52%, #030817 100%) !important;
+}
+
+#result-screen .result-banner {
+  font-family: var(--ad-font-display, 'Cinzel', serif) !important;
+  font-size: clamp(72px, 18vw, 112px) !important;
+  line-height: .9 !important;
+  letter-spacing: 2px !important;
+  margin-bottom: 20px !important;
+}
+
+#result-screen .result-banner.win {
+  background: linear-gradient(180deg, #fff3b0 0%, #ffb83d 46%, #ff6a00 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter:
+    drop-shadow(0 0 18px rgba(255, 184, 61, .50))
+    drop-shadow(0 10px 18px rgba(255, 106, 0, .22)) !important;
+}
+
+#result-screen .result-banner.lose {
+  background: linear-gradient(180deg, #d8e1ff 0%, #6f7fa8 54%, #30384f 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 18px rgba(110, 140, 255, .24)) !important;
+}
+
+#result-screen .result-banner.draw {
+  background: linear-gradient(180deg, #dff3ff 0%, #68b7ff 55%, #2b5dc6 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+#result-screen .result-detail {
+  width: min(84vw, 360px) !important;
+  padding: 24px 22px !important;
+  border-radius: 18px !important;
+  border: 1.5px solid rgba(255, 220, 115, .66) !important;
+  background:
+    linear-gradient(180deg, rgba(20, 11, 8, .72), rgba(7, 17, 39, .60)) !important;
+  color: rgba(245, 248, 255, .88) !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+  box-shadow:
+    0 20px 44px rgba(0,0,0,.34),
+    inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
+
+#result-screen .result-detail strong {
+  color: #ffdc73 !important;
+}
+
+/* 결과 버튼 */
+#result-screen .btn-primary,
+#result-screen .btn-secondary {
+  min-height: 58px !important;
+  border-radius: 999px !important;
+  font-family: var(--ad-font-ui, 'Noto Sans KR', sans-serif) !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+}
+
+#result-screen .btn-primary {
+  padding: 0 46px !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.20), transparent 50%),
+    linear-gradient(180deg, #ff8d22 0%, #f45b00 52%, #bd2600 100%) !important;
+  box-shadow:
+    0 18px 34px rgba(255, 106, 0, .28),
+    inset 0 1px 0 rgba(255,255,255,.20) !important;
+}
+
+#result-screen .btn-secondary {
+  padding: 0 30px !important;
+  background:
+    linear-gradient(180deg, rgba(26, 47, 102, .86), rgba(7, 17, 39, .92)) !important;
+  border: 1.5px solid rgba(255, 220, 115, .60) !important;
+  color: #ffe8a7 !important;
+}
+
+/* 좁은 모바일 */
+@media (max-width: 390px) {
+  #battle-screen .player-zone.enemy .battle-card,
+  #battle-screen #enemy-card {
+    width: min(36vw, 138px) !important;
+  }
+
+  #battle-screen .player-zone.me .battle-card,
+  #battle-screen #my-card {
+    width: min(44vw, 164px) !important;
+  }
+
+  #result-screen .result-banner {
+    font-size: clamp(64px, 17vw, 94px) !important;
+  }
+
+  #result-screen .result-detail {
+    font-size: 14px !important;
+  }
+}
