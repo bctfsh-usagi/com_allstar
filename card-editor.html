@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>카드 에디터 · 컴투스 올스타 카드 배틀</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    font-family: 'Noto Sans KR', system-ui, sans-serif;
+    background: #0d0e14;
+    color: #e0e2ec;
+    font-size: 14px;
+    overflow: hidden;
+  }
+  button { font-family: inherit; }
+
+  /* ===== 헤더 ===== */
+  .app-header {
+    background: #16181f;
+    border-bottom: 1px solid #2a2d3a;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 56px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 15px;
+  }
+  .brand-icon { font-size: 22px; }
+  .brand-sub {
+    color: #8a8e9c; font-size: 11px; margin-left: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .header-actions { display: flex; gap: 8px; }
+
+  .btn {
+    background: #2a2d3a;
+    border: 1px solid #3a3d4a;
+    color: #e0e2ec;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: #3a3d4a; border-color: #4a4d5a; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: #ffd76a; color: #1a1610; border-color: #ffd76a; font-weight: 700; }
+  .btn-primary:hover { background: #ffc433; border-color: #ffc433; }
+  .btn-danger { color: #ff8a8a; border-color: #5a3a3a; }
+  .btn-danger:hover { background: #4a2a2a; border-color: #6a4a4a; }
+
+  /* ===== 메인 그리드 ===== */
+  .app-main {
+    display: grid;
+    grid-template-columns: 280px 340px 1fr;
+    height: calc(100% - 56px - 32px);
+    overflow: hidden;
+  }
+  @media (max-width: 1100px) {
+    .app-main { grid-template-columns: 240px 1fr; }
+    .preview { display: none; }
+  }
+  @media (max-width: 700px) {
+    .app-main { grid-template-columns: 1fr; }
+    .card-list { display: none; }
+    .mobile-tip { display: block !important; }
+  }
+
+  /* ===== 카드 목록 ===== */
+  .card-list {
+    background: #131520;
+    border-right: 1px solid #2a2d3a;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .list-header {
+    padding: 14px 14px 8px;
+    border-bottom: 1px solid #2a2d3a;
+  }
+  .search {
+    width: 100%;
+    background: #0d0e14;
+    border: 1px solid #2a2d3a;
+    color: #e0e2ec;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 8px;
+    font-family: inherit;
+  }
+  .search:focus { outline: none; border-color: #ffd76a; }
+
+  .filters {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .filter-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid #2a2d3a;
+    color: #8a8e9c;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    font-weight: 700;
+  }
+  .filter-btn.active { background: rgba(255,215,106,0.15); color: #ffd76a; border-color: #ffd76a; }
+
+  .new-card-btn {
+    width: 100%;
+    background: linear-gradient(180deg, #ffd76a, #ffae00);
+    color: #1a1610;
+    border: none;
+    padding: 9px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  .list-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 8px 16px;
+  }
+  .list-empty {
+    color: #5a5e6c; font-size: 12px;
+    text-align: center; padding: 40px 10px;
+    line-height: 1.7;
+  }
+  .list-item {
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-left: 2px solid transparent;
+  }
+  .list-item:hover { background: rgba(255,255,255,0.04); }
+  .list-item.active { background: rgba(255,215,106,0.08); border-left-color: #ffd76a; }
+
+  .list-item-mini {
+    width: 32px;
+    height: 48px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    background: #1a1d2a;
+    overflow: hidden;
+    position: relative;
+  }
+  .list-item-mini img { width:100%; height:100%; object-fit: cover; }
+  .list-item-mini .mini-icon {
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 18px;
+  }
+
+  .list-item-info { flex: 1; min-width: 0; }
+  .list-item-name {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .list-item-meta {
+    font-size: 10px;
+    color: #8a8e9c;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .list-item .stars-mini { color: #ffd76a; font-size: 10px; }
+
+  /* ===== 미리보기 패널 ===== */
+  .preview {
+    background: #0d0e14;
+    border-right: 1px solid #2a2d3a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 20px;
+    gap: 16px;
+    overflow-y: auto;
+  }
+  .preview-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #8a8e9c;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .preview-card {
+    width: 220px;
+    aspect-ratio: 2/3;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2.5px solid #d4a747;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 30px rgba(255,174,0,0.2);
+    background: #000;
+    position: relative;
+  }
+  .preview-card.s5 { border-color: #ffd76a; box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 40px rgba(255,174,0,0.4); }
+  .preview-card.s4 { border-color: #c084ff; box-shadow: 0 8px 24px rgba(0,0,0,0.6), 0 0 30px rgba(192,132,255,0.3); }
+  .preview-card.s3 { border-color: #6a7a9c; }
+  .preview-card.empty {
+    border-style: dashed;
+    background: rgba(20, 30, 70, 0.3);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,215,106,0.4);
+    font-size: 11px;
+    letter-spacing: 2px;
+    box-shadow: none;
+  }
+
+  .card-art {
+    width:100%; height:100%;
+    position: relative; overflow: hidden;
+  }
+  .card-art img { width:100%; height:100%; object-fit: cover; display: block; }
+
+  .concept-art {
+    width:100%; height:100%; position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .concept-art::before {
+    content: ''; position: absolute; inset: -30%;
+    background: radial-gradient(circle, rgba(255,255,255,0.25) 0%, transparent 50%);
+    z-index: 1;
+  }
+  .concept-art .ip-tag {
+    position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.7); color: #fff;
+    padding: 3px 10px; border-radius: 999px;
+    font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+    z-index: 4; white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .concept-art .symbol-bg {
+    position: absolute; font-size: 200px;
+    color: rgba(255,255,255,0.1);
+    font-family: serif; font-weight: 900;
+    z-index: 1; line-height: 1;
+  }
+  .concept-art .big-icon {
+    font-size: 75px; z-index: 3;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6));
+  }
+  .concept-art .char-name {
+    position: absolute; bottom: 12px;
+    font-family: 'Black Han Sans'; font-size: 14px;
+    color: #fff; letter-spacing: 1px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.9), 0 0 12px rgba(0,0,0,0.7);
+    z-index: 4; text-align: center; padding: 0 6px;
+    left: 0; right: 0;
+  }
+
+  .preview-card .attr-badge {
+    position: absolute; top: 6px; right: 6px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(0,0,0,0.85); border: 1.5px solid #d4a747;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; z-index: 5;
+  }
+  .preview-card .stars-overlay {
+    position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+    background: rgba(0,0,0,0.85); padding: 3px 10px; border-radius: 999px;
+    color: #ffd76a; font-size: 11px; font-weight: 800; letter-spacing: 2px; z-index: 5;
+  }
+
+  .card-meta {
+    text-align: center;
+    font-size: 13px;
+    color: #b0b4c2;
+  }
+  .card-meta .name {
+    font-family: 'Black Han Sans';
+    font-size: 18px;
+    color: #ffd76a;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  .card-meta .ip-line {
+    color: #8a8e9c;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .placeholder-art {
+    background: linear-gradient(135deg, #2a2d3a, #0a0a14);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    width:100%; height:100%;
+  }
+  .placeholder-art .ph-q { font-size: 50px; opacity: 0.3; }
+  .placeholder-art .ph-msg { font-size: 11px; color: #5a5e6c; margin-top: 8px; }
+
+  /* ===== 편집 폼 ===== */
+  .editor {
+    background: #0d0e14;
+    overflow-y: auto;
+    padding: 24px 32px;
+  }
+  .editor-empty {
+    height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 14px;
+    color: #5a5e6c;
+    text-align: center;
+  }
+  .editor-empty .icon { font-size: 64px; opacity: 0.4; }
+  .editor-empty .text { font-size: 14px; line-height: 1.7; }
+
+  .form-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #2a2d3a;
+    gap: 12px;
+  }
+  .form-header .title {
+    font-size: 18px; font-weight: 700;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .form-header .title-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #8a8e9c;
+    margin-top: 4px;
+  }
+  .form-header .form-actions {
+    display: flex; gap: 8px; flex-shrink: 0;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+  }
+  .form-field { display: flex; flex-direction: column; gap: 6px; }
+  .form-field.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #8a8e9c;
+    text-transform: uppercase;
+  }
+
+  input[type="text"], textarea {
+    background: #16181f;
+    border: 1px solid #2a2d3a;
+    color: #e0e2ec;
+    padding: 9px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: #ffd76a;
+  }
+  input.mono { font-family: 'JetBrains Mono', monospace; }
+  input[type="color"] {
+    width: 100%; height: 36px;
+    background: #16181f;
+    border: 1px solid #2a2d3a;
+    border-radius: 6px;
+    cursor: pointer;
+    padding: 2px;
+  }
+
+  .radio-group { display: flex; gap: 6px; }
+  .radio-btn {
+    flex: 1;
+    background: #16181f;
+    border: 1px solid #2a2d3a;
+    color: #8a8e9c;
+    padding: 9px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .radio-btn:hover { border-color: #4a4d5a; color: #e0e2ec; }
+  .radio-btn.selected { background: rgba(255,215,106,0.1); color: #ffd76a; border-color: #ffd76a; }
+
+  .drop-zone {
+    border: 2px dashed #3a3d4a;
+    border-radius: 8px;
+    padding: 28px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    min-height: 100px;
+    background: #16181f;
+  }
+  .drop-zone:hover { border-color: #ffd76a; background: rgba(255,215,106,0.04); }
+  .drop-zone.has-image { padding: 0; min-height: auto; border-style: solid; border-color: #d4a747; }
+  .drop-zone.dragover { border-color: #ffd76a; background: rgba(255,215,106,0.15); }
+  .drop-zone .placeholder { color: #5a5e6c; font-size: 12px; }
+  .drop-zone .placeholder .icon { font-size: 28px; display: block; margin-bottom: 6px; opacity: 0.6; }
+  .drop-zone img {
+    width: 100%; max-height: 280px;
+    object-fit: contain; display: block;
+    border-radius: 6px;
+  }
+  .drop-zone .img-actions {
+    position: absolute; top: 8px; right: 8px;
+    display: flex; gap: 4px;
+  }
+  .drop-zone .img-actions button {
+    background: rgba(0,0,0,0.85); color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 4px 10px; border-radius: 4px;
+    cursor: pointer; font-size: 11px;
+    font-family: inherit;
+  }
+  .drop-zone .img-actions button:hover { background: rgba(255,215,106,0.2); color: #ffd76a; }
+
+  .concept-toggle {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    background: #16181f;
+    border: 1px solid #2a2d3a;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-top: 8px;
+    user-select: none;
+  }
+  .concept-toggle.active { background: rgba(255,215,106,0.08); border-color: #ffd76a; color: #ffd76a; }
+  .concept-toggle .toggle-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    border: 2px solid currentColor;
+    position: relative;
+  }
+  .concept-toggle.active .toggle-dot::after {
+    content: ''; position: absolute; inset: 2px;
+    border-radius: 50%; background: currentColor;
+  }
+  .concept-fields {
+    display: none;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .concept-fields.show { display: grid; }
+
+  .image-path-info {
+    font-size: 11px; color: #8a8e9c; margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .image-path-info code { color: #ffd76a; }
+
+  .save-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(180deg, #ffd76a, #ffae00);
+    color: #1a1610;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 8px;
+  }
+  .save-btn:hover { filter: brightness(1.05); }
+
+  /* ===== 상태바 ===== */
+  .status-bar {
+    background: #16181f;
+    border-top: 1px solid #2a2d3a;
+    padding: 6px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 32px;
+    font-size: 11px;
+    color: #8a8e9c;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .save-indicator { display: flex; align-items: center; gap: 6px; }
+  .save-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #6dd49e;
+    box-shadow: 0 0 8px rgba(109,212,158,0.5);
+  }
+  .save-dot.saving { background: #ffae00; box-shadow: 0 0 8px #ffae00; animation: pulse 0.6s; }
+  @keyframes pulse { 50% { transform: scale(1.4); opacity: 0.5; } }
+
+  /* ===== 모달 ===== */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay[hidden] { display: none; }
+  .modal-box {
+    background: #16181f;
+    border: 1px solid #2a2d3a;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 560px;
+    padding: 24px;
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-close {
+    background: transparent; border: none; color: #8a8e9c;
+    font-size: 20px; cursor: pointer; padding: 4px 8px;
+  }
+  .modal-body { margin-bottom: 16px; font-size: 13px; color: #b0b4c2; line-height: 1.6; }
+  .modal-body p { margin-bottom: 10px; }
+  .modal-body code { background: #0d0e14; padding: 2px 6px; border-radius: 3px; font-family: 'JetBrains Mono', monospace; }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; }
+  .import-area {
+    width: 100%;
+    min-height: 240px;
+    background: #0d0e14;
+    border: 1px solid #2a2d3a;
+    color: #e0e2ec;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    resize: vertical;
+  }
+  .import-area:focus { outline: none; border-color: #ffd76a; }
+
+  /* ===== 토스트 ===== */
+  .toast {
+    position: fixed;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2a2d3a;
+    color: #ffd76a;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid #3a3d4a;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s, transform 0.3s;
+    z-index: 200;
+    max-width: 90%;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-8px); }
+  .toast.error { color: #ff8a8a; border-color: #6a4a4a; background: #2a1a1a; }
+  .toast.success { color: #6dd49e; border-color: #4a6a5a; background: #1a2a20; }
+
+  .mobile-tip {
+    display: none;
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #16181f; border: 1px solid #2a2d3a;
+    padding: 24px; border-radius: 12px;
+    text-align: center; max-width: 320px;
+    z-index: 999;
+  }
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">
+    <span class="brand-icon">🎴</span>
+    <div>
+      <span>카드 에디터</span>
+      <span class="brand-sub">v0.1 · com2us allstar</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn" onclick="loadSample()" title="기본 19장 시드 데이터 로드">📥 샘플 로드</button>
+    <button class="btn" onclick="openImport()" title="기존 cards.js 가져오기">📂 가져오기</button>
+    <button class="btn btn-primary" onclick="exportCards()" title="cards.js 파일로 내보내기">💾 cards.js 내보내기</button>
+  </div>
+</header>
+
+<main class="app-main">
+  <aside class="card-list">
+    <div class="list-header">
+      <input class="search" id="search-input" placeholder="🔍 이름·IP·ID로 검색..." oninput="renderList()">
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">전체</button>
+        <button class="filter-btn" data-filter="5" onclick="setFilter('5')">★5</button>
+        <button class="filter-btn" data-filter="4" onclick="setFilter('4')">★4</button>
+        <button class="filter-btn" data-filter="3" onclick="setFilter('3')">★3</button>
+      </div>
+      <button class="new-card-btn" onclick="newCard()">+ 새 카드 추가</button>
+    </div>
+    <div class="list-items" id="card-list-items"></div>
+  </aside>
+
+  <section class="preview">
+    <div class="preview-label">PREVIEW</div>
+    <div class="preview-card empty" id="preview-card">카드를 선택해</div>
+    <div class="card-meta" id="card-meta" hidden></div>
+  </section>
+
+  <section class="editor">
+    <div class="editor-empty" id="editor-empty">
+      <div class="icon">🎴</div>
+      <div class="text">왼쪽에서 카드를 선택하거나<br>새 카드를 만들어봐</div>
+      <button class="btn btn-primary" onclick="newCard()">+ 새 카드 만들기</button>
+      <button class="btn" onclick="loadSample()" style="margin-top: -4px;">또는 샘플 19장 로드</button>
+    </div>
+
+    <div id="editor-form" hidden>
+      <div class="form-header">
+        <div style="min-width:0; flex:1;">
+          <div class="title" id="form-title">새 카드</div>
+          <div class="title-id" id="form-id-display">ID: new_card_1</div>
+        </div>
+        <div class="form-actions">
+          <button class="btn" onclick="duplicateCard()" title="이 카드를 복제 (베리에이션 만들기)">📋 복제</button>
+          <button class="btn btn-danger" onclick="deleteCard()">🗑️ 삭제</button>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-field">
+          <label>카드 ID (영문)</label>
+          <input type="text" id="f-id" class="mono" placeholder="artamiel" oninput="onIdChange()">
+        </div>
+        <div class="form-field">
+          <label>이름</label>
+          <input type="text" id="f-name" placeholder="아르타미엘" oninput="updateForm()">
+        </div>
+
+        <div class="form-field full">
+          <label>출처 IP</label>
+          <input type="text" id="f-ip" placeholder="서머너즈워" list="ip-list" oninput="updateForm()">
+          <datalist id="ip-list">
+            <option value="서머너즈워">
+            <option value="제노니아">
+            <option value="크리티카">
+            <option value="데스티니차일드">
+            <option value="사커스피리츠">
+            <option value="컴투스프로야구">
+            <option value="타이니팜">
+            <option value="미니게임천국">
+          </datalist>
+        </div>
+
+        <div class="form-field">
+          <label>등급</label>
+          <div class="radio-group">
+            <div class="radio-btn" data-stars="3" onclick="setStars(3)">★3</div>
+            <div class="radio-btn" data-stars="4" onclick="setStars(4)">★4</div>
+            <div class="radio-btn" data-stars="5" onclick="setStars(5)">★5</div>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>속성 (가위바위보)</label>
+          <div class="radio-group">
+            <div class="radio-btn" data-attr="rock" onclick="setAttr('rock')">✊ 바위</div>
+            <div class="radio-btn" data-attr="scissors" onclick="setAttr('scissors')">✌️ 가위</div>
+            <div class="radio-btn" data-attr="paper" onclick="setAttr('paper')">🖐️ 보</div>
+          </div>
+        </div>
+
+        <div class="form-field full">
+          <label>이미지 (600×900 권장)</label>
+          <div class="drop-zone" id="drop-zone"
+               onclick="if(!this.classList.contains('has-image')) document.getElementById('f-image').click()"
+               ondragover="onDragOver(event)"
+               ondragleave="onDragLeave(event)"
+               ondrop="onDrop(event)">
+            <div class="placeholder">
+              <span class="icon">📁</span>
+              <div>이미지를 드래그하거나 클릭해서 업로드</div>
+              <div style="font-size:10px; margin-top:6px; color:#5a5e6c;">JPG · PNG · WEBP / 200KB 이하 권장</div>
+            </div>
+          </div>
+          <input type="file" id="f-image" accept="image/*" style="display:none" onchange="onImageSelect(event)">
+          <div class="image-path-info">
+            저장 경로: <code id="image-path">(없음)</code>
+          </div>
+        </div>
+
+        <div class="form-field full">
+          <div class="concept-toggle" id="concept-toggle" onclick="toggleConcept()">
+            <span class="toggle-dot"></span>
+            <span>컨셉카드 모드 (이미지 없을 때 사용 / 또는 이미지 있어도 무시)</span>
+          </div>
+          <div class="concept-fields" id="concept-fields">
+            <div class="form-field">
+              <label>색상 1 (밝은)</label>
+              <input type="color" id="f-c1" value="#ff6a00" oninput="updateForm()">
+            </div>
+            <div class="form-field">
+              <label>색상 2 (어두운)</label>
+              <input type="color" id="f-c2" value="#5e1a00" oninput="updateForm()">
+            </div>
+            <div class="form-field">
+              <label>큰 아이콘 (이모지 1자)</label>
+              <input type="text" id="f-icon" placeholder="🔥" maxlength="4" oninput="updateForm()">
+            </div>
+            <div class="form-field">
+              <label>배경 심볼 (한 글자)</label>
+              <input type="text" id="f-symbol" placeholder="⚒" maxlength="2" oninput="updateForm()">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-field full">
+          <button class="save-btn" onclick="saveCard()">💾 저장 확인</button>
+          <div style="font-size:11px; color:#5a5e6c; margin-top:6px; text-align:center;">
+            모든 변경사항은 자동 저장돼 · 이 버튼은 검증/확인용
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="status-bar">
+  <span id="stats">0장</span>
+  <div class="save-indicator">
+    <span class="save-dot" id="save-dot"></span>
+    <span id="save-status">대기 중</span>
+  </div>
+</footer>
+
+<div class="modal-overlay" id="import-modal" hidden>
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">📂 cards.js 가져오기</div>
+      <button class="modal-close" onclick="closeImport()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>기존 <code>js/cards.js</code> 파일을 열어서 내용을 통째로 복사 → 아래에 붙여넣어:</p>
+      <textarea class="import-area" id="import-text" placeholder="const CARDS = [
+  { id:'artamiel', name:'아르타미엘', ... },
+  ...
+];"></textarea>
+      <p style="color:#8a8e9c; font-size:11px; margin-top:8px;">
+        ⚠️ 가져오기 하면 현재 작업 중인 카드 데이터가 덮어씌워져. 이미지는 다시 업로드해야 해.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeImport()">취소</button>
+      <button class="btn btn-primary" onclick="doImport()">가져오기 실행</button>
+    </div>
+  </div>
+</div>
+
+<div class="mobile-tip">
+  <div style="font-size:40px; margin-bottom:12px;">💻</div>
+  <div style="font-weight:700; margin-bottom:8px;">PC에서 열어줘</div>
+  <div style="font-size:13px; color:#8a8e9c; line-height:1.6;">
+    카드 에디터는 데스크탑에 최적화돼 있어. 모바일에서도 보긴 보이지만, PC 브라우저에서 사용하는 걸 권장.
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== 상수 ==========
+const STORAGE_KEY = 'card-editor-data-v1';
+const ATTR_EMOJI = { rock:'✊', scissors:'✌️', paper:'🖐️' };
+const ATTR_KR    = { rock:'바위', scissors:'가위', paper:'보' };
+
+// ========== 상태 ==========
+let cards = [];
+let imageData = {}; // { cardId: 'data:image/jpeg;base64,...' }
+let selectedId = null;
+let currentFilter = 'all';
+
+// ========== 헬퍼 ==========
+function $(id) { return document.getElementById(id); }
+
+function toast(msg, type) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ========== 저장/로드 ==========
+function save(silent) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      cards: cards,
+      images: imageData,
+      lastSaved: Date.now()
+    }));
+    if(!silent) showSavedIndicator();
+  } catch(e) {
+    if(e.name === 'QuotaExceededError') {
+      toast('⚠️ 저장 용량 초과! cards.js로 내보내고 일부 카드를 정리해주세요.', 'error');
+    } else {
+      console.error(e);
+      toast('저장 실패', 'error');
+    }
+  }
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return false;
+    const data = JSON.parse(raw);
+    cards = data.cards || [];
+    imageData = data.images || {};
+    return true;
+  } catch(e) { console.error(e); return false; }
+}
+
+function showSavedIndicator() {
+  $('save-status').textContent = '저장됨 · ' + new Date().toLocaleTimeString('ko-KR', { hour12: false });
+  const dot = $('save-dot');
+  dot.classList.add('saving');
+  setTimeout(() => dot.classList.remove('saving'), 400);
+}
+
+// ========== 카드 목록 ==========
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === f);
+  });
+  renderList();
+}
+
+function renderList() {
+  const search = $('search-input').value.toLowerCase().trim();
+  const items = cards.filter(c => {
+    if(currentFilter !== 'all' && String(c.stars) !== currentFilter) return false;
+    if(search) {
+      const haystack = (c.name + ' ' + c.ip + ' ' + c.id).toLowerCase();
+      if(!haystack.includes(search)) return false;
+    }
+    return true;
+  }).sort((a,b) => b.stars - a.stars || a.id.localeCompare(b.id));
+
+  const list = $('card-list-items');
+
+  if(items.length === 0) {
+    if(cards.length === 0) {
+      list.innerHTML = '<div class="list-empty">카드가 없어<br><br>"+ 새 카드"로 시작하거나<br>"📥 샘플 로드" 눌러봐</div>';
+    } else {
+      list.innerHTML = '<div class="list-empty">검색 결과 없음</div>';
+    }
+  } else {
+    list.innerHTML = '';
+    items.forEach(c => {
+      const item = document.createElement('div');
+      item.className = 'list-item' + (c.id === selectedId ? ' active' : '');
+
+      let miniImg = '';
+      if(imageData[c.id]) {
+        miniImg = `<img src="${imageData[c.id]}" alt="">`;
+      } else if(c.theme) {
+        const t = c.theme;
+        miniImg = `<div class="mini-icon" style="background: linear-gradient(135deg, ${t.c1 || '#444'}, ${t.c2 || '#111'});">${t.icon || '?'}</div>`;
+      } else {
+        miniImg = `<div class="mini-icon" style="background: #1a1d2a; color:#5a5e6c;">?</div>`;
+      }
+
+      item.innerHTML = `
+        <div class="list-item-mini">${miniImg}</div>
+        <div class="list-item-info">
+          <div class="list-item-name">${escapeHtml(c.name) || '<span style="color:#5a5e6c;">(이름 없음)</span>'}</div>
+          <div class="list-item-meta">${escapeHtml(c.id)} · <span class="stars-mini">${'★'.repeat(c.stars)}</span></div>
+        </div>
+      `;
+      item.onclick = () => selectCard(c.id);
+      list.appendChild(item);
+    });
+  }
+  updateStats();
+}
+
+function updateStats() {
+  const total = cards.length;
+  const s5 = cards.filter(c => c.stars === 5).length;
+  const s4 = cards.filter(c => c.stars === 4).length;
+  const s3 = cards.filter(c => c.stars === 3).length;
+  $('stats').textContent = `${total}장 · ★5 ${s5} · ★4 ${s4} · ★3 ${s3}`;
+}
+
+// ========== 카드 선택 ==========
+function selectCard(id) {
+  selectedId = id;
+  const card = cards.find(c => c.id === id);
+  if(!card) {
+    $('editor-empty').hidden = false;
+    $('editor-form').hidden = true;
+    renderPreview(null);
+    return;
+  }
+
+  $('editor-empty').hidden = true;
+  $('editor-form').hidden = false;
+
+  $('f-id').value = card.id;
+  $('f-name').value = card.name || '';
+  $('f-ip').value = card.ip || '';
+  setStars(card.stars || 4, true);
+  setAttr(card.attr || 'paper', true);
+
+  const img = imageData[card.id];
+  if(img) {
+    showImage(img);
+  } else {
+    clearImage();
+  }
+
+  if(card.theme) {
+    $('f-c1').value = card.theme.c1 || '#ff6a00';
+    $('f-c2').value = card.theme.c2 || '#5e1a00';
+    $('f-icon').value = card.theme.icon || '';
+    $('f-symbol').value = card.theme.symbol || '';
+    toggleConcept(true);
+  } else {
+    $('f-c1').value = '#ff6a00';
+    $('f-c2').value = '#5e1a00';
+    $('f-icon').value = '';
+    $('f-symbol').value = '';
+    toggleConcept(false);
+  }
+
+  refreshFormHeader();
+  renderPreview(card);
+  renderList();
+}
+
+function refreshFormHeader() {
+  const card = cards.find(c => c.id === selectedId);
+  if(!card) return;
+  $('form-title').textContent = card.name || '(이름 없음)';
+  $('form-id-display').textContent = `ID: ${card.id}`;
+  if(imageData[card.id]) {
+    $('image-path').textContent = `assets/cards/${card.id}.jpg`;
+  } else {
+    $('image-path').textContent = '(없음)';
+  }
+}
+
+// ========== 새 카드 ==========
+function newCard() {
+  let n = 1;
+  while(cards.find(c => c.id === `new_card_${n}`)) n++;
+  const id = `new_card_${n}`;
+  cards.push({ id, name: '새 카드', ip: '', stars: 4, attr: 'paper' });
+  save();
+  selectCard(id);
+  toast('새 카드 생성됨', 'success');
+}
+
+// ========== 라디오 ==========
+function setStars(n, silent) {
+  document.querySelectorAll('[data-stars]').forEach(b => {
+    b.classList.toggle('selected', Number(b.dataset.stars) === n);
+  });
+  if(!silent) updateForm();
+}
+function setAttr(a, silent) {
+  document.querySelectorAll('[data-attr]').forEach(b => {
+    b.classList.toggle('selected', b.dataset.attr === a);
+  });
+  if(!silent) updateForm();
+}
+
+// ========== 컨셉 토글 ==========
+function toggleConcept(forceState) {
+  const t = $('concept-toggle');
+  const f = $('concept-fields');
+  const isOn = forceState !== undefined ? forceState : !t.classList.contains('active');
+  t.classList.toggle('active', isOn);
+  f.classList.toggle('show', isOn);
+  if(forceState === undefined) updateForm();
+}
+
+// ========== ID 변경 ==========
+function onIdChange() {
+  let v = $('f-id').value.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_+/g, '_');
+  $('f-id').value = v;
+  updateForm();
+}
+
+// ========== 폼 업데이트 (실시간) ==========
+function updateForm() {
+  if(!selectedId) return;
+  const card = cards.find(c => c.id === selectedId);
+  if(!card) return;
+
+  const newId = $('f-id').value.trim() || selectedId;
+  const oldId = card.id;
+
+  card.name = $('f-name').value;
+  card.ip = $('f-ip').value;
+
+  const starsBtn = document.querySelector('[data-stars].selected');
+  card.stars = starsBtn ? Number(starsBtn.dataset.stars) : 4;
+  const attrBtn = document.querySelector('[data-attr].selected');
+  card.attr = attrBtn ? attrBtn.dataset.attr : 'paper';
+
+  // 컨셉 카드 데이터
+  if($('concept-toggle').classList.contains('active')) {
+    card.theme = {
+      c1: $('f-c1').value,
+      c2: $('f-c2').value,
+      icon: $('f-icon').value,
+      symbol: $('f-symbol').value || '?'
+    };
+  } else {
+    delete card.theme;
+  }
+
+  // 이미지가 있으면 경로 저장
+  if(imageData[oldId]) {
+    card.image = `assets/cards/${newId}.jpg`;
+  } else {
+    delete card.image;
+  }
+
+  // ID 변경 처리
+  if(newId !== oldId && newId) {
+    // 중복 체크
+    const dupe = cards.find(c => c.id === newId && c !== card);
+    if(dupe) {
+      toast('⚠️ 이미 같은 ID가 있어!', 'error');
+      $('f-id').value = oldId;
+      return;
+    }
+    if(imageData[oldId]) {
+      imageData[newId] = imageData[oldId];
+      delete imageData[oldId];
+    }
+    card.id = newId;
+    selectedId = newId;
+  }
+
+  refreshFormHeader();
+  renderPreview(card);
+  save();
+  renderList();
+}
+
+// ========== 명시 저장 (검증) ==========
+function saveCard() {
+  if(!selectedId) return;
+  const card = cards.find(c => c.id === selectedId);
+  if(!card) return;
+
+  const errors = [];
+  if(!card.id) errors.push('ID');
+  if(!card.name) errors.push('이름');
+  if(!card.ip) errors.push('IP');
+  if(![3,4,5].includes(card.stars)) errors.push('등급');
+  if(!['rock','scissors','paper'].includes(card.attr)) errors.push('속성');
+
+  // 컨셉 모드인데 이미지도 없으면
+  if(!card.theme && !imageData[card.id]) {
+    errors.push('이미지 또는 컨셉카드 둘 중 하나');
+  }
+
+  if(errors.length > 0) {
+    toast('⚠️ 입력 필요: ' + errors.join(', '), 'error');
+    return;
+  }
+
+  save();
+  toast('✅ 저장 확인됨', 'success');
+}
+
+// ========== 삭제 ==========
+function deleteCard() {
+  if(!selectedId) return;
+  const card = cards.find(c => c.id === selectedId);
+  if(!card) return;
+  if(!confirm(`정말 "${card.name || card.id}"을(를) 삭제할까?`)) return;
+
+  cards = cards.filter(c => c.id !== selectedId);
+  delete imageData[selectedId];
+  selectedId = null;
+
+  save();
+  renderList();
+  $('editor-empty').hidden = false;
+  $('editor-form').hidden = true;
+  renderPreview(null);
+  toast('🗑️ 삭제됨');
+}
+
+// ========== 복제 (베리에이션용) ==========
+function duplicateCard() {
+  if(!selectedId) return;
+  const original = cards.find(c => c.id === selectedId);
+  if(!original) return;
+
+  let n = 2;
+  let newId = `${original.id}_v${n}`;
+  while(cards.find(c => c.id === newId)) {
+    n++; newId = `${original.id}_v${n}`;
+  }
+
+  const copy = JSON.parse(JSON.stringify(original));
+  copy.id = newId;
+  copy.name = original.name + ' (복제)';
+
+  if(imageData[original.id]) {
+    imageData[newId] = imageData[original.id];
+    copy.image = `assets/cards/${newId}.jpg`;
+  }
+
+  cards.push(copy);
+  save();
+  selectCard(newId);
+  toast('📋 복제됨! 속성·등급·이름을 바꿔서 베리에이션 만들어봐', 'success');
+}
+
+// ========== 이미지 처리 ==========
+function onDragOver(e) {
+  e.preventDefault();
+  $('drop-zone').classList.add('dragover');
+}
+function onDragLeave(e) {
+  $('drop-zone').classList.remove('dragover');
+}
+function onDrop(e) {
+  e.preventDefault();
+  $('drop-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if(file) handleImageFile(file);
+}
+function onImageSelect(e) {
+  const file = e.target.files[0];
+  if(file) handleImageFile(file);
+  e.target.value = ''; // 같은 파일 재선택 가능하게
+}
+function handleImageFile(file) {
+  if(!selectedId) { toast('먼저 카드를 선택해', 'error'); return; }
+  if(!file.type.startsWith('image/')) { toast('이미지 파일만 가능해', 'error'); return; }
+  if(file.size > 20 * 1024 * 1024) {
+    toast('⚠️ 20MB 초과. 너무 큰 이미지야', 'error');
+    return;
+  }
+
+  const originalKB = Math.round(file.size / 1024);
+  toast(`🖼️ 이미지 처리 중... (${originalKB} KB)`);
+
+  resizeImage(file, 600, 900, 0.85)
+    .then(result => {
+      imageData[selectedId] = result.dataUrl;
+      showImage(result.dataUrl);
+      updateForm();
+      const finalKB = Math.round(result.dataUrl.length * 0.75 / 1024);
+      const ratio = originalKB > finalKB ? `${originalKB}→${finalKB} KB` : `${finalKB} KB`;
+      toast(`✅ 업로드 완료 · ${result.width}×${result.height} · ${ratio}`, 'success');
+    })
+    .catch(err => {
+      console.error(err);
+      toast('❌ 이미지 처리 실패: ' + err.message, 'error');
+    });
+}
+
+// 큰 이미지를 자동으로 600x900 이하로 비례 축소 + JPEG 압축
+function resizeImage(file, maxWidth, maxHeight, quality) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const { width: w, height: h } = img;
+      // 이미 작은 이미지는 확대하지 않음 (scale <= 1)
+      const scale = Math.min(maxWidth / w, maxHeight / h, 1);
+      const targetW = Math.round(w * scale);
+      const targetH = Math.round(h * scale);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = targetW;
+      canvas.height = targetH;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, targetW, targetH);
+
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      resolve({ dataUrl, width: targetW, height: targetH });
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('이미지를 읽을 수 없어'));
+    };
+    img.src = url;
+  });
+}
+
+function showImage(dataUrl) {
+  const dz = $('drop-zone');
+  dz.classList.add('has-image');
+  dz.innerHTML = `
+    <img src="${dataUrl}" alt="">
+    <div class="img-actions">
+      <button onclick="event.stopPropagation(); changeImage()">교체</button>
+      <button onclick="event.stopPropagation(); removeImage()">제거</button>
+    </div>
+  `;
+}
+function clearImage() {
+  const dz = $('drop-zone');
+  dz.classList.remove('has-image');
+  dz.innerHTML = `
+    <div class="placeholder">
+      <span class="icon">📁</span>
+      <div>이미지를 드래그하거나 클릭해서 업로드</div>
+      <div style="font-size:10px; margin-top:6px; color:#5a5e6c;">JPG · PNG · WEBP / 200KB 이하 권장</div>
+    </div>
+  `;
+}
+function changeImage() { $('f-image').click(); }
+function removeImage() {
+  if(!selectedId) return;
+  delete imageData[selectedId];
+  clearImage();
+  updateForm();
+}
+
+// ========== 미리보기 ==========
+function renderPreview(card) {
+  const pc = $('preview-card');
+  const meta = $('card-meta');
+
+  if(!card) {
+    pc.className = 'preview-card empty';
+    pc.innerHTML = '카드를 선택해';
+    meta.hidden = true;
+    return;
+  }
+
+  pc.className = 'preview-card s' + card.stars;
+
+  let content = '';
+  const img = imageData[card.id];
+  const useConceptMode = !!card.theme;
+
+  // 컨셉 모드면 컨셉 카드, 아니면 이미지, 둘 다 없으면 placeholder
+  if(useConceptMode) {
+    const t = card.theme;
+    content = `<div class="card-art" style="background: linear-gradient(135deg, ${t.c1} 0%, ${t.c2} 100%);">
+      <div class="concept-art">
+        <div class="symbol-bg">${escapeHtml(t.symbol || '?')}</div>
+        <div class="ip-tag">${escapeHtml(card.ip || 'IP')}</div>
+        <div class="big-icon">${escapeHtml(t.icon || '?')}</div>
+        <div class="char-name">${escapeHtml(card.name || '(이름)')}</div>
+      </div>
+    </div>`;
+  } else if(img) {
+    content = `<div class="card-art"><img src="${img}" alt="${escapeHtml(card.name)}"></div>`;
+  } else {
+    content = `<div class="placeholder-art">
+      <div class="ph-q">?</div>
+      <div class="ph-msg">이미지 또는 컨셉카드 설정 필요</div>
+    </div>`;
+  }
+
+  pc.innerHTML = content +
+    `<div class="attr-badge">${ATTR_EMOJI[card.attr] || '?'}</div>` +
+    `<div class="stars-overlay">${'★'.repeat(card.stars)}</div>`;
+
+  meta.hidden = false;
+  meta.innerHTML = `
+    <div class="name">${escapeHtml(card.name || '(이름)')}</div>
+    <div class="ip-line">${escapeHtml(card.ip || 'IP 미정')} · ${ATTR_KR[card.attr]} · ★${card.stars}</div>
+  `;
+}
+
+// ========== 샘플 로드 ==========
+function loadSample() {
+  if(cards.length > 0) {
+    if(!confirm(`현재 ${cards.length}장의 카드가 있어. 샘플 19장으로 덮어쓸까?`)) return;
+  }
+  cards = JSON.parse(JSON.stringify(SAMPLE_CARDS));
+  imageData = {};
+  selectedId = null;
+
+  save();
+  renderList();
+  $('editor-empty').hidden = false;
+  $('editor-form').hidden = true;
+  renderPreview(null);
+  toast(`📥 샘플 ${cards.length}장 로드됨 (이미지는 별도 업로드 필요)`, 'success');
+}
+
+// ========== 가져오기 ==========
+function openImport() {
+  $('import-modal').hidden = false;
+  $('import-text').value = '';
+  setTimeout(() => $('import-text').focus(), 100);
+}
+function closeImport() { $('import-modal').hidden = true; }
+function doImport() {
+  const text = $('import-text').value.trim();
+  if(!text) { toast('내용을 입력해', 'error'); return; }
+
+  try {
+    // Function constructor로 안전하게 실행
+    const f = new Function(`
+      let CARDS, ATTR_EMOJI, ATTR_KR, RARITY_PROB, COOLDOWN_MS;
+      ${text}
+      return typeof CARDS !== "undefined" ? CARDS : null;
+    `);
+    const imported = f();
+
+    if(!imported || !Array.isArray(imported)) {
+      throw new Error('CARDS 배열을 찾을 수 없어. const CARDS = [...] 부분이 있는지 확인해.');
+    }
+
+    imported.forEach((c, i) => {
+      if(!c.id) throw new Error(`카드 #${i+1}: id 누락`);
+      if(!c.stars || ![3,4,5].includes(c.stars)) throw new Error(`카드 "${c.id}": stars는 3·4·5 중 하나`);
+      if(!c.attr || !['rock','scissors','paper'].includes(c.attr)) throw new Error(`카드 "${c.id}": attr 잘못됨`);
+    });
+
+    cards = imported;
+    imageData = {};
+    selectedId = null;
+
+    save();
+    renderList();
+    closeImport();
+    $('editor-empty').hidden = false;
+    $('editor-form').hidden = true;
+    renderPreview(null);
+    toast(`📂 ${cards.length}장 가져왔어! (이미지는 다시 업로드 필요)`, 'success');
+  } catch(e) {
+    toast('❌ ' + e.message, 'error');
+    console.error(e);
+  }
+}
+
+// ========== 내보내기 ==========
+function exportCards() {
+  if(cards.length === 0) { toast('카드가 없어!', 'error'); return; }
+
+  const sorted = [...cards].sort((a,b) => b.stars - a.stars || a.id.localeCompare(b.id));
+
+  let js = `// ===================================================================\n` +
+           `// 카드 마스터 데이터\n` +
+           `// 카드 에디터로 생성 · ${new Date().toLocaleString('ko-KR')}\n` +
+           `// 카드 수: ${cards.length}장 (★5 ${sorted.filter(c=>c.stars===5).length} · ★4 ${sorted.filter(c=>c.stars===4).length} · ★3 ${sorted.filter(c=>c.stars===3).length})\n` +
+           `// ===================================================================\n\n` +
+           `const CARDS = [\n`;
+
+  [5, 4, 3].forEach(stars => {
+    const group = sorted.filter(c => c.stars === stars);
+    if(group.length === 0) return;
+    js += `  // ===== ${stars}성 =====\n`;
+    group.forEach(c => {
+      const fields = [
+        `id:'${esc(c.id)}'`,
+        `name:'${esc(c.name)}'`,
+        `ip:'${esc(c.ip)}'`,
+        `stars:${c.stars}`,
+        `attr:'${c.attr}'`,
+      ];
+      if(c.image) fields.push(`image:'${esc(c.image)}'`);
+      if(c.theme) {
+        fields.push(`theme:{ c1:'${esc(c.theme.c1)}', c2:'${esc(c.theme.c2)}', icon:'${esc(c.theme.icon)}', symbol:'${esc(c.theme.symbol)}' }`);
+      }
+      js += `  { ${fields.join(', ')} },\n`;
+    });
+    js += '\n';
+  });
+
+  js += `];\n\n` +
+        `// 속성 메타데이터\n` +
+        `const ATTR_EMOJI = { rock:'✊', scissors:'✌️', paper:'🖐️' };\n` +
+        `const ATTR_KR    = { rock:'바위', scissors:'가위', paper:'보' };\n\n` +
+        `// 등급별 출현 확률 (%) · 합 100\n` +
+        `const RARITY_PROB = { 5: 5, 4: 25, 3: 70 };\n\n` +
+        `// 가챠 쿨다운 (밀리초)\n` +
+        `const COOLDOWN_MS = 30 * 1000;\n`;
+
+  downloadFile('cards.js', js);
+
+  const imgCount = Object.keys(imageData).length;
+  setTimeout(() => {
+    if(imgCount > 0) {
+      toast(`💾 cards.js 다운로드 완료! 업로드한 이미지 ${imgCount}장은 따로 assets/cards/에 저장해야 해`, 'success');
+    } else {
+      toast('💾 cards.js 다운로드 완료', 'success');
+    }
+  }, 300);
+}
+
+function esc(s) { return String(s || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
+function escapeHtml(s) {
+  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function downloadFile(filename, content) {
+  const blob = new Blob([content], { type: 'text/javascript;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ========== 시드 데이터 (기본 19장) ==========
+const SAMPLE_CARDS = [
+  { id:'artamiel', name:'아르타미엘', ip:'서머너즈워', stars:5, attr:'paper', image:'assets/cards/artamiel.jpg' },
+  { id:'regret', name:'리그릿', ip:'제노니아', stars:5, attr:'scissors', image:'assets/cards/regret.jpg' },
+  { id:'warrior', name:'전사', ip:'크리티카', stars:5, attr:'rock', image:'assets/cards/warrior.jpg' },
+  { id:'verde', name:'베르데하일', ip:'서머너즈워', stars:5, attr:'scissors',
+    theme:{ c1:'#6a1aae', c2:'#1a0a3e', icon:'🦇', symbol:'☾' } },
+  { id:'rakan', name:'라칸', ip:'서머너즈워', stars:5, attr:'rock',
+    theme:{ c1:'#ff6a00', c2:'#5e1a00', icon:'🔥', symbol:'⚒' } },
+  { id:'mona', name:'모나', ip:'데스티니차일드', stars:5, attr:'paper',
+    theme:{ c1:'#ff7ad4', c2:'#7a2a8e', icon:'👑', symbol:'♛' } },
+  { id:'davi', name:'다비', ip:'데스티니차일드', stars:5, attr:'scissors',
+    theme:{ c1:'#5a4aae', c2:'#1a0a3e', icon:'🌙', symbol:'✦' } },
+  { id:'striker', name:'스트라이커', ip:'사커스피리츠', stars:5, attr:'rock',
+    theme:{ c1:'#2aae5e', c2:'#0a3e1e', icon:'⚽', symbol:'⚡' } },
+  { id:'jiptokki', name:'집토끼', ip:'미니게임천국', stars:4, attr:'paper', image:'assets/cards/jiptokki.jpg' },
+  { id:'mage', name:'마법사', ip:'제노니아', stars:4, attr:'paper',
+    theme:{ c1:'#2a8eae', c2:'#0a2e4e', icon:'🔮', symbol:'✧' } },
+  { id:'thief', name:'도적', ip:'제노니아', stars:4, attr:'rock',
+    theme:{ c1:'#4e4e4e', c2:'#0a0a0a', icon:'🗡️', symbol:'◆' } },
+  { id:'archer', name:'궁수', ip:'크리티카', stars:4, attr:'scissors',
+    theme:{ c1:'#5e8e2a', c2:'#1e3e0a', icon:'🏹', symbol:'➤' } },
+  { id:'dancer', name:'댄서', ip:'사커스피리츠', stars:4, attr:'scissors',
+    theme:{ c1:'#ff6aae', c2:'#5e1a3e', icon:'💃', symbol:'♪' } },
+  { id:'pitcher', name:'에이스 투수', ip:'컴투스프로야구', stars:4, attr:'rock',
+    theme:{ c1:'#cc2a2a', c2:'#3e0a0a', icon:'⚾', symbol:'⚡' } },
+  { id:'slime', name:'슬라임', ip:'서머너즈워', stars:3, attr:'paper',
+    theme:{ c1:'#7abadf', c2:'#2a5a7e', icon:'💧', symbol:'◯' } },
+  { id:'goblin', name:'고블린', ip:'크리티카', stars:3, attr:'scissors',
+    theme:{ c1:'#6e8e3a', c2:'#2e3e1a', icon:'👺', symbol:'✗' } },
+  { id:'farmer', name:'농부', ip:'타이니팜', stars:3, attr:'rock',
+    theme:{ c1:'#dfae4a', c2:'#5e3e0a', icon:'🌾', symbol:'☀' } },
+  { id:'puppy', name:'강아지', ip:'미니게임천국', stars:3, attr:'paper',
+    theme:{ c1:'#ff9ace', c2:'#7e3a5e', icon:'🐶', symbol:'♥' } },
+  { id:'ball', name:'야구공', ip:'컴투스프로야구', stars:3, attr:'scissors',
+    theme:{ c1:'#bababa', c2:'#3e3e3e', icon:'⚾', symbol:'✦' } },
+];
+
+// ========== 키보드 단축키 ==========
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') closeImport();
+});
+
+// ========== 초기화 ==========
+function init() {
+  load();
+  renderList();
+  $('save-status').textContent = cards.length > 0
+    ? `${cards.length}장 로드됨`
+    : '대기 중';
+}
+init();
+</script>
+</body>
+</html>
