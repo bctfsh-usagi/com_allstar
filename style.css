@@ -4267,3 +4267,15 @@ body {
     top: -17px !important;
   }
 }
+/* ===================================================================
+   AD COLLECTION HEADER SAFE AREA FIX
+   타이틀 상단 잘림 방지
+   =================================================================== */
+
+#collection-screen .collection-header {
+  padding-top: max(76px, calc(env(safe-area-inset-top) + 62px)) !important;
+}
+
+#collection-screen .back-btn {
+  top: max(96px, calc(env(safe-area-inset-top) + 78px)) !important;
+}
