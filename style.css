@@ -5289,3 +5289,428 @@ body {
 .logout-btn:active {
   transform: scale(0.95);
 }
+/* ===================================================================
+   AD AUTH UI RESCUE PATCH v1.0
+   로그인 / 회원가입 / 닉네임 / 유저바 긴급 복구
+   - 기능 JS 변경 없음
+   - 기존 navy + gold 그래픽 톤 유지
+   - auth-body 클래스가 없어도 최대한 적용
+   =================================================================== */
+
+/* 로그인/회원가입/닉네임 화면 공통 */
+#auth-screen,
+#nickname-screen {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: max(28px, env(safe-area-inset-top)) 24px max(28px, env(safe-area-inset-bottom)) !important;
+  overflow: hidden !important;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.10) 0%, transparent 20%),
+    radial-gradient(ellipse at 50% 18%, rgba(125, 170, 245, .36) 0%, transparent 38%),
+    radial-gradient(ellipse at 50% 56%, rgba(255, 199, 94, .10) 0%, transparent 42%),
+    linear-gradient(180deg, #0c1d42 0%, #071127 48%, #030817 100%) !important;
+
+  color: #fff !important;
+  box-sizing: border-box !important;
+}
+
+@supports (height: 100dvh) {
+  #auth-screen,
+  #nickname-screen {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+  }
+}
+
+/* 배경 파티클 */
+#auth-screen::before,
+#nickname-screen::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+  background:
+    radial-gradient(2px 2px at 18% 18%, rgba(255, 220, 115, .75), transparent),
+    radial-gradient(2px 2px at 80% 24%, rgba(120, 175, 255, .55), transparent),
+    radial-gradient(1px 1px at 64% 42%, rgba(255,255,255,.55), transparent),
+    radial-gradient(2px 2px at 25% 74%, rgba(255, 220, 115, .45), transparent);
+  background-size: 280px 280px !important;
+  opacity: .65 !important;
+}
+
+/* 내부 컨테이너가 있든 없든 중앙 카드처럼 */
+#auth-screen > *,
+#nickname-screen > * {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* auth-body가 있으면 카드 패널로 */
+.auth-body,
+#auth-screen .auth-body,
+#nickname-screen .auth-body {
+  width: min(100%, 390px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 14px !important;
+
+  padding: 30px 24px 26px !important;
+  border-radius: 28px !important;
+  border: 1.5px solid rgba(255, 220, 115, .46) !important;
+
+  background:
+    linear-gradient(180deg, rgba(18, 35, 78, .78), rgba(5, 12, 31, .84)) !important;
+
+  box-shadow:
+    0 24px 58px rgba(0,0,0,.40),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    0 0 36px rgba(255, 198, 78, .10) !important;
+
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+/* auth-body가 없는 현재 화면도 보기 좋게 강제 정렬 */
+#auth-screen:not(:has(.auth-body)),
+#nickname-screen:not(:has(.auth-body)) {
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+}
+
+#auth-screen:not(:has(.auth-body)) > *,
+#nickname-screen:not(:has(.auth-body)) > * {
+  width: min(100%, 390px) !important;
+  max-width: 390px !important;
+}
+
+/* 로고 */
+.auth-logo {
+  align-items: center !important;
+  text-align: center !important;
+  margin-bottom: 8px !important;
+}
+
+.auth-logo-star,
+#auth-screen > .auth-logo-star,
+#nickname-screen > .auth-logo-star {
+  font-size: 52px !important;
+  line-height: 1 !important;
+  color: #ffdc73 !important;
+  text-shadow:
+    0 0 24px rgba(255, 220, 115, .76),
+    0 0 48px rgba(255, 143, 36, .36) !important;
+}
+
+.auth-logo-text {
+  font-family: var(--ad-font-display, 'Cinzel', serif) !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  letter-spacing: 4px !important;
+  color: rgba(230, 238, 255, .90) !important;
+  text-align: center !important;
+}
+
+/* 타이틀 */
+.auth-title,
+#auth-screen h1,
+#auth-screen h2,
+#nickname-screen h1,
+#nickname-screen h2 {
+  width: 100% !important;
+  margin: 0 0 4px !important;
+  text-align: center !important;
+
+  font-family: var(--ad-font-display, 'Cinzel', 'Noto Sans KR', serif) !important;
+  font-size: clamp(28px, 7.8vw, 42px) !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  letter-spacing: 1px !important;
+
+  background: linear-gradient(180deg, #fff8da 0%, #ffdc73 45%, #f0a32a 78%, #8a4200 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+
+  filter:
+    drop-shadow(0 2px 0 rgba(101, 54, 5, .20))
+    drop-shadow(0 0 18px rgba(255, 198, 78, .25)) !important;
+}
+
+/* 설명 문구 */
+.auth-sub,
+#auth-screen p,
+#nickname-screen p {
+  width: 100% !important;
+  margin: 0 !important;
+  text-align: center !important;
+  color: rgba(210, 222, 255, .76) !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  letter-spacing: .2px !important;
+}
+
+/* 폼 */
+.auth-form,
+#auth-screen form,
+#nickname-screen form {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  margin: 8px 0 0 !important;
+}
+
+/* 입력창 */
+#auth-screen input,
+#nickname-screen input,
+.auth-form input {
+  width: 100% !important;
+  height: 52px !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+
+  border-radius: 16px !important;
+  border: 1.5px solid rgba(255, 220, 115, .34) !important;
+
+  background:
+    linear-gradient(180deg, rgba(13, 28, 65, .82), rgba(5, 12, 31, .88)) !important;
+
+  color: #fff !important;
+  font-family: var(--ad-font-ui, 'Noto Sans KR', system-ui, sans-serif) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+
+  outline: none !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 10px 22px rgba(0,0,0,.20) !important;
+
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+#auth-screen input::placeholder,
+#nickname-screen input::placeholder {
+  color: rgba(210, 222, 255, .46) !important;
+}
+
+#auth-screen input:focus,
+#nickname-screen input:focus {
+  border-color: rgba(255, 220, 115, .88) !important;
+  box-shadow:
+    0 0 0 3px rgba(255, 220, 115, .14),
+    0 0 24px rgba(255, 198, 78, .18),
+    inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+
+/* 기본 버튼: 로그인/가입/시작 */
+#auth-screen button,
+#nickname-screen button,
+.auth-submit {
+  width: 100% !important;
+  min-height: 56px !important;
+  padding: 0 22px !important;
+  box-sizing: border-box !important;
+
+  border: 0 !important;
+  border-radius: 999px !important;
+
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.22), transparent 50%),
+    linear-gradient(180deg, #ff8d22 0%, #f45b00 52%, #bd2600 100%) !important;
+
+  color: #fff !important;
+  font-family: var(--ad-font-ui, 'Noto Sans KR', system-ui, sans-serif) !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  letter-spacing: 1px !important;
+
+  cursor: pointer !important;
+  box-shadow:
+    0 18px 34px rgba(255, 106, 0, .26),
+    0 6px 0 rgba(110, 35, 0, .50),
+    inset 0 1px 0 rgba(255,255,255,.20) !important;
+}
+
+/* 구글 버튼 */
+.btn-google,
+#auth-screen button.google,
+#auth-screen .google-login,
+#auth-screen [data-provider="google"] {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(226, 233, 247, .96)) !important;
+  color: #172033 !important;
+  border: 1.5px solid rgba(255,255,255,.72) !important;
+  box-shadow:
+    0 14px 28px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.8) !important;
+}
+
+/* 구분선 */
+.auth-divider {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 2px 0 !important;
+  color: rgba(210, 222, 255, .54) !important;
+  font-size: 12px !important;
+  letter-spacing: 2px !important;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '' !important;
+  flex: 1 !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 220, 115, .34), transparent) !important;
+}
+
+/* 로그인/회원가입 전환 */
+.auth-toggle,
+#auth-screen a,
+#nickname-screen a {
+  color: rgba(210, 222, 255, .78) !important;
+  font-size: 14px !important;
+  text-align: center !important;
+}
+
+.auth-toggle a,
+#auth-screen a,
+#nickname-screen a {
+  color: #ffdc73 !important;
+  font-weight: 900 !important;
+  text-decoration: none !important;
+}
+
+/* 닉네임 힌트 */
+.auth-hint,
+#nickname-screen small,
+#nickname-screen .hint {
+  color: rgba(210, 222, 255, .62) !important;
+  font-size: 12px !important;
+  text-align: center !important;
+  line-height: 1.4 !important;
+}
+
+/* 허브 상단 계정 정보: 현재처럼 화면 위에 깨지지 않게 */
+.user-bar {
+  position: absolute !important;
+  top: max(8px, calc(env(safe-area-inset-top) + 4px)) !important;
+  left: 18px !important;
+  right: 18px !important;
+  z-index: 50 !important;
+
+  height: 34px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  pointer-events: auto !important;
+}
+
+.user-name {
+  max-width: calc(100% - 48px) !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+
+  padding: 7px 12px !important;
+  border-radius: 999px !important;
+
+  background: rgba(7, 17, 39, .54) !important;
+  border: 1px solid rgba(255, 220, 115, .32) !important;
+
+  color: #ffdc73 !important;
+  font-family: var(--ad-font-ui, 'Noto Sans KR', system-ui, sans-serif) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+.logout-btn {
+  width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 !important;
+
+  border-radius: 50% !important;
+  border: 1.5px solid rgba(255, 220, 115, .58) !important;
+
+  background:
+    linear-gradient(180deg, rgba(16, 33, 74, .78), rgba(5, 12, 31, .84)) !important;
+
+  color: #ffdc73 !important;
+  font-size: 15px !important;
+  box-shadow:
+    0 8px 18px rgba(0,0,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+
+/* 유저바가 허브 top-bar를 밀지 않게 허브 보정 */
+#hub-screen .user-bar + .top-bar {
+  margin-top: max(52px, calc(env(safe-area-inset-top) + 44px)) !important;
+}
+
+/* PC/가로폭 넓을 때 */
+@media (min-width: 700px) {
+  #auth-screen,
+  #nickname-screen {
+    padding-left: 32px !important;
+    padding-right: 32px !important;
+  }
+
+  .auth-body,
+  #auth-screen:not(:has(.auth-body)) > *,
+  #nickname-screen:not(:has(.auth-body)) > * {
+    max-width: 420px !important;
+  }
+}
+
+/* 작은 모바일 */
+@media (max-width: 390px) {
+  #auth-screen,
+  #nickname-screen {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  .auth-body {
+    padding: 26px 20px 24px !important;
+    border-radius: 24px !important;
+  }
+
+  .auth-title,
+  #auth-screen h1,
+  #auth-screen h2,
+  #nickname-screen h1,
+  #nickname-screen h2 {
+    font-size: clamp(26px, 7.2vw, 36px) !important;
+  }
+
+  #auth-screen input,
+  #nickname-screen input {
+    height: 50px !important;
+  }
+
+  #auth-screen button,
+  #nickname-screen button {
+    min-height: 54px !important;
+    font-size: 17px !important;
+  }
+}
