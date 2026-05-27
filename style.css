@@ -5056,959 +5056,676 @@ body {
     font-size: 14px !important;
   }
 }
-
 /* ===================================================================
-   AD EMERGENCY: AUTH UI DISABLED
-   로그인/회원가입 임시 비활성화. 기존 게임 화면 보호용.
-   =================================================================== */
-#auth-screen, #nickname-screen, .auth-screen, .nickname-screen, .auth-body, .auth-panel, .user-bar { display: none !important; }
-#title-screen, #hub-screen, #gacha-screen, #collection-screen, #select-screen, #battle-screen, #result-screen { visibility: visible; }
-
-
-/* ===================================================================
-   AD EMERGENCY COLLECTION + GACHA RESULT FIX v1.0
-   - 로그인 제거 후 깨진 컬렉션 ID/레이아웃 대응
-   - 가챠 결과 카드/텍스트/버튼이 옆으로 붙는 문제 해결
+   AUTH SCREEN + NICKNAME SCREEN
+   디자이너 톤 유지 (navy + gold + cyan)
    =================================================================== */
 
-/* 가챠 화면: 결과는 무조건 세로 중앙 정렬 */
-#gacha-screen .gacha-body,
-#gacha-screen .gacha-stage {
-  width: 100% !important;
-  max-width: 480px !important;
-  margin: 0 auto !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  text-align: center !important;
-}
-
-#gacha-screen #gacha-stage1,
-#gacha-screen #gacha-stage2 {
-  width: 100% !important;
-  min-width: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 18px !important;
-}
-
-#gacha-screen #gacha-stage2[style*="display: flex"] {
-  display: flex !important;
-}
-
-#gacha-screen .card-reveal {
-  width: min(56vw, 246px) !important;
-  flex: 0 0 auto !important;
-  margin: 0 auto !important;
-}
-
-#gacha-screen .reveal-info {
-  width: min(86vw, 360px) !important;
-  margin: 2px auto 0 !important;
-  text-align: center !important;
-  font-family: var(--ad-font-display, 'Cinzel', 'Noto Sans KR', serif) !important;
-  font-size: clamp(22px, 6vw, 30px) !important;
-  line-height: 1.25 !important;
-  color: #ffdc73 !important;
-  text-shadow: 0 0 18px rgba(255, 198, 78, .28) !important;
-}
-
-#gacha-screen #gacha-stage2 .btn-primary {
-  width: min(54vw, 220px) !important;
-  min-height: 58px !important;
-  margin: 6px auto 0 !important;
-  border-radius: 999px !important;
-}
-
-/* 컬렉션 화면: JS가 사용하는 ID 기준으로 안정화 */
-#collection-screen {
-  padding: 0 18px max(28px, env(safe-area-inset-bottom)) !important;
-  overflow: hidden !important;
+#auth-screen, #nickname-screen {
   background:
-    linear-gradient(180deg, rgba(255,255,255,.08) 0%, transparent 18%),
-    radial-gradient(ellipse at 50% 8%, rgba(94,145,225,.32) 0%, transparent 36%),
-    radial-gradient(ellipse at 50% 55%, rgba(255,199,94,.08) 0%, transparent 42%),
-    linear-gradient(180deg, #0c1d42 0%, #071127 48%, #030817 100%) !important;
+    linear-gradient(180deg, rgba(255,255,255,.10), transparent 22%),
+    linear-gradient(180deg, rgba(7,16,39,.10), rgba(2,7,20,.78)),
+    radial-gradient(ellipse at 50% 30%, #4a6daa 0%, #1a2e60 45%, #061027 85%, #030817 100%);
+  padding-top: max(20px, env(safe-area-inset-top));
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
-#collection-screen .collection-header {
+.auth-body {
+  width: 100%;
+  max-width: 380px;
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.auth-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.auth-logo-star {
+  font-size: 56px;
+  color: #ffd76a;
+  text-shadow:
+    0 0 24px rgba(255, 215, 106, 0.8),
+    0 0 48px rgba(255, 175, 60, 0.5);
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.4));
+  animation: pulse 2.5s ease-in-out infinite;
+}
+.auth-logo-text {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  letter-spacing: 6px;
+  color: #8ba8d6;
+  font-weight: 700;
+}
+
+.auth-title {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  background: linear-gradient(180deg, #fff5d0 0%, #ffd36a 50%, #f5a623 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 8px rgba(255, 175, 60, 0.4));
+  margin-top: 4px;
+}
+
+.auth-sub {
+  font-size: 12px;
+  color: #8ba8d6;
+  letter-spacing: 1px;
+  text-align: center;
+  margin-top: -8px;
+  margin-bottom: 8px;
+}
+
+.auth-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255, 215, 106, 0.3);
+  background: rgba(11, 23, 53, 0.6);
+  color: #fff;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.auth-form input::placeholder {
+  color: rgba(155, 178, 220, 0.6);
+}
+.auth-form input:focus {
+  border-color: #54f4ff;
+  box-shadow: 0 0 0 3px rgba(84, 244, 255, 0.15);
+}
+
+.auth-hint {
+  font-size: 11px;
+  color: #6a8aba;
+  margin-top: -4px;
+  padding-left: 4px;
+  letter-spacing: 0.5px;
+}
+
+.auth-submit {
+  margin-top: 8px;
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+}
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-divider {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+  color: rgba(155, 178, 220, 0.6);
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+.auth-divider::before, .auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 215, 106, 0.3), transparent);
+}
+
+.btn-google {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.95);
+  color: #1a1a1a;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.btn-google:active {
+  transform: translateY(1px);
+}
+.btn-google .g-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, #4285f4, #34a853, #fbbc05, #ea4335, #4285f4);
+  color: white;
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-toggle {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #8ba8d6;
+}
+.auth-toggle a {
+  color: #ffd76a;
+  font-weight: 700;
+  margin-left: 8px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ===================================================================
+   허브 상단 유저 바 (닉네임 + 로그아웃)
+   =================================================================== */
+.user-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  margin-top: max(8px, calc(env(safe-area-inset-top) + 4px));
+  margin-bottom: 4px;
+  height: 32px;
+  position: relative;
+  z-index: 5;
+}
+.user-name {
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffd76a;
+  letter-spacing: 1px;
+  text-shadow: 0 0 12px rgba(255, 215, 106, 0.4);
+}
+.user-name::before {
+  content: '👤 ';
+  margin-right: 4px;
+}
+.logout-btn {
+  background: rgba(11, 23, 53, 0.6);
+  border: 1px solid rgba(255, 215, 106, 0.3);
+  color: #ffd76a;
+  font-size: 14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.logout-btn:active {
+  transform: scale(0.95);
+}
+/* ===================================================================
+   AD AUTH UI RESCUE PATCH v1.0
+   로그인 / 회원가입 / 닉네임 / 유저바 긴급 복구
+   - 기능 JS 변경 없음
+   - 기존 navy + gold 그래픽 톤 유지
+   - auth-body 클래스가 없어도 최대한 적용
+   =================================================================== */
+
+/* 로그인/회원가입/닉네임 화면 공통 */
+#auth-screen,
+#nickname-screen {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  min-height: 100vh !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: max(28px, env(safe-area-inset-top)) 24px max(28px, env(safe-area-inset-bottom)) !important;
+  overflow: hidden !important;
+
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.10) 0%, transparent 20%),
+    radial-gradient(ellipse at 50% 18%, rgba(125, 170, 245, .36) 0%, transparent 38%),
+    radial-gradient(ellipse at 50% 56%, rgba(255, 199, 94, .10) 0%, transparent 42%),
+    linear-gradient(180deg, #0c1d42 0%, #071127 48%, #030817 100%) !important;
+
+  color: #fff !important;
+  box-sizing: border-box !important;
+}
+
+@supports (height: 100dvh) {
+  #auth-screen,
+  #nickname-screen {
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+  }
+}
+
+/* 배경 파티클 */
+#auth-screen::before,
+#nickname-screen::before {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+  background:
+    radial-gradient(2px 2px at 18% 18%, rgba(255, 220, 115, .75), transparent),
+    radial-gradient(2px 2px at 80% 24%, rgba(120, 175, 255, .55), transparent),
+    radial-gradient(1px 1px at 64% 42%, rgba(255,255,255,.55), transparent),
+    radial-gradient(2px 2px at 25% 74%, rgba(255, 220, 115, .45), transparent);
+  background-size: 280px 280px !important;
+  opacity: .65 !important;
+}
+
+/* 내부 컨테이너가 있든 없든 중앙 카드처럼 */
+#auth-screen > *,
+#nickname-screen > * {
   position: relative !important;
-  z-index: 5 !important;
-  padding-top: max(72px, calc(env(safe-area-inset-top) + 54px)) !important;
-  padding-bottom: 12px !important;
+  z-index: 1 !important;
+}
+
+/* auth-body가 있으면 카드 패널로 */
+.auth-body,
+#auth-screen .auth-body,
+#nickname-screen .auth-body {
+  width: min(100%, 390px) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 14px !important;
+
+  padding: 30px 24px 26px !important;
+  border-radius: 28px !important;
+  border: 1.5px solid rgba(255, 220, 115, .46) !important;
+
+  background:
+    linear-gradient(180deg, rgba(18, 35, 78, .78), rgba(5, 12, 31, .84)) !important;
+
+  box-shadow:
+    0 24px 58px rgba(0,0,0,.40),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    0 0 36px rgba(255, 198, 78, .10) !important;
+
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+/* auth-body가 없는 현재 화면도 보기 좋게 강제 정렬 */
+#auth-screen:not(:has(.auth-body)),
+#nickname-screen:not(:has(.auth-body)) {
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+}
+
+#auth-screen:not(:has(.auth-body)) > *,
+#nickname-screen:not(:has(.auth-body)) > * {
+  width: min(100%, 390px) !important;
+  max-width: 390px !important;
+}
+
+/* 로고 */
+.auth-logo {
+  align-items: center !important;
+  text-align: center !important;
+  margin-bottom: 8px !important;
+}
+
+.auth-logo-star,
+#auth-screen > .auth-logo-star,
+#nickname-screen > .auth-logo-star {
+  font-size: 52px !important;
+  line-height: 1 !important;
+  color: #ffdc73 !important;
+  text-shadow:
+    0 0 24px rgba(255, 220, 115, .76),
+    0 0 48px rgba(255, 143, 36, .36) !important;
+}
+
+.auth-logo-text {
+  font-family: var(--ad-font-display, 'Cinzel', serif) !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  letter-spacing: 4px !important;
+  color: rgba(230, 238, 255, .90) !important;
   text-align: center !important;
 }
 
-#collection-screen .collection-header .title {
-  font-family: var(--ad-font-display, 'Cinzel', serif) !important;
-  font-size: clamp(28px, 7.6vw, 40px) !important;
+/* 타이틀 */
+.auth-title,
+#auth-screen h1,
+#auth-screen h2,
+#nickname-screen h1,
+#nickname-screen h2 {
+  width: 100% !important;
+  margin: 0 0 4px !important;
+  text-align: center !important;
+
+  font-family: var(--ad-font-display, 'Cinzel', 'Noto Sans KR', serif) !important;
+  font-size: clamp(28px, 7.8vw, 42px) !important;
   line-height: 1 !important;
   font-weight: 900 !important;
-  letter-spacing: .5px !important;
-  white-space: nowrap !important;
+  letter-spacing: 1px !important;
+
   background: linear-gradient(180deg, #fff8da 0%, #ffdc73 45%, #f0a32a 78%, #8a4200 100%) !important;
   -webkit-background-clip: text !important;
   background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  filter: drop-shadow(0 0 16px rgba(255,198,78,.24)) !important;
+
+  filter:
+    drop-shadow(0 2px 0 rgba(101, 54, 5, .20))
+    drop-shadow(0 0 18px rgba(255, 198, 78, .25)) !important;
 }
 
-#collection-screen .collection-header .sub,
-#collection-screen #col-sub {
-  margin-top: 8px !important;
-  font-size: 13px !important;
-  line-height: 1.35 !important;
-  color: rgba(210,222,255,.72) !important;
-}
-
-#collection-screen .back-btn {
-  top: max(96px, calc(env(safe-area-inset-top) + 78px)) !important;
-  left: 22px !important;
-  width: 40px !important;
-  height: 40px !important;
-  z-index: 30 !important;
-}
-
-#collection-screen .col-stats {
-  display: flex !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  margin-top: 12px !important;
-  flex-wrap: nowrap !important;
-}
-
-#collection-screen .col-stats .chip {
-  min-width: 76px !important;
-  height: 34px !important;
-  padding: 0 10px !important;
-  border-radius: 999px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-family: var(--ad-font-ui, 'Noto Sans KR', sans-serif) !important;
-  font-size: 12px !important;
-  font-weight: 900 !important;
-  background: linear-gradient(180deg, rgba(16,33,74,.86), rgba(5,12,31,.90)) !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 8px 18px rgba(0,0,0,.22) !important;
-}
-#collection-screen .col-stats .chip.s5 { color:#ffdc73 !important; border-color:rgba(255,220,115,.85) !important; }
-#collection-screen .col-stats .chip.s4 { color:#cb7cff !important; border-color:rgba(203,124,255,.85) !important; }
-#collection-screen .col-stats .chip.s3 { color:#b9c7e7 !important; border-color:rgba(170,182,214,.56) !important; }
-
-#collection-screen .col-filter {
-  display: flex !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  padding: 10px 0 14px !important;
-}
-
-#collection-screen .filter-btn {
-  min-width: 54px !important;
-  height: 36px !important;
-  padding: 0 12px !important;
-  border-radius: 999px !important;
-  border: 1.5px solid rgba(255,220,115,.26) !important;
-  background: linear-gradient(180deg, rgba(10,22,54,.78), rgba(4,10,27,.84)) !important;
-  color: rgba(215,225,255,.74) !important;
-  font-size: 13px !important;
-  font-weight: 900 !important;
-}
-
-#collection-screen .filter-btn.active {
-  background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.20), transparent 46%), linear-gradient(180deg, rgba(255,220,115,.28), rgba(112,72,8,.38)) !important;
-  border-color: rgba(255,220,115,.88) !important;
-  color: #ffeaad !important;
-}
-
-#collection-screen #col-grid,
-#collection-screen .collection-grid {
-  position: relative !important;
-  z-index: 2 !important;
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  gap: 18px 16px !important;
-  align-items: start !important;
-  padding: 4px 0 36px !important;
-  margin: 0 !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-  scrollbar-width: none !important;
-}
-#collection-screen #col-grid::-webkit-scrollbar { display: none !important; }
-
-#collection-screen .col-card {
-  position: relative !important;
-  display: block !important;
+/* 설명 문구 */
+.auth-sub,
+#auth-screen p,
+#nickname-screen p {
   width: 100% !important;
-  height: clamp(205px, 62vw, 270px) !important;
-  min-height: clamp(205px, 62vw, 270px) !important;
-  max-height: clamp(205px, 62vw, 270px) !important;
-  aspect-ratio: auto !important;
   margin: 0 !important;
-  padding: 0 !important;
-  border-radius: 18px !important;
-  overflow: hidden !important;
-  transform: none !important;
-  contain: none !important;
-  box-sizing: border-box !important;
-  background: linear-gradient(180deg, rgba(20,39,90,.78), rgba(7,17,48,.92)) !important;
-  border: 1.5px solid rgba(255,220,115,.24) !important;
-  box-shadow: 0 14px 28px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.08) !important;
-}
-
-#collection-screen .col-card::before,
-#collection-screen .col-card::after,
-#collection-screen .col-card.empty::before,
-#collection-screen .col-card.empty::after {
-  content: none !important;
-  display: none !important;
-}
-
-#collection-screen .col-card.empty .lock {
-  position: absolute !important;
-  left: 50% !important;
-  top: 48% !important;
-  transform: translate(-50%, -50%) !important;
-  display: block !important;
-  width: 40px !important;
-  height: 40px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  font-size: 0 !important;
-  line-height: 0 !important;
-  color: transparent !important;
-  border-radius: 50% !important;
-  background: linear-gradient(180deg, #fff1b8 0%, #f5c85d 45%, #b17320 100%) !important;
-  box-shadow: 0 10px 20px rgba(0,0,0,.34), 0 0 22px rgba(255,220,115,.20), inset 0 1px 0 rgba(255,255,255,.55) !important;
-  z-index: 5 !important;
-}
-
-#collection-screen .col-card.empty .lock::before {
-  content: '' !important;
-  display: block !important;
-  position: absolute !important;
-  left: 50% !important;
-  top: -17px !important;
-  width: 24px !important;
-  height: 22px !important;
-  transform: translateX(-50%) !important;
-  border: 4px solid rgba(230,234,226,.96) !important;
-  border-bottom: 0 !important;
-  border-radius: 16px 16px 0 0 !important;
-}
-
-#collection-screen .col-card.empty .hint {
-  position: absolute !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 16px !important;
   text-align: center !important;
-  font-size: 12px !important;
-  color: rgba(255,220,115,.34) !important;
-  z-index: 4 !important;
+  color: rgba(210, 222, 255, .76) !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  letter-spacing: .2px !important;
 }
 
-#collection-screen .col-card .card-art,
-#collection-screen .col-card .concept-art,
-#collection-screen .col-card .card-art img {
-  position: absolute !important;
-  inset: 0 !important;
+/* 폼 */
+.auth-form,
+#auth-screen form,
+#nickname-screen form {
   width: 100% !important;
-  height: 100% !important;
-  display: block !important;
-}
-#collection-screen .col-card .card-art img { object-fit: cover !important; }
-
-#collection-screen .col-card .count-badge,
-#collection-screen .col-card .attr-badge,
-#collection-screen .col-card .stars-mini {
-  position: absolute !important;
-  z-index: 10 !important;
-}
-
-#card-modal .modal-wrap {
   display: flex !important;
   flex-direction: column !important;
-  align-items: center !important;
+  gap: 12px !important;
+  margin: 8px 0 0 !important;
 }
-/* ===================================================================
-   AD EMERGENCY GACHA RESULT CENTER FIX
-   카드팩 결과 화면 세로 정렬 복구
-   =================================================================== */
 
-#gacha-screen #gacha-stage2 {
-  position: relative !important;
-  z-index: 5 !important;
-
+/* 입력창 */
+#auth-screen input,
+#nickname-screen input,
+.auth-form input {
   width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
-
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  gap: 18px !important;
-  padding: max(70px, env(safe-area-inset-top)) 22px max(90px, env(safe-area-inset-bottom)) !important;
-  box-sizing: border-box !important;
-}
-
-/* 결과 카드 */
-#gacha-screen #card-reveal,
-#gacha-screen .card-reveal {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-  transform: none !important;
-
-  width: min(56vw, 250px) !important;
-  max-width: 250px !important;
-  margin: 0 auto !important;
-
-  flex: 0 0 auto !important;
-}
-
-/* 결과 텍스트 */
-#gacha-screen #reveal-info,
-#gacha-screen .reveal-info {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-  transform: none !important;
-
-  width: min(86vw, 360px) !important;
-  margin: 0 auto !important;
-
-  text-align: center !important;
-  font-family: var(--ad-font-display, 'Cinzel', 'Noto Sans KR', serif) !important;
-  font-size: clamp(22px, 6vw, 32px) !important;
-  line-height: 1.35 !important;
-  color: #ffdc73 !important;
-  text-shadow:
-    0 0 16px rgba(255, 220, 115, .36),
-    0 4px 12px rgba(0,0,0,.42) !important;
-}
-
-/* NEW 배지 같은 요소가 옆으로 튀지 않게 */
-#gacha-screen #reveal-info *,
-#gacha-screen .reveal-info * {
-  vertical-align: middle !important;
-}
-
-/* 계속 버튼 */
-#gacha-screen #gacha-stage2 .btn-primary,
-#gacha-screen #gacha-stage2 button {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-  transform: none !important;
-
-  width: min(72vw, 300px) !important;
-  min-height: 58px !important;
-  margin: 8px auto 0 !important;
-
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  border-radius: 999px !important;
-  font-size: 20px !important;
-  font-weight: 900 !important;
-}
-
-/* 작은 모바일 */
-@media (max-width: 390px) {
-  #gacha-screen #gacha-stage2 {
-    gap: 14px !important;
-    padding-top: max(64px, env(safe-area-inset-top)) !important;
-    padding-bottom: max(82px, env(safe-area-inset-bottom)) !important;
-  }
-
-  #gacha-screen #card-reveal,
-  #gacha-screen .card-reveal {
-    width: min(54vw, 220px) !important;
-  }
-
-  #gacha-screen #reveal-info,
-  #gacha-screen .reveal-info {
-    font-size: clamp(20px, 5.6vw, 28px) !important;
-  }
-}
-
-/* ===================================================================
-   AD EMERGENCY GACHA RESULT CENTER FIX
-   카드팩 결과 화면 세로 정렬 복구
-   =================================================================== */
-
-#gacha-screen #gacha-stage2 {
-  position: relative !important;
-  z-index: 5 !important;
-
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
-
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  gap: 18px !important;
-  padding: max(70px, env(safe-area-inset-top)) 22px max(90px, env(safe-area-inset-bottom)) !important;
-  box-sizing: border-box !important;
-}
-
-/* 결과 카드 */
-#gacha-screen #card-reveal,
-#gacha-screen .card-reveal {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-  transform: none !important;
-
-  width: min(56vw, 250px) !important;
-  max-width: 250px !important;
-  margin: 0 auto !important;
-
-  flex: 0 0 auto !important;
-}
-
-/* 결과 텍스트 */
-#gacha-screen #reveal-info,
-#gacha-screen .reveal-info {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-  transform: none !important;
-
-  width: min(86vw, 360px) !important;
-  margin: 0 auto !important;
-
-  text-align: center !important;
-  font-family: var(--ad-font-display, 'Cinzel', 'Noto Sans KR', serif) !important;
-  font-size: clamp(22px, 6vw, 32px) !important;
-  line-height: 1.35 !important;
-  color: #ffdc73 !important;
-  text-shadow:
-    0 0 16px rgba(255, 220, 115, .36),
-    0 4px 12px rgba(0,0,0,.42) !important;
-}
-
-/* NEW 배지 같은 요소가 옆으로 튀지 않게 */
-#gacha-screen #reveal-info *,
-#gacha-screen .reveal-info * {
-  vertical-align: middle !important;
-}
-
-/* 계속 버튼 */
-#gacha-screen #gacha-stage2 .btn-primary,
-#gacha-screen #gacha-stage2 button {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-  transform: none !important;
-
-  width: min(72vw, 300px) !important;
-  min-height: 58px !important;
-  margin: 8px auto 0 !important;
-
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  border-radius: 999px !important;
-  font-size: 20px !important;
-  font-weight: 900 !important;
-}
-
-/* 작은 모바일 */
-@media (max-width: 390px) {
-  #gacha-screen #gacha-stage2 {
-    gap: 14px !important;
-    padding-top: max(64px, env(safe-area-inset-top)) !important;
-    padding-bottom: max(82px, env(safe-area-inset-bottom)) !important;
-  }
-
-  #gacha-screen #card-reveal,
-  #gacha-screen .card-reveal {
-    width: min(54vw, 220px) !important;
-  }
-
-  #gacha-screen #reveal-info,
-  #gacha-screen .reveal-info {
-    font-size: clamp(20px, 5.6vw, 28px) !important;
-  }
-}
-/* ===================================================================
-   AD EMERGENCY GACHA OPENING CENTER FIX
-   카드팩 오픈 전 화면 중앙 정렬 복구
-   =================================================================== */
-
-/* 가챠 화면 전체 */
-#gacha-screen {
-  overflow: hidden !important;
-}
-
-/* 카드팩 오픈 전 stage */
-#gacha-screen #gacha-stage1 {
-  position: relative !important;
-  z-index: 5 !important;
-
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
-
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  gap: 18px !important;
-
-  padding:
-    max(64px, env(safe-area-inset-top))
-    22px
-    max(96px, env(safe-area-inset-bottom)) !important;
-
-  box-sizing: border-box !important;
-}
-
-/* CARD PACK 타이틀 */
-#gacha-screen #gacha-stage1 .hub-title,
-#gacha-screen .hub-title {
-  position: relative !important;
-  z-index: 6 !important;
-
-  margin: 0 0 4px !important;
-  text-align: center !important;
-
-  font-size: clamp(34px, 9vw, 52px) !important;
-  line-height: .92 !important;
-  white-space: nowrap !important;
-}
-
-/* 오프닝 카드팩 */
-#gacha-screen #opening-pack,
-#gacha-screen .opening-pack {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  bottom: auto !important;
-
-  transform: none !important;
-
-  width: min(62vw, 280px) !important;
-  max-width: 280px !important;
-
-  margin: 0 auto !important;
-  flex: 0 0 auto !important;
-}
-
-/* 단상/빛이 너무 위로 붙지 않게 */
-#gacha-screen #gacha-stage1::before {
-  bottom: auto !important;
-  top: calc(50% + 150px) !important;
-  transform: translateX(-50%) !important;
-}
-
-/* 안내 문구 */
-#gacha-screen .gacha-instruction {
-  position: relative !important;
-  z-index: 7 !important;
-
-  margin: 2px 0 0 !important;
-  text-align: center !important;
-
-  font-family: var(--ad-font-display, 'Cinzel', 'Noto Sans KR', serif) !important;
-  font-size: clamp(16px, 4.6vw, 22px) !important;
-  line-height: 1.2 !important;
-  letter-spacing: 3px !important;
-
-  color: #ffe3a0 !important;
-  text-shadow:
-    0 0 14px rgba(255, 220, 115, .34),
-    0 4px 12px rgba(0,0,0,.42) !important;
-}
-
-/* 작은 모바일 */
-@media (max-width: 390px) {
-  #gacha-screen #gacha-stage1 {
-    gap: 14px !important;
-    padding-top: max(58px, env(safe-area-inset-top)) !important;
-    padding-bottom: max(86px, env(safe-area-inset-bottom)) !important;
-  }
-
-  #gacha-screen #gacha-stage1 .hub-title,
-  #gacha-screen .hub-title {
-    font-size: clamp(30px, 8.4vw, 42px) !important;
-  }
-
-  #gacha-screen #opening-pack,
-  #gacha-screen .opening-pack {
-    width: min(58vw, 240px) !important;
-  }
-
-  #gacha-screen #gacha-stage1::before {
-    top: calc(50% + 130px) !important;
-  }
-
-  #gacha-screen .gacha-instruction {
-    font-size: clamp(15px, 4.2vw, 19px) !important;
-  }
-}
-/* ===================================================================
-   AD GACHA OPENING ABSOLUTE RESCUE v2
-   카드팩 오픈 전 화면 위로 밀림 강제 복구
-   - CARD PACK / 팩 / 안내문을 화면 안에 고정 배치
-   =================================================================== */
-
-#gacha-screen {
-  position: absolute !important;
-  inset: 0 !important;
-  overflow: hidden !important;
-}
-
-#gacha-screen #gacha-stage1 {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
-
-  display: block !important;
-  padding: 0 !important;
-  margin: 0 !important;
-  overflow: hidden !important;
-
-  box-sizing: border-box !important;
-  z-index: 5 !important;
-}
-
-/* 제목을 화면 상단 안전영역 아래에 고정 */
-#gacha-screen #gacha-stage1 .hub-title {
-  position: absolute !important;
-  left: 50% !important;
-  top: max(82px, calc(env(safe-area-inset-top) + 62px)) !important;
-  transform: translateX(-50%) !important;
-
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 20px !important;
+  height: 52px !important;
+  padding: 0 16px !important;
   box-sizing: border-box !important;
 
-  text-align: center !important;
-  white-space: nowrap !important;
-
-  font-family: var(--ad-font-display, 'Cinzel', serif) !important;
-  font-size: clamp(34px, 9vw, 52px) !important;
-  line-height: .92 !important;
-  letter-spacing: 1px !important;
-
-  z-index: 8 !important;
-}
-
-/* 카드팩을 화면 중앙보다 살짝 위에 고정 */
-#gacha-screen #opening-pack,
-#gacha-screen .opening-pack {
-  position: absolute !important;
-  left: 50% !important;
-  top: 44% !important;
-
-  width: min(64vw, 280px) !important;
-  max-width: 280px !important;
-
-  margin: 0 !important;
-  padding: 0 !important;
-
-  transform: translate(-50%, -50%) !important;
-  transform-origin: center center !important;
-
-  z-index: 7 !important;
-}
-
-/* 단상/빛 위치 */
-#gacha-screen #gacha-stage1::before {
-  content: '' !important;
-  position: absolute !important;
-  left: 50% !important;
-  top: calc(44% + 170px) !important;
-  bottom: auto !important;
-
-  width: min(88vw, 390px) !important;
-  height: 34px !important;
-
-  transform: translateX(-50%) !important;
-  border-radius: 50% !important;
+  border-radius: 16px !important;
+  border: 1.5px solid rgba(255, 220, 115, .34) !important;
 
   background:
-    radial-gradient(
-      ellipse at center,
-      rgba(255,255,255,.95) 0%,
-      rgba(255,239,191,.84) 20%,
-      rgba(255,194,73,.48) 38%,
-      transparent 72%
-    ) !important;
+    linear-gradient(180deg, rgba(13, 28, 65, .82), rgba(5, 12, 31, .88)) !important;
 
-  box-shadow: 0 0 18px rgba(255, 220, 115, .40) !important;
-  z-index: 6 !important;
+  color: #fff !important;
+  font-family: var(--ad-font-ui, 'Noto Sans KR', system-ui, sans-serif) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+
+  outline: none !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 10px 22px rgba(0,0,0,.20) !important;
+
+  -webkit-appearance: none !important;
+  appearance: none !important;
 }
 
-/* 안내문을 팩 아래에 고정 */
-#gacha-screen .gacha-instruction {
-  position: absolute !important;
-  left: 50% !important;
-  top: calc(44% + 210px) !important;
+#auth-screen input::placeholder,
+#nickname-screen input::placeholder {
+  color: rgba(210, 222, 255, .46) !important;
+}
 
+#auth-screen input:focus,
+#nickname-screen input:focus {
+  border-color: rgba(255, 220, 115, .88) !important;
+  box-shadow:
+    0 0 0 3px rgba(255, 220, 115, .14),
+    0 0 24px rgba(255, 198, 78, .18),
+    inset 0 1px 0 rgba(255,255,255,.12) !important;
+}
+
+/* 기본 버튼: 로그인/가입/시작 */
+#auth-screen button,
+#nickname-screen button,
+.auth-submit {
   width: 100% !important;
-  padding: 0 20px !important;
-  margin: 0 !important;
+  min-height: 56px !important;
+  padding: 0 22px !important;
   box-sizing: border-box !important;
 
-  transform: translateX(-50%) !important;
+  border: 0 !important;
+  border-radius: 999px !important;
 
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.22), transparent 50%),
+    linear-gradient(180deg, #ff8d22 0%, #f45b00 52%, #bd2600 100%) !important;
+
+  color: #fff !important;
+  font-family: var(--ad-font-ui, 'Noto Sans KR', system-ui, sans-serif) !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  letter-spacing: 1px !important;
+
+  cursor: pointer !important;
+  box-shadow:
+    0 18px 34px rgba(255, 106, 0, .26),
+    0 6px 0 rgba(110, 35, 0, .50),
+    inset 0 1px 0 rgba(255,255,255,.20) !important;
+}
+
+/* 구글 버튼 */
+.btn-google,
+#auth-screen button.google,
+#auth-screen .google-login,
+#auth-screen [data-provider="google"] {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(226, 233, 247, .96)) !important;
+  color: #172033 !important;
+  border: 1.5px solid rgba(255,255,255,.72) !important;
+  box-shadow:
+    0 14px 28px rgba(0,0,0,.24),
+    inset 0 1px 0 rgba(255,255,255,.8) !important;
+}
+
+/* 구분선 */
+.auth-divider {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 2px 0 !important;
+  color: rgba(210, 222, 255, .54) !important;
+  font-size: 12px !important;
+  letter-spacing: 2px !important;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '' !important;
+  flex: 1 !important;
+  height: 1px !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 220, 115, .34), transparent) !important;
+}
+
+/* 로그인/회원가입 전환 */
+.auth-toggle,
+#auth-screen a,
+#nickname-screen a {
+  color: rgba(210, 222, 255, .78) !important;
+  font-size: 14px !important;
   text-align: center !important;
-  font-family: var(--ad-font-display, 'Cinzel', 'Noto Sans KR', serif) !important;
-  font-size: clamp(16px, 4.6vw, 22px) !important;
-  line-height: 1.2 !important;
-  letter-spacing: 3px !important;
-
-  color: #ffe3a0 !important;
-  text-shadow:
-    0 0 14px rgba(255, 220, 115, .34),
-    0 4px 12px rgba(0,0,0,.42) !important;
-
-  z-index: 8 !important;
 }
 
-/* 오프닝 애니메이션 중에도 화면 밖으로 튀지 않게 */
-#gacha-screen #opening-pack.is-pressed,
-#gacha-screen .opening-pack.is-pressed {
-  transform: translate(-50%, -50%) scale(.98) !important;
+.auth-toggle a,
+#auth-screen a,
+#nickname-screen a {
+  color: #ffdc73 !important;
+  font-weight: 900 !important;
+  text-decoration: none !important;
 }
 
-#gacha-screen #opening-pack.is-charging,
-#gacha-screen .opening-pack.is-charging {
-  transform: translate(-50%, -52%) scale(1.04) !important;
+/* 닉네임 힌트 */
+.auth-hint,
+#nickname-screen small,
+#nickname-screen .hint {
+  color: rgba(210, 222, 255, .62) !important;
+  font-size: 12px !important;
+  text-align: center !important;
+  line-height: 1.4 !important;
 }
 
-#gacha-screen #opening-pack.is-opening,
-#gacha-screen .opening-pack.is-opening {
-  transform: translate(-50%, -50%) scale(1.08) !important;
-}
-
-/* 작은 모바일 */
-@media (max-width: 390px) {
-  #gacha-screen #gacha-stage1 .hub-title {
-    top: max(76px, calc(env(safe-area-inset-top) + 56px)) !important;
-    font-size: clamp(30px, 8.4vw, 42px) !important;
-  }
-
-  #gacha-screen #opening-pack,
-  #gacha-screen .opening-pack {
-    top: 43% !important;
-    width: min(60vw, 240px) !important;
-  }
-
-  #gacha-screen #gacha-stage1::before {
-    top: calc(43% + 145px) !important;
-  }
-
-  #gacha-screen .gacha-instruction {
-    top: calc(43% + 180px) !important;
-    font-size: clamp(15px, 4.2vw, 19px) !important;
-  }
-}
-
-/* ===================================================================
-   AD GACHA ANIMATION RESTORE v3
-   - 중앙 배치 유지
-   - 팩 뜯는 연출 복구
-   - 오픈 전 계속 버튼 숨김
-   =================================================================== */
-
-/* 오픈 전 화면에 결과용 버튼이 보이지 않게 */
-#gacha-screen #gacha-stage1 button,
-#gacha-screen #gacha-stage1 .btn-primary {
-  display: none !important;
-}
-
-/* 카드팩 기본 위치 */
-#gacha-screen #opening-pack,
-#gacha-screen .opening-pack {
+/* 허브 상단 계정 정보: 현재처럼 화면 위에 깨지지 않게 */
+.user-bar {
   position: absolute !important;
-  left: 50% !important;
-  top: 44% !important;
-  width: min(64vw, 280px) !important;
-  max-width: 280px !important;
-  margin: 0 !important;
-  transform: translate(-50%, -50%) !important;
-  transform-origin: center center !important;
-  z-index: 7 !important;
+  top: max(8px, calc(env(safe-area-inset-top) + 4px)) !important;
+  left: 18px !important;
+  right: 18px !important;
+  z-index: 50 !important;
+
+  height: 34px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+
+  pointer-events: auto !important;
 }
 
-/* 이전 강제 transform 때문에 죽은 애니메이션 복구 */
-#gacha-screen #opening-pack.is-pressed,
-#gacha-screen .opening-pack.is-pressed {
-  animation: adPackPressCentered .22s ease-out forwards !important;
+.user-name {
+  max-width: calc(100% - 48px) !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+
+  padding: 7px 12px !important;
+  border-radius: 999px !important;
+
+  background: rgba(7, 17, 39, .54) !important;
+  border: 1px solid rgba(255, 220, 115, .32) !important;
+
+  color: #ffdc73 !important;
+  font-family: var(--ad-font-ui, 'Noto Sans KR', system-ui, sans-serif) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
 }
 
-#gacha-screen #opening-pack.is-charging,
-#gacha-screen .opening-pack.is-charging {
-  animation: adPackChargeCentered .68s ease-in forwards !important;
+.logout-btn {
+  width: 34px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  padding: 0 !important;
+
+  border-radius: 50% !important;
+  border: 1.5px solid rgba(255, 220, 115, .58) !important;
+
+  background:
+    linear-gradient(180deg, rgba(16, 33, 74, .78), rgba(5, 12, 31, .84)) !important;
+
+  color: #ffdc73 !important;
+  font-size: 15px !important;
+  box-shadow:
+    0 8px 18px rgba(0,0,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.12) !important;
 }
 
-#gacha-screen #opening-pack.is-opening,
-#gacha-screen .opening-pack.is-opening {
-  animation: adPackOpenCentered .86s cubic-bezier(.2,.95,.2,1) forwards !important;
+/* 유저바가 허브 top-bar를 밀지 않게 허브 보정 */
+#hub-screen .user-bar + .top-bar {
+  margin-top: max(52px, calc(env(safe-area-inset-top) + 44px)) !important;
 }
 
-/* 눌림 */
-@keyframes adPackPressCentered {
-  0% {
-    transform: translate(-50%, -50%) scale(1) rotateZ(0deg);
-    filter: brightness(1);
+/* PC/가로폭 넓을 때 */
+@media (min-width: 700px) {
+  #auth-screen,
+  #nickname-screen {
+    padding-left: 32px !important;
+    padding-right: 32px !important;
   }
-  45% {
-    transform: translate(-50%, -47%) scale(.96, .985) rotateZ(-2deg);
-    filter: brightness(1.05);
-  }
-  100% {
-    transform: translate(-50%, -53%) scale(1.035) rotateZ(1.4deg);
-    filter: brightness(1.12);
-  }
-}
 
-/* 에너지 충전 */
-@keyframes adPackChargeCentered {
-  0% {
-    transform: translate(-50%, -53%) scale(1.035) rotateZ(1deg);
-    filter: brightness(1);
-  }
-  55% {
-    transform: translate(-50%, -56%) scale(1.075) rotateZ(-1.2deg);
-    filter:
-      brightness(1.24)
-      drop-shadow(0 0 34px rgba(255, 220, 115, .72));
-  }
-  100% {
-    transform: translate(-50%, -57%) scale(1.09) rotateZ(.5deg);
-    filter:
-      brightness(1.46)
-      drop-shadow(0 0 70px rgba(255, 220, 115, .96));
-  }
-}
-
-/* 팩 오픈/터짐 */
-@keyframes adPackOpenCentered {
-  0% {
-    transform: translate(-50%, -57%) scale(1.09) rotateZ(.5deg);
-    filter: brightness(1.45);
-    opacity: 1;
-  }
-  20% {
-    transform: translate(-50%, -60%) scale(1.13) rotateZ(-2deg);
-    filter:
-      brightness(2.1)
-      drop-shadow(0 0 80px rgba(255,255,255,.9));
-    opacity: 1;
-  }
-  40% {
-    transform: translate(-50%, -62%) scale(1.20) rotateZ(2.5deg);
-    filter:
-      brightness(3.2)
-      drop-shadow(0 0 120px rgba(255,255,255,1));
-    opacity: 1;
-  }
-  68% {
-    transform: translate(-50%, -48%) scale(.96) rotateZ(-1deg);
-    filter: brightness(2.4) blur(1px);
-    opacity: .55;
-  }
-  100% {
-    transform: translate(-50%, -36%) scale(.78);
-    filter: brightness(2.8) blur(7px);
-    opacity: 0;
-  }
-}
-
-/* shine/찢어지는 빛도 다시 살아나게 */
-#gacha-screen #opening-pack.is-opening::before,
-#gacha-screen .opening-pack.is-opening::before {
-  animation: adPackTearRayCentered .86s ease-out both !important;
-}
-
-@keyframes adPackTearRayCentered {
-  0% {
-    opacity: 0;
-    transform: translateX(-110%) skewX(-8deg);
-  }
-  25% {
-    opacity: .45;
-  }
-  46% {
-    opacity: 1;
-    transform: translateX(8%) skewX(-8deg) scaleX(1.8);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(120%) skewX(-8deg) scaleX(2.4);
-  }
-}
-
-/* 화면 플래시 복구 */
-#gacha-screen.is-pack-opening::after {
-  animation: adGachaWhiteFlashRestore .82s ease-out both !important;
-}
-
-@keyframes adGachaWhiteFlashRestore {
-  0%, 24% {
-    opacity: 0;
-  }
-  42% {
-    opacity: .72;
-  }
-  56% {
-    opacity: .18;
-  }
-  100% {
-    opacity: 0;
+  .auth-body,
+  #auth-screen:not(:has(.auth-body)) > *,
+  #nickname-screen:not(:has(.auth-body)) > * {
+    max-width: 420px !important;
   }
 }
 
 /* 작은 모바일 */
 @media (max-width: 390px) {
-  #gacha-screen #opening-pack,
-  #gacha-screen .opening-pack {
-    top: 43% !important;
-    width: min(60vw, 240px) !important;
+  #auth-screen,
+  #nickname-screen {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  .auth-body {
+    padding: 26px 20px 24px !important;
+    border-radius: 24px !important;
+  }
+
+  .auth-title,
+  #auth-screen h1,
+  #auth-screen h2,
+  #nickname-screen h1,
+  #nickname-screen h2 {
+    font-size: clamp(26px, 7.2vw, 36px) !important;
+  }
+
+  #auth-screen input,
+  #nickname-screen input {
+    height: 50px !important;
+  }
+
+  #auth-screen button,
+  #nickname-screen button {
+    min-height: 54px !important;
+    font-size: 17px !important;
   }
 }
+
+
 /* ===================================================================
-   AD EMERGENCY GACHA HARD RESTORE
-   가챠 뽑기 화면 기능 우선 복구
-   - stage1/stage2 강제 충돌 정리
-   - 오픈 전 계속 버튼 노출 방지
-   - 팩 오픈 연출 최소 복구
+   AD GACHA STRUCTURE FIX v1.0
+   목적: 팩 위치와 팩 애니메이션을 분리해서 transform 충돌 제거
+   필요 HTML:
+   <div class="pack-position" id="opening-pack-position">
+     <div class="opening-pack" id="opening-pack"></div>
+   </div>
    =================================================================== */
 
+/* 가챠 화면은 화면 전체를 사용 */
 #gacha-screen {
   position: absolute !important;
   inset: 0 !important;
@@ -6027,7 +5744,7 @@ body {
   overflow: hidden !important;
 }
 
-/* 핵심: JS가 display:none 준 stage는 무조건 숨김 */
+/* JS가 display:none 준 스테이지는 확실히 숨긴다 */
 #gacha-screen #gacha-stage1[style*="display: none"],
 #gacha-screen #gacha-stage2[style*="display: none"],
 #gacha-screen #gacha-stage1[style*="display:none"],
@@ -6041,46 +5758,31 @@ body {
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
-
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-
-  gap: 18px !important;
-  padding: max(78px, env(safe-area-inset-top)) 22px max(92px, env(safe-area-inset-bottom)) !important;
   box-sizing: border-box !important;
   z-index: 5 !important;
-}
 
-/* 결과 화면 */
-#gacha-screen #gacha-stage2 {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-
+  display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
+  gap: 18px !important;
 
-  gap: 16px !important;
-  padding: max(70px, env(safe-area-inset-top)) 22px max(90px, env(safe-area-inset-bottom)) !important;
-  box-sizing: border-box !important;
-  z-index: 6 !important;
+  padding: max(82px, env(safe-area-inset-top)) 22px max(96px, env(safe-area-inset-bottom)) !important;
+  margin: 0 !important;
+  overflow: hidden !important;
 }
 
-/* 제목 */
+/* 제목은 스테이지 위쪽에 독립 고정 */
 #gacha-screen .gacha-body > .hub-title {
   position: absolute !important;
   left: 50% !important;
-  top: max(72px, calc(env(safe-area-inset-top) + 54px)) !important;
+  top: max(74px, calc(env(safe-area-inset-top) + 54px)) !important;
   transform: translateX(-50%) !important;
 
   width: 100% !important;
-  padding: 0 20px !important;
   margin: 0 !important;
+  padding: 0 20px !important;
   box-sizing: border-box !important;
-
   text-align: center !important;
   white-space: nowrap !important;
   z-index: 10 !important;
@@ -6088,73 +5790,111 @@ body {
   font-family: var(--ad-font-display, 'Cinzel', serif) !important;
   font-size: clamp(34px, 9vw, 52px) !important;
   line-height: .92 !important;
-  color: #ffdc73 !important;
 }
 
-/* 오프닝 팩 */
-#gacha-screen #opening-pack,
-#gacha-screen .opening-pack {
+/* 위치 담당 wrapper: 여기만 중앙 배치를 담당한다. 애니메이션 금지. */
+#gacha-screen #opening-pack-position,
+#gacha-screen .pack-position {
   position: relative !important;
   width: min(64vw, 280px) !important;
   max-width: 280px !important;
-  margin: 30px auto 0 !important;
+  aspect-ratio: 432 / 696 !important;
+  flex: 0 0 auto !important;
+  margin: 36px auto 0 !important;
+  padding: 0 !important;
+  z-index: 7 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 
   transform: none !important;
-  transform-origin: center center !important;
-  z-index: 7 !important;
+  animation: none !important;
+}
+
+/* 애니메이션 담당 pack: left/top/absolute를 전부 제거하고 wrapper 안에서만 움직인다. */
+#gacha-screen #gacha-stage1 #opening-pack,
+#gacha-screen #gacha-stage1 .opening-pack {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+
+  width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  aspect-ratio: 432 / 696 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 
   display: block !important;
   opacity: 1 !important;
   visibility: visible !important;
+
+  transform: translateY(0) scale(1) rotateZ(0deg) !important;
+  transform-origin: center center !important;
+  z-index: 7 !important;
 }
 
-/* 단상 */
+/* 단상/조명은 wrapper 아래로 */
 #gacha-screen #gacha-stage1::before {
   content: '' !important;
   position: absolute !important;
   left: 50% !important;
   top: calc(50% + 160px) !important;
+  bottom: auto !important;
   width: min(88vw, 390px) !important;
   height: 34px !important;
   transform: translateX(-50%) !important;
   border-radius: 50% !important;
   background:
-    radial-gradient(
-      ellipse at center,
+    radial-gradient(ellipse at center,
       rgba(255,255,255,.95) 0%,
       rgba(255,239,191,.84) 20%,
       rgba(255,194,73,.48) 38%,
-      transparent 72%
-    ) !important;
+      transparent 72%) !important;
   box-shadow: 0 0 18px rgba(255, 220, 115, .40) !important;
   z-index: 4 !important;
 }
 
-/* 안내문 */
 #gacha-screen .gacha-instruction {
   position: relative !important;
   z-index: 8 !important;
   margin: 0 !important;
   text-align: center !important;
-
   font-family: var(--ad-font-display, 'Cinzel', 'Noto Sans KR', serif) !important;
   font-size: clamp(16px, 4.6vw, 22px) !important;
   line-height: 1.2 !important;
   letter-spacing: 3px !important;
-
   color: #ffe3a0 !important;
   text-shadow:
     0 0 14px rgba(255, 220, 115, .34),
     0 4px 12px rgba(0,0,0,.42) !important;
 }
 
-/* 오픈 전에는 stage2 버튼이 절대 보이면 안 됨 */
-#gacha-screen #gacha-stage2[style*="display: none"] button,
-#gacha-screen #gacha-stage2[style*="display:none"] button {
+/* 오픈 전 stage에는 결과 버튼이 보이면 안 된다 */
+#gacha-screen #gacha-stage1 button,
+#gacha-screen #gacha-stage1 .btn-primary {
   display: none !important;
 }
 
-/* 결과 카드 */
+/* stage2 결과 화면 */
+#gacha-screen #gacha-stage2 {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 6 !important;
+  box-sizing: border-box !important;
+
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 16px !important;
+  padding: max(70px, env(safe-area-inset-top)) 22px max(90px, env(safe-area-inset-bottom)) !important;
+}
+
 #gacha-screen #card-reveal,
 #gacha-screen .card-reveal {
   position: relative !important;
@@ -6164,7 +5904,6 @@ body {
   flex: 0 0 auto !important;
 }
 
-/* 결과 텍스트 */
 #gacha-screen #reveal-info,
 #gacha-screen .reveal-info {
   width: min(86vw, 360px) !important;
@@ -6176,7 +5915,6 @@ body {
   color: #ffdc73 !important;
 }
 
-/* 계속 버튼 */
 #gacha-screen #gacha-stage2 .btn-primary {
   width: min(72vw, 300px) !important;
   min-height: 58px !important;
@@ -6187,98 +5925,75 @@ body {
   justify-content: center !important;
 }
 
-/* 팩 애니메이션 복구 */
-#gacha-screen #opening-pack.is-pressed,
-#gacha-screen .opening-pack.is-pressed {
-  animation: emergencyPackPress .22s ease-out forwards !important;
+/* 상태 애니메이션: 이제 X축 중앙 보정이 필요 없다. pack 내부 움직임만 담당. */
+#gacha-screen #gacha-stage1 #opening-pack.is-pressed,
+#gacha-screen #gacha-stage1 .opening-pack.is-pressed {
+  animation: adGachaPackPressOnly .22s ease-out forwards !important;
 }
 
-#gacha-screen #opening-pack.is-charging,
-#gacha-screen .opening-pack.is-charging {
-  animation: emergencyPackCharge .62s ease-in forwards !important;
+#gacha-screen #gacha-stage1 #opening-pack.is-charging,
+#gacha-screen #gacha-stage1 .opening-pack.is-charging {
+  animation: adGachaPackChargeOnly .62s ease-in forwards !important;
 }
 
-#gacha-screen #opening-pack.is-opening,
-#gacha-screen .opening-pack.is-opening {
-  animation: emergencyPackOpen .82s cubic-bezier(.2,.95,.2,1) forwards !important;
+#gacha-screen #gacha-stage1 #opening-pack.is-opening,
+#gacha-screen #gacha-stage1 .opening-pack.is-opening {
+  animation: adGachaPackOpenOnly .82s cubic-bezier(.2,.95,.2,1) forwards !important;
 }
 
-@keyframes emergencyPackPress {
-  0% {
-    transform: translateY(0) scale(1) rotateZ(0deg);
-    filter: brightness(1);
-  }
-  45% {
-    transform: translateY(8px) scale(.96, .985) rotateZ(-2deg);
-    filter: brightness(1.05);
-  }
-  100% {
-    transform: translateY(-6px) scale(1.035) rotateZ(1.4deg);
-    filter: brightness(1.12);
-  }
+@keyframes adGachaPackPressOnly {
+  0% { transform: translateY(0) scale(1) rotateZ(0deg); filter: brightness(1); }
+  45% { transform: translateY(8px) scale(.96, .985) rotateZ(-2deg); filter: brightness(1.05); }
+  100% { transform: translateY(-6px) scale(1.035) rotateZ(1.4deg); filter: brightness(1.12); }
 }
 
-@keyframes emergencyPackCharge {
-  0% {
-    transform: translateY(-6px) scale(1.035) rotateZ(1deg);
-    filter: brightness(1);
-  }
-  60% {
-    transform: translateY(-14px) scale(1.075) rotateZ(-1.2deg);
-    filter:
-      brightness(1.24)
-      drop-shadow(0 0 34px rgba(255, 220, 115, .72));
-  }
-  100% {
-    transform: translateY(-16px) scale(1.09) rotateZ(.5deg);
-    filter:
-      brightness(1.46)
-      drop-shadow(0 0 70px rgba(255, 220, 115, .96));
-  }
+@keyframes adGachaPackChargeOnly {
+  0% { transform: translateY(-6px) scale(1.035) rotateZ(1deg); filter: brightness(1); }
+  60% { transform: translateY(-14px) scale(1.075) rotateZ(-1.2deg); filter: brightness(1.24) drop-shadow(0 0 34px rgba(255, 220, 115, .72)); }
+  100% { transform: translateY(-16px) scale(1.09) rotateZ(.5deg); filter: brightness(1.46) drop-shadow(0 0 70px rgba(255, 220, 115, .96)); }
 }
 
-@keyframes emergencyPackOpen {
-  0% {
-    transform: translateY(-16px) scale(1.09) rotateZ(.5deg);
-    filter: brightness(1.45);
-    opacity: 1;
-  }
-  22% {
-    transform: translateY(-22px) scale(1.14) rotateZ(-2deg);
-    filter:
-      brightness(2.1)
-      drop-shadow(0 0 80px rgba(255,255,255,.9));
-    opacity: 1;
-  }
-  42% {
-    transform: translateY(-28px) scale(1.20) rotateZ(2.5deg);
-    filter:
-      brightness(3.2)
-      drop-shadow(0 0 120px rgba(255,255,255,1));
-    opacity: 1;
-  }
-  70% {
-    transform: translateY(12px) scale(.96) rotateZ(-1deg);
-    filter: brightness(2.4) blur(1px);
-    opacity: .55;
-  }
-  100% {
-    transform: translateY(58px) scale(.78);
-    filter: brightness(2.8) blur(7px);
-    opacity: 0;
-  }
+@keyframes adGachaPackOpenOnly {
+  0% { transform: translateY(-16px) scale(1.09) rotateZ(.5deg); filter: brightness(1.45); opacity: 1; }
+  22% { transform: translateY(-22px) scale(1.14) rotateZ(-2deg); filter: brightness(2.1) drop-shadow(0 0 80px rgba(255,255,255,.9)); opacity: 1; }
+  42% { transform: translateY(-28px) scale(1.20) rotateZ(2.5deg); filter: brightness(3.2) drop-shadow(0 0 120px rgba(255,255,255,1)); opacity: 1; }
+  70% { transform: translateY(12px) scale(.96) rotateZ(-1deg); filter: brightness(2.4) blur(1px); opacity: .55; }
+  100% { transform: translateY(58px) scale(.78); filter: brightness(2.8) blur(7px); opacity: 0; }
 }
 
-/* 작은 모바일 */
+#gacha-screen #gacha-stage1 #opening-pack.is-opening::before,
+#gacha-screen #gacha-stage1 .opening-pack.is-opening::before {
+  animation: adGachaTearRayOnly .82s ease-out both !important;
+}
+
+@keyframes adGachaTearRayOnly {
+  0% { opacity: 0; transform: translateX(-110%) skewX(-8deg); }
+  25% { opacity: .45; }
+  46% { opacity: 1; transform: translateX(8%) skewX(-8deg) scaleX(1.8); }
+  100% { opacity: 0; transform: translateX(120%) skewX(-8deg) scaleX(2.4); }
+}
+
+#gacha-screen.is-pack-opening::after {
+  animation: adGachaWhiteFlashOnly .82s ease-out both !important;
+}
+
+@keyframes adGachaWhiteFlashOnly {
+  0%, 24% { opacity: 0; }
+  42% { opacity: .72; }
+  56% { opacity: .18; }
+  100% { opacity: 0; }
+}
+
 @media (max-width: 390px) {
   #gacha-screen .gacha-body > .hub-title {
     top: max(66px, calc(env(safe-area-inset-top) + 50px)) !important;
     font-size: clamp(30px, 8.4vw, 42px) !important;
   }
 
-  #gacha-screen #opening-pack,
-  #gacha-screen .opening-pack {
+  #gacha-screen #opening-pack-position,
+  #gacha-screen .pack-position {
     width: min(60vw, 240px) !important;
+    margin-top: 28px !important;
   }
 
   #gacha-screen #gacha-stage1 {
