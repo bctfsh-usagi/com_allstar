@@ -5836,3 +5836,168 @@ body {
     font-size: clamp(15px, 4.2vw, 19px) !important;
   }
 }
+
+/* ===================================================================
+   AD GACHA ANIMATION RESTORE v3
+   - 중앙 배치 유지
+   - 팩 뜯는 연출 복구
+   - 오픈 전 계속 버튼 숨김
+   =================================================================== */
+
+/* 오픈 전 화면에 결과용 버튼이 보이지 않게 */
+#gacha-screen #gacha-stage1 button,
+#gacha-screen #gacha-stage1 .btn-primary {
+  display: none !important;
+}
+
+/* 카드팩 기본 위치 */
+#gacha-screen #opening-pack,
+#gacha-screen .opening-pack {
+  position: absolute !important;
+  left: 50% !important;
+  top: 44% !important;
+  width: min(64vw, 280px) !important;
+  max-width: 280px !important;
+  margin: 0 !important;
+  transform: translate(-50%, -50%) !important;
+  transform-origin: center center !important;
+  z-index: 7 !important;
+}
+
+/* 이전 강제 transform 때문에 죽은 애니메이션 복구 */
+#gacha-screen #opening-pack.is-pressed,
+#gacha-screen .opening-pack.is-pressed {
+  animation: adPackPressCentered .22s ease-out forwards !important;
+}
+
+#gacha-screen #opening-pack.is-charging,
+#gacha-screen .opening-pack.is-charging {
+  animation: adPackChargeCentered .68s ease-in forwards !important;
+}
+
+#gacha-screen #opening-pack.is-opening,
+#gacha-screen .opening-pack.is-opening {
+  animation: adPackOpenCentered .86s cubic-bezier(.2,.95,.2,1) forwards !important;
+}
+
+/* 눌림 */
+@keyframes adPackPressCentered {
+  0% {
+    transform: translate(-50%, -50%) scale(1) rotateZ(0deg);
+    filter: brightness(1);
+  }
+  45% {
+    transform: translate(-50%, -47%) scale(.96, .985) rotateZ(-2deg);
+    filter: brightness(1.05);
+  }
+  100% {
+    transform: translate(-50%, -53%) scale(1.035) rotateZ(1.4deg);
+    filter: brightness(1.12);
+  }
+}
+
+/* 에너지 충전 */
+@keyframes adPackChargeCentered {
+  0% {
+    transform: translate(-50%, -53%) scale(1.035) rotateZ(1deg);
+    filter: brightness(1);
+  }
+  55% {
+    transform: translate(-50%, -56%) scale(1.075) rotateZ(-1.2deg);
+    filter:
+      brightness(1.24)
+      drop-shadow(0 0 34px rgba(255, 220, 115, .72));
+  }
+  100% {
+    transform: translate(-50%, -57%) scale(1.09) rotateZ(.5deg);
+    filter:
+      brightness(1.46)
+      drop-shadow(0 0 70px rgba(255, 220, 115, .96));
+  }
+}
+
+/* 팩 오픈/터짐 */
+@keyframes adPackOpenCentered {
+  0% {
+    transform: translate(-50%, -57%) scale(1.09) rotateZ(.5deg);
+    filter: brightness(1.45);
+    opacity: 1;
+  }
+  20% {
+    transform: translate(-50%, -60%) scale(1.13) rotateZ(-2deg);
+    filter:
+      brightness(2.1)
+      drop-shadow(0 0 80px rgba(255,255,255,.9));
+    opacity: 1;
+  }
+  40% {
+    transform: translate(-50%, -62%) scale(1.20) rotateZ(2.5deg);
+    filter:
+      brightness(3.2)
+      drop-shadow(0 0 120px rgba(255,255,255,1));
+    opacity: 1;
+  }
+  68% {
+    transform: translate(-50%, -48%) scale(.96) rotateZ(-1deg);
+    filter: brightness(2.4) blur(1px);
+    opacity: .55;
+  }
+  100% {
+    transform: translate(-50%, -36%) scale(.78);
+    filter: brightness(2.8) blur(7px);
+    opacity: 0;
+  }
+}
+
+/* shine/찢어지는 빛도 다시 살아나게 */
+#gacha-screen #opening-pack.is-opening::before,
+#gacha-screen .opening-pack.is-opening::before {
+  animation: adPackTearRayCentered .86s ease-out both !important;
+}
+
+@keyframes adPackTearRayCentered {
+  0% {
+    opacity: 0;
+    transform: translateX(-110%) skewX(-8deg);
+  }
+  25% {
+    opacity: .45;
+  }
+  46% {
+    opacity: 1;
+    transform: translateX(8%) skewX(-8deg) scaleX(1.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(120%) skewX(-8deg) scaleX(2.4);
+  }
+}
+
+/* 화면 플래시 복구 */
+#gacha-screen.is-pack-opening::after {
+  animation: adGachaWhiteFlashRestore .82s ease-out both !important;
+}
+
+@keyframes adGachaWhiteFlashRestore {
+  0%, 24% {
+    opacity: 0;
+  }
+  42% {
+    opacity: .72;
+  }
+  56% {
+    opacity: .18;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 작은 모바일 */
+@media (max-width: 390px) {
+  #gacha-screen #opening-pack,
+  #gacha-screen .opening-pack {
+    top: 43% !important;
+    width: min(60vw, 240px) !important;
+  }
+}
