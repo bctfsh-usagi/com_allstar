@@ -5556,3 +5556,121 @@ body {
     font-size: clamp(20px, 5.6vw, 28px) !important;
   }
 }
+/* ===================================================================
+   AD EMERGENCY GACHA OPENING CENTER FIX
+   카드팩 오픈 전 화면 중앙 정렬 복구
+   =================================================================== */
+
+/* 가챠 화면 전체 */
+#gacha-screen {
+  overflow: hidden !important;
+}
+
+/* 카드팩 오픈 전 stage */
+#gacha-screen #gacha-stage1 {
+  position: relative !important;
+  z-index: 5 !important;
+
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 18px !important;
+
+  padding:
+    max(64px, env(safe-area-inset-top))
+    22px
+    max(96px, env(safe-area-inset-bottom)) !important;
+
+  box-sizing: border-box !important;
+}
+
+/* CARD PACK 타이틀 */
+#gacha-screen #gacha-stage1 .hub-title,
+#gacha-screen .hub-title {
+  position: relative !important;
+  z-index: 6 !important;
+
+  margin: 0 0 4px !important;
+  text-align: center !important;
+
+  font-size: clamp(34px, 9vw, 52px) !important;
+  line-height: .92 !important;
+  white-space: nowrap !important;
+}
+
+/* 오프닝 카드팩 */
+#gacha-screen #opening-pack,
+#gacha-screen .opening-pack {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+
+  transform: none !important;
+
+  width: min(62vw, 280px) !important;
+  max-width: 280px !important;
+
+  margin: 0 auto !important;
+  flex: 0 0 auto !important;
+}
+
+/* 단상/빛이 너무 위로 붙지 않게 */
+#gacha-screen #gacha-stage1::before {
+  bottom: auto !important;
+  top: calc(50% + 150px) !important;
+  transform: translateX(-50%) !important;
+}
+
+/* 안내 문구 */
+#gacha-screen .gacha-instruction {
+  position: relative !important;
+  z-index: 7 !important;
+
+  margin: 2px 0 0 !important;
+  text-align: center !important;
+
+  font-family: var(--ad-font-display, 'Cinzel', 'Noto Sans KR', serif) !important;
+  font-size: clamp(16px, 4.6vw, 22px) !important;
+  line-height: 1.2 !important;
+  letter-spacing: 3px !important;
+
+  color: #ffe3a0 !important;
+  text-shadow:
+    0 0 14px rgba(255, 220, 115, .34),
+    0 4px 12px rgba(0,0,0,.42) !important;
+}
+
+/* 작은 모바일 */
+@media (max-width: 390px) {
+  #gacha-screen #gacha-stage1 {
+    gap: 14px !important;
+    padding-top: max(58px, env(safe-area-inset-top)) !important;
+    padding-bottom: max(86px, env(safe-area-inset-bottom)) !important;
+  }
+
+  #gacha-screen #gacha-stage1 .hub-title,
+  #gacha-screen .hub-title {
+    font-size: clamp(30px, 8.4vw, 42px) !important;
+  }
+
+  #gacha-screen #opening-pack,
+  #gacha-screen .opening-pack {
+    width: min(58vw, 240px) !important;
+  }
+
+  #gacha-screen #gacha-stage1::before {
+    top: calc(50% + 130px) !important;
+  }
+
+  #gacha-screen .gacha-instruction {
+    font-size: clamp(15px, 4.2vw, 19px) !important;
+  }
+}
