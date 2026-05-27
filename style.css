@@ -5063,3 +5063,275 @@ body {
    =================================================================== */
 #auth-screen, #nickname-screen, .auth-screen, .nickname-screen, .auth-body, .auth-panel, .user-bar { display: none !important; }
 #title-screen, #hub-screen, #gacha-screen, #collection-screen, #select-screen, #battle-screen, #result-screen { visibility: visible; }
+
+
+/* ===================================================================
+   AD EMERGENCY COLLECTION + GACHA RESULT FIX v1.0
+   - 로그인 제거 후 깨진 컬렉션 ID/레이아웃 대응
+   - 가챠 결과 카드/텍스트/버튼이 옆으로 붙는 문제 해결
+   =================================================================== */
+
+/* 가챠 화면: 결과는 무조건 세로 중앙 정렬 */
+#gacha-screen .gacha-body,
+#gacha-screen .gacha-stage {
+  width: 100% !important;
+  max-width: 480px !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+#gacha-screen #gacha-stage1,
+#gacha-screen #gacha-stage2 {
+  width: 100% !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 18px !important;
+}
+
+#gacha-screen #gacha-stage2[style*="display: flex"] {
+  display: flex !important;
+}
+
+#gacha-screen .card-reveal {
+  width: min(56vw, 246px) !important;
+  flex: 0 0 auto !important;
+  margin: 0 auto !important;
+}
+
+#gacha-screen .reveal-info {
+  width: min(86vw, 360px) !important;
+  margin: 2px auto 0 !important;
+  text-align: center !important;
+  font-family: var(--ad-font-display, 'Cinzel', 'Noto Sans KR', serif) !important;
+  font-size: clamp(22px, 6vw, 30px) !important;
+  line-height: 1.25 !important;
+  color: #ffdc73 !important;
+  text-shadow: 0 0 18px rgba(255, 198, 78, .28) !important;
+}
+
+#gacha-screen #gacha-stage2 .btn-primary {
+  width: min(54vw, 220px) !important;
+  min-height: 58px !important;
+  margin: 6px auto 0 !important;
+  border-radius: 999px !important;
+}
+
+/* 컬렉션 화면: JS가 사용하는 ID 기준으로 안정화 */
+#collection-screen {
+  padding: 0 18px max(28px, env(safe-area-inset-bottom)) !important;
+  overflow: hidden !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.08) 0%, transparent 18%),
+    radial-gradient(ellipse at 50% 8%, rgba(94,145,225,.32) 0%, transparent 36%),
+    radial-gradient(ellipse at 50% 55%, rgba(255,199,94,.08) 0%, transparent 42%),
+    linear-gradient(180deg, #0c1d42 0%, #071127 48%, #030817 100%) !important;
+}
+
+#collection-screen .collection-header {
+  position: relative !important;
+  z-index: 5 !important;
+  padding-top: max(72px, calc(env(safe-area-inset-top) + 54px)) !important;
+  padding-bottom: 12px !important;
+  text-align: center !important;
+}
+
+#collection-screen .collection-header .title {
+  font-family: var(--ad-font-display, 'Cinzel', serif) !important;
+  font-size: clamp(28px, 7.6vw, 40px) !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  letter-spacing: .5px !important;
+  white-space: nowrap !important;
+  background: linear-gradient(180deg, #fff8da 0%, #ffdc73 45%, #f0a32a 78%, #8a4200 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: drop-shadow(0 0 16px rgba(255,198,78,.24)) !important;
+}
+
+#collection-screen .collection-header .sub,
+#collection-screen #col-sub {
+  margin-top: 8px !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  color: rgba(210,222,255,.72) !important;
+}
+
+#collection-screen .back-btn {
+  top: max(96px, calc(env(safe-area-inset-top) + 78px)) !important;
+  left: 22px !important;
+  width: 40px !important;
+  height: 40px !important;
+  z-index: 30 !important;
+}
+
+#collection-screen .col-stats {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  margin-top: 12px !important;
+  flex-wrap: nowrap !important;
+}
+
+#collection-screen .col-stats .chip {
+  min-width: 76px !important;
+  height: 34px !important;
+  padding: 0 10px !important;
+  border-radius: 999px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: var(--ad-font-ui, 'Noto Sans KR', sans-serif) !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  background: linear-gradient(180deg, rgba(16,33,74,.86), rgba(5,12,31,.90)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.13), 0 8px 18px rgba(0,0,0,.22) !important;
+}
+#collection-screen .col-stats .chip.s5 { color:#ffdc73 !important; border-color:rgba(255,220,115,.85) !important; }
+#collection-screen .col-stats .chip.s4 { color:#cb7cff !important; border-color:rgba(203,124,255,.85) !important; }
+#collection-screen .col-stats .chip.s3 { color:#b9c7e7 !important; border-color:rgba(170,182,214,.56) !important; }
+
+#collection-screen .col-filter {
+  display: flex !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 10px 0 14px !important;
+}
+
+#collection-screen .filter-btn {
+  min-width: 54px !important;
+  height: 36px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  border: 1.5px solid rgba(255,220,115,.26) !important;
+  background: linear-gradient(180deg, rgba(10,22,54,.78), rgba(4,10,27,.84)) !important;
+  color: rgba(215,225,255,.74) !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+}
+
+#collection-screen .filter-btn.active {
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.20), transparent 46%), linear-gradient(180deg, rgba(255,220,115,.28), rgba(112,72,8,.38)) !important;
+  border-color: rgba(255,220,115,.88) !important;
+  color: #ffeaad !important;
+}
+
+#collection-screen #col-grid,
+#collection-screen .collection-grid {
+  position: relative !important;
+  z-index: 2 !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 18px 16px !important;
+  align-items: start !important;
+  padding: 4px 0 36px !important;
+  margin: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+}
+#collection-screen #col-grid::-webkit-scrollbar { display: none !important; }
+
+#collection-screen .col-card {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  height: clamp(205px, 62vw, 270px) !important;
+  min-height: clamp(205px, 62vw, 270px) !important;
+  max-height: clamp(205px, 62vw, 270px) !important;
+  aspect-ratio: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  transform: none !important;
+  contain: none !important;
+  box-sizing: border-box !important;
+  background: linear-gradient(180deg, rgba(20,39,90,.78), rgba(7,17,48,.92)) !important;
+  border: 1.5px solid rgba(255,220,115,.24) !important;
+  box-shadow: 0 14px 28px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.08) !important;
+}
+
+#collection-screen .col-card::before,
+#collection-screen .col-card::after,
+#collection-screen .col-card.empty::before,
+#collection-screen .col-card.empty::after {
+  content: none !important;
+  display: none !important;
+}
+
+#collection-screen .col-card.empty .lock {
+  position: absolute !important;
+  left: 50% !important;
+  top: 48% !important;
+  transform: translate(-50%, -50%) !important;
+  display: block !important;
+  width: 40px !important;
+  height: 40px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: transparent !important;
+  border-radius: 50% !important;
+  background: linear-gradient(180deg, #fff1b8 0%, #f5c85d 45%, #b17320 100%) !important;
+  box-shadow: 0 10px 20px rgba(0,0,0,.34), 0 0 22px rgba(255,220,115,.20), inset 0 1px 0 rgba(255,255,255,.55) !important;
+  z-index: 5 !important;
+}
+
+#collection-screen .col-card.empty .lock::before {
+  content: '' !important;
+  display: block !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: -17px !important;
+  width: 24px !important;
+  height: 22px !important;
+  transform: translateX(-50%) !important;
+  border: 4px solid rgba(230,234,226,.96) !important;
+  border-bottom: 0 !important;
+  border-radius: 16px 16px 0 0 !important;
+}
+
+#collection-screen .col-card.empty .hint {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 16px !important;
+  text-align: center !important;
+  font-size: 12px !important;
+  color: rgba(255,220,115,.34) !important;
+  z-index: 4 !important;
+}
+
+#collection-screen .col-card .card-art,
+#collection-screen .col-card .concept-art,
+#collection-screen .col-card .card-art img {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}
+#collection-screen .col-card .card-art img { object-fit: cover !important; }
+
+#collection-screen .col-card .count-badge,
+#collection-screen .col-card .attr-badge,
+#collection-screen .col-card .stars-mini {
+  position: absolute !important;
+  z-index: 10 !important;
+}
+
+#card-modal .modal-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
