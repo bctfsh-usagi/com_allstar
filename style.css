@@ -6001,3 +6001,291 @@ body {
     width: min(60vw, 240px) !important;
   }
 }
+/* ===================================================================
+   AD EMERGENCY GACHA HARD RESTORE
+   가챠 뽑기 화면 기능 우선 복구
+   - stage1/stage2 강제 충돌 정리
+   - 오픈 전 계속 버튼 노출 방지
+   - 팩 오픈 연출 최소 복구
+   =================================================================== */
+
+#gacha-screen {
+  position: absolute !important;
+  inset: 0 !important;
+  overflow: hidden !important;
+}
+
+#gacha-screen .gacha-body {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  display: block !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+}
+
+/* 핵심: JS가 display:none 준 stage는 무조건 숨김 */
+#gacha-screen #gacha-stage1[style*="display: none"],
+#gacha-screen #gacha-stage2[style*="display: none"],
+#gacha-screen #gacha-stage1[style*="display:none"],
+#gacha-screen #gacha-stage2[style*="display:none"] {
+  display: none !important;
+}
+
+/* 오픈 전 화면 */
+#gacha-screen #gacha-stage1 {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 18px !important;
+  padding: max(78px, env(safe-area-inset-top)) 22px max(92px, env(safe-area-inset-bottom)) !important;
+  box-sizing: border-box !important;
+  z-index: 5 !important;
+}
+
+/* 결과 화면 */
+#gacha-screen #gacha-stage2 {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 16px !important;
+  padding: max(70px, env(safe-area-inset-top)) 22px max(90px, env(safe-area-inset-bottom)) !important;
+  box-sizing: border-box !important;
+  z-index: 6 !important;
+}
+
+/* 제목 */
+#gacha-screen .gacha-body > .hub-title {
+  position: absolute !important;
+  left: 50% !important;
+  top: max(72px, calc(env(safe-area-inset-top) + 54px)) !important;
+  transform: translateX(-50%) !important;
+
+  width: 100% !important;
+  padding: 0 20px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+
+  text-align: center !important;
+  white-space: nowrap !important;
+  z-index: 10 !important;
+
+  font-family: var(--ad-font-display, 'Cinzel', serif) !important;
+  font-size: clamp(34px, 9vw, 52px) !important;
+  line-height: .92 !important;
+  color: #ffdc73 !important;
+}
+
+/* 오프닝 팩 */
+#gacha-screen #opening-pack,
+#gacha-screen .opening-pack {
+  position: relative !important;
+  width: min(64vw, 280px) !important;
+  max-width: 280px !important;
+  margin: 30px auto 0 !important;
+
+  transform: none !important;
+  transform-origin: center center !important;
+  z-index: 7 !important;
+
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* 단상 */
+#gacha-screen #gacha-stage1::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: calc(50% + 160px) !important;
+  width: min(88vw, 390px) !important;
+  height: 34px !important;
+  transform: translateX(-50%) !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255,255,255,.95) 0%,
+      rgba(255,239,191,.84) 20%,
+      rgba(255,194,73,.48) 38%,
+      transparent 72%
+    ) !important;
+  box-shadow: 0 0 18px rgba(255, 220, 115, .40) !important;
+  z-index: 4 !important;
+}
+
+/* 안내문 */
+#gacha-screen .gacha-instruction {
+  position: relative !important;
+  z-index: 8 !important;
+  margin: 0 !important;
+  text-align: center !important;
+
+  font-family: var(--ad-font-display, 'Cinzel', 'Noto Sans KR', serif) !important;
+  font-size: clamp(16px, 4.6vw, 22px) !important;
+  line-height: 1.2 !important;
+  letter-spacing: 3px !important;
+
+  color: #ffe3a0 !important;
+  text-shadow:
+    0 0 14px rgba(255, 220, 115, .34),
+    0 4px 12px rgba(0,0,0,.42) !important;
+}
+
+/* 오픈 전에는 stage2 버튼이 절대 보이면 안 됨 */
+#gacha-screen #gacha-stage2[style*="display: none"] button,
+#gacha-screen #gacha-stage2[style*="display:none"] button {
+  display: none !important;
+}
+
+/* 결과 카드 */
+#gacha-screen #card-reveal,
+#gacha-screen .card-reveal {
+  position: relative !important;
+  width: min(56vw, 250px) !important;
+  max-width: 250px !important;
+  margin: 0 auto !important;
+  flex: 0 0 auto !important;
+}
+
+/* 결과 텍스트 */
+#gacha-screen #reveal-info,
+#gacha-screen .reveal-info {
+  width: min(86vw, 360px) !important;
+  margin: 0 auto !important;
+  text-align: center !important;
+  font-family: var(--ad-font-display, 'Cinzel', 'Noto Sans KR', serif) !important;
+  font-size: clamp(22px, 6vw, 32px) !important;
+  line-height: 1.35 !important;
+  color: #ffdc73 !important;
+}
+
+/* 계속 버튼 */
+#gacha-screen #gacha-stage2 .btn-primary {
+  width: min(72vw, 300px) !important;
+  min-height: 58px !important;
+  margin: 8px auto 0 !important;
+  border-radius: 999px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* 팩 애니메이션 복구 */
+#gacha-screen #opening-pack.is-pressed,
+#gacha-screen .opening-pack.is-pressed {
+  animation: emergencyPackPress .22s ease-out forwards !important;
+}
+
+#gacha-screen #opening-pack.is-charging,
+#gacha-screen .opening-pack.is-charging {
+  animation: emergencyPackCharge .62s ease-in forwards !important;
+}
+
+#gacha-screen #opening-pack.is-opening,
+#gacha-screen .opening-pack.is-opening {
+  animation: emergencyPackOpen .82s cubic-bezier(.2,.95,.2,1) forwards !important;
+}
+
+@keyframes emergencyPackPress {
+  0% {
+    transform: translateY(0) scale(1) rotateZ(0deg);
+    filter: brightness(1);
+  }
+  45% {
+    transform: translateY(8px) scale(.96, .985) rotateZ(-2deg);
+    filter: brightness(1.05);
+  }
+  100% {
+    transform: translateY(-6px) scale(1.035) rotateZ(1.4deg);
+    filter: brightness(1.12);
+  }
+}
+
+@keyframes emergencyPackCharge {
+  0% {
+    transform: translateY(-6px) scale(1.035) rotateZ(1deg);
+    filter: brightness(1);
+  }
+  60% {
+    transform: translateY(-14px) scale(1.075) rotateZ(-1.2deg);
+    filter:
+      brightness(1.24)
+      drop-shadow(0 0 34px rgba(255, 220, 115, .72));
+  }
+  100% {
+    transform: translateY(-16px) scale(1.09) rotateZ(.5deg);
+    filter:
+      brightness(1.46)
+      drop-shadow(0 0 70px rgba(255, 220, 115, .96));
+  }
+}
+
+@keyframes emergencyPackOpen {
+  0% {
+    transform: translateY(-16px) scale(1.09) rotateZ(.5deg);
+    filter: brightness(1.45);
+    opacity: 1;
+  }
+  22% {
+    transform: translateY(-22px) scale(1.14) rotateZ(-2deg);
+    filter:
+      brightness(2.1)
+      drop-shadow(0 0 80px rgba(255,255,255,.9));
+    opacity: 1;
+  }
+  42% {
+    transform: translateY(-28px) scale(1.20) rotateZ(2.5deg);
+    filter:
+      brightness(3.2)
+      drop-shadow(0 0 120px rgba(255,255,255,1));
+    opacity: 1;
+  }
+  70% {
+    transform: translateY(12px) scale(.96) rotateZ(-1deg);
+    filter: brightness(2.4) blur(1px);
+    opacity: .55;
+  }
+  100% {
+    transform: translateY(58px) scale(.78);
+    filter: brightness(2.8) blur(7px);
+    opacity: 0;
+  }
+}
+
+/* 작은 모바일 */
+@media (max-width: 390px) {
+  #gacha-screen .gacha-body > .hub-title {
+    top: max(66px, calc(env(safe-area-inset-top) + 50px)) !important;
+    font-size: clamp(30px, 8.4vw, 42px) !important;
+  }
+
+  #gacha-screen #opening-pack,
+  #gacha-screen .opening-pack {
+    width: min(60vw, 240px) !important;
+  }
+
+  #gacha-screen #gacha-stage1 {
+    gap: 14px !important;
+  }
+
+  #gacha-screen #gacha-stage1::before {
+    top: calc(50% + 138px) !important;
+  }
+}
