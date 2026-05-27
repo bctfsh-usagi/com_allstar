@@ -410,3 +410,16 @@ function init(){
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+/* =========================================================
+   EMERGENCY: Battle Coming Soon
+   배틀 기능 임시 비활성화
+   ========================================================= */
+
+function goBattle() {
+  if (typeof toast === 'function') {
+    toast('배틀은 준비중입니다.');
+  } else {
+    alert('배틀은 준비중입니다.');
+  }
+}
