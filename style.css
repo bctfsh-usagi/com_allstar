@@ -5674,3 +5674,165 @@ body {
     font-size: clamp(15px, 4.2vw, 19px) !important;
   }
 }
+/* ===================================================================
+   AD GACHA OPENING ABSOLUTE RESCUE v2
+   카드팩 오픈 전 화면 위로 밀림 강제 복구
+   - CARD PACK / 팩 / 안내문을 화면 안에 고정 배치
+   =================================================================== */
+
+#gacha-screen {
+  position: absolute !important;
+  inset: 0 !important;
+  overflow: hidden !important;
+}
+
+#gacha-screen #gacha-stage1 {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+
+  display: block !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+
+  box-sizing: border-box !important;
+  z-index: 5 !important;
+}
+
+/* 제목을 화면 상단 안전영역 아래에 고정 */
+#gacha-screen #gacha-stage1 .hub-title {
+  position: absolute !important;
+  left: 50% !important;
+  top: max(82px, calc(env(safe-area-inset-top) + 62px)) !important;
+  transform: translateX(-50%) !important;
+
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 20px !important;
+  box-sizing: border-box !important;
+
+  text-align: center !important;
+  white-space: nowrap !important;
+
+  font-family: var(--ad-font-display, 'Cinzel', serif) !important;
+  font-size: clamp(34px, 9vw, 52px) !important;
+  line-height: .92 !important;
+  letter-spacing: 1px !important;
+
+  z-index: 8 !important;
+}
+
+/* 카드팩을 화면 중앙보다 살짝 위에 고정 */
+#gacha-screen #opening-pack,
+#gacha-screen .opening-pack {
+  position: absolute !important;
+  left: 50% !important;
+  top: 44% !important;
+
+  width: min(64vw, 280px) !important;
+  max-width: 280px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  transform: translate(-50%, -50%) !important;
+  transform-origin: center center !important;
+
+  z-index: 7 !important;
+}
+
+/* 단상/빛 위치 */
+#gacha-screen #gacha-stage1::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 50% !important;
+  top: calc(44% + 170px) !important;
+  bottom: auto !important;
+
+  width: min(88vw, 390px) !important;
+  height: 34px !important;
+
+  transform: translateX(-50%) !important;
+  border-radius: 50% !important;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255,255,255,.95) 0%,
+      rgba(255,239,191,.84) 20%,
+      rgba(255,194,73,.48) 38%,
+      transparent 72%
+    ) !important;
+
+  box-shadow: 0 0 18px rgba(255, 220, 115, .40) !important;
+  z-index: 6 !important;
+}
+
+/* 안내문을 팩 아래에 고정 */
+#gacha-screen .gacha-instruction {
+  position: absolute !important;
+  left: 50% !important;
+  top: calc(44% + 210px) !important;
+
+  width: 100% !important;
+  padding: 0 20px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+
+  transform: translateX(-50%) !important;
+
+  text-align: center !important;
+  font-family: var(--ad-font-display, 'Cinzel', 'Noto Sans KR', serif) !important;
+  font-size: clamp(16px, 4.6vw, 22px) !important;
+  line-height: 1.2 !important;
+  letter-spacing: 3px !important;
+
+  color: #ffe3a0 !important;
+  text-shadow:
+    0 0 14px rgba(255, 220, 115, .34),
+    0 4px 12px rgba(0,0,0,.42) !important;
+
+  z-index: 8 !important;
+}
+
+/* 오프닝 애니메이션 중에도 화면 밖으로 튀지 않게 */
+#gacha-screen #opening-pack.is-pressed,
+#gacha-screen .opening-pack.is-pressed {
+  transform: translate(-50%, -50%) scale(.98) !important;
+}
+
+#gacha-screen #opening-pack.is-charging,
+#gacha-screen .opening-pack.is-charging {
+  transform: translate(-50%, -52%) scale(1.04) !important;
+}
+
+#gacha-screen #opening-pack.is-opening,
+#gacha-screen .opening-pack.is-opening {
+  transform: translate(-50%, -50%) scale(1.08) !important;
+}
+
+/* 작은 모바일 */
+@media (max-width: 390px) {
+  #gacha-screen #gacha-stage1 .hub-title {
+    top: max(76px, calc(env(safe-area-inset-top) + 56px)) !important;
+    font-size: clamp(30px, 8.4vw, 42px) !important;
+  }
+
+  #gacha-screen #opening-pack,
+  #gacha-screen .opening-pack {
+    top: 43% !important;
+    width: min(60vw, 240px) !important;
+  }
+
+  #gacha-screen #gacha-stage1::before {
+    top: calc(43% + 145px) !important;
+  }
+
+  #gacha-screen .gacha-instruction {
+    top: calc(43% + 180px) !important;
+    font-size: clamp(15px, 4.2vw, 19px) !important;
+  }
+}
