@@ -186,5 +186,19 @@
 <script src="js/cards.js"></script>
 <script src="js/game.js"></script>
 <script src="js/ui.js"></script>
+
+<script>
+// AD EMERGENCY AUTH OFF: 로그인/회원가입 임시 비활성화
+window.startGame = function(){ if (typeof goto === 'function') goto('hub'); };
+window.authSubmit = function(){ console.warn('Auth disabled by emergency patch'); if (typeof goto === 'function') goto('hub'); };
+window.loginEmail = window.signupEmail = window.loginGoogle = window.saveNickname = function(){ if (typeof toast === 'function') toast('로그인은 임시 비활성화됐어'); };
+window.logout = function(){ if (typeof goto === 'function') goto('title'); };
+document.addEventListener('DOMContentLoaded', function(){
+  ['auth-screen','nickname-screen'].forEach(function(id){ var el=document.getElementById(id); if(el) el.remove(); });
+  document.querySelectorAll('.user-bar,.auth-body,.auth-panel').forEach(function(el){ el.remove(); });
+  var title=document.getElementById('title-screen');
+  if(title) title.onclick=function(){ if (typeof goto === 'function') goto('hub'); };
+});
+</script>
 </body>
 </html>
