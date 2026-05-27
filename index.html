@@ -23,7 +23,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 
   <!-- 게임 스타일 -->
-  <link rel="stylesheet" href="style.css?v=collectionfix1">
+  <link rel="stylesheet" href="style.css?v=gacha-structure1">
 </head>
 <body>
 
@@ -89,8 +89,11 @@
       <div class="hub-title">CARD PACK</div>
 
       <div id="gacha-stage1" class="gacha-stage">
-        <div class="opening-pack" id="opening-pack" onclick="openPack()">
-          <div class="pack-icon">★</div>
+        <!-- AD STRUCTURE FIX: 위치 담당 wrapper와 애니메이션 담당 pack을 분리 -->
+        <div class="pack-position" id="opening-pack-position">
+          <div class="opening-pack" id="opening-pack" onclick="openPack()">
+            <div class="pack-icon">★</div>
+          </div>
         </div>
         <div class="gacha-instruction" id="gacha-instruction">탭해서 팩을 열어!</div>
       </div>
@@ -110,17 +113,17 @@
   <div id="collection-screen" class="screen">
     <div class="back-btn" onclick="goto('hub')">✕</div>
     <div class="collection-header">
-      <div class="title">MY COLLECTION</div>
-      <div class="sub" id="col-sub">0 / 18 종류 · 누적 0회 뽑기 · 최고 0연승</div>
-      <div class="col-stats" id="col-stats"></div>
-      <div class="col-filter" id="col-filter">
-        <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">전체</button>
-        <button class="filter-btn" data-filter="5" onclick="setFilter('5')">★5</button>
-        <button class="filter-btn" data-filter="4" onclick="setFilter('4')">★4</button>
-        <button class="filter-btn" data-filter="3" onclick="setFilter('3')">★3</button>
+      <div class="hub-title">MY COLLECTION</div>
+      <div class="collection-stats" id="collection-stats"></div>
+      <div class="collection-tabs" id="collection-tabs"></div>
+      <div class="collection-filters" id="collection-filters">
+        <button class="filter-btn active" onclick="filterCollection('all', this)">전체</button>
+        <button class="filter-btn" onclick="filterCollection(5, this)">★5</button>
+        <button class="filter-btn" onclick="filterCollection(4, this)">★4</button>
+        <button class="filter-btn" onclick="filterCollection(3, this)">★3</button>
       </div>
     </div>
-    <div class="collection-grid" id="col-grid"></div>
+    <div class="collection-grid" id="collection-grid"></div>
   </div>
 
   <!-- 5. 카드 선택 -->
@@ -173,18 +176,9 @@
   </div>
 
   <!-- 카드 상세 모달 -->
-  <div id="card-modal" class="modal-overlay" onclick="closeModal(event)">
-    <div class="modal-wrap">
-      <div class="modal-card" id="modal-card-art"></div>
-      <div class="modal-info">
-        <div class="name" id="modal-name"></div>
-        <div class="ip" id="modal-ip"></div>
-        <div class="stars-big" id="modal-stars"></div>
-        <div class="attr-info" id="modal-attr"></div>
-        <div class="owned" id="modal-owned"></div>
-      </div>
-      <button class="modal-close" onclick="closeModalForce()">닫기</button>
-    </div>
+  <div id="card-modal" class="modal-overlay">
+    <div class="modal-card" id="modal-card-content"></div>
+    <button class="modal-close" onclick="closeCardModal()">닫기</button>
   </div>
 
   <!-- 토스트 -->
@@ -195,19 +189,5 @@
 <script src="js/cards.js"></script>
 <script src="js/game.js"></script>
 <script src="js/ui.js"></script>
-
-<script>
-// AD EMERGENCY AUTH OFF: 로그인/회원가입 임시 비활성화
-window.startGame = function(){ if (typeof goto === 'function') goto('hub'); };
-window.authSubmit = function(){ console.warn('Auth disabled by emergency patch'); if (typeof goto === 'function') goto('hub'); };
-window.loginEmail = window.signupEmail = window.loginGoogle = window.saveNickname = function(){ if (typeof toast === 'function') toast('로그인은 임시 비활성화됐어'); };
-window.logout = function(){ if (typeof goto === 'function') goto('title'); };
-document.addEventListener('DOMContentLoaded', function(){
-  ['auth-screen','nickname-screen'].forEach(function(id){ var el=document.getElementById(id); if(el) el.remove(); });
-  document.querySelectorAll('.user-bar,.auth-body,.auth-panel').forEach(function(el){ el.remove(); });
-  var title=document.getElementById('title-screen');
-  if(title) title.onclick=function(){ if (typeof goto === 'function') goto('hub'); };
-});
-</script>
 </body>
 </html>
