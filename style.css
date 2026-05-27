@@ -5445,3 +5445,114 @@ body {
     font-size: clamp(20px, 5.6vw, 28px) !important;
   }
 }
+
+/* ===================================================================
+   AD EMERGENCY GACHA RESULT CENTER FIX
+   카드팩 결과 화면 세로 정렬 복구
+   =================================================================== */
+
+#gacha-screen #gacha-stage2 {
+  position: relative !important;
+  z-index: 5 !important;
+
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  gap: 18px !important;
+  padding: max(70px, env(safe-area-inset-top)) 22px max(90px, env(safe-area-inset-bottom)) !important;
+  box-sizing: border-box !important;
+}
+
+/* 결과 카드 */
+#gacha-screen #card-reveal,
+#gacha-screen .card-reveal {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+
+  width: min(56vw, 250px) !important;
+  max-width: 250px !important;
+  margin: 0 auto !important;
+
+  flex: 0 0 auto !important;
+}
+
+/* 결과 텍스트 */
+#gacha-screen #reveal-info,
+#gacha-screen .reveal-info {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+
+  width: min(86vw, 360px) !important;
+  margin: 0 auto !important;
+
+  text-align: center !important;
+  font-family: var(--ad-font-display, 'Cinzel', 'Noto Sans KR', serif) !important;
+  font-size: clamp(22px, 6vw, 32px) !important;
+  line-height: 1.35 !important;
+  color: #ffdc73 !important;
+  text-shadow:
+    0 0 16px rgba(255, 220, 115, .36),
+    0 4px 12px rgba(0,0,0,.42) !important;
+}
+
+/* NEW 배지 같은 요소가 옆으로 튀지 않게 */
+#gacha-screen #reveal-info *,
+#gacha-screen .reveal-info * {
+  vertical-align: middle !important;
+}
+
+/* 계속 버튼 */
+#gacha-screen #gacha-stage2 .btn-primary,
+#gacha-screen #gacha-stage2 button {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+
+  width: min(72vw, 300px) !important;
+  min-height: 58px !important;
+  margin: 8px auto 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border-radius: 999px !important;
+  font-size: 20px !important;
+  font-weight: 900 !important;
+}
+
+/* 작은 모바일 */
+@media (max-width: 390px) {
+  #gacha-screen #gacha-stage2 {
+    gap: 14px !important;
+    padding-top: max(64px, env(safe-area-inset-top)) !important;
+    padding-bottom: max(82px, env(safe-area-inset-bottom)) !important;
+  }
+
+  #gacha-screen #card-reveal,
+  #gacha-screen .card-reveal {
+    width: min(54vw, 220px) !important;
+  }
+
+  #gacha-screen #reveal-info,
+  #gacha-screen .reveal-info {
+    font-size: clamp(20px, 5.6vw, 28px) !important;
+  }
+}
