@@ -23,7 +23,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 
   <!-- 게임 스타일 -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=collectionfix1">
 </head>
 <body>
 
@@ -110,17 +110,17 @@
   <div id="collection-screen" class="screen">
     <div class="back-btn" onclick="goto('hub')">✕</div>
     <div class="collection-header">
-      <div class="hub-title">MY COLLECTION</div>
-      <div class="collection-stats" id="collection-stats"></div>
-      <div class="collection-tabs" id="collection-tabs"></div>
-      <div class="collection-filters" id="collection-filters">
-        <button class="filter-btn active" onclick="filterCollection('all', this)">전체</button>
-        <button class="filter-btn" onclick="filterCollection(5, this)">★5</button>
-        <button class="filter-btn" onclick="filterCollection(4, this)">★4</button>
-        <button class="filter-btn" onclick="filterCollection(3, this)">★3</button>
+      <div class="title">MY COLLECTION</div>
+      <div class="sub" id="col-sub">0 / 18 종류 · 누적 0회 뽑기 · 최고 0연승</div>
+      <div class="col-stats" id="col-stats"></div>
+      <div class="col-filter" id="col-filter">
+        <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">전체</button>
+        <button class="filter-btn" data-filter="5" onclick="setFilter('5')">★5</button>
+        <button class="filter-btn" data-filter="4" onclick="setFilter('4')">★4</button>
+        <button class="filter-btn" data-filter="3" onclick="setFilter('3')">★3</button>
       </div>
     </div>
-    <div class="collection-grid" id="collection-grid"></div>
+    <div class="collection-grid" id="col-grid"></div>
   </div>
 
   <!-- 5. 카드 선택 -->
@@ -173,9 +173,18 @@
   </div>
 
   <!-- 카드 상세 모달 -->
-  <div id="card-modal" class="modal-overlay">
-    <div class="modal-card" id="modal-card-content"></div>
-    <button class="modal-close" onclick="closeCardModal()">닫기</button>
+  <div id="card-modal" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal-wrap">
+      <div class="modal-card" id="modal-card-art"></div>
+      <div class="modal-info">
+        <div class="name" id="modal-name"></div>
+        <div class="ip" id="modal-ip"></div>
+        <div class="stars-big" id="modal-stars"></div>
+        <div class="attr-info" id="modal-attr"></div>
+        <div class="owned" id="modal-owned"></div>
+      </div>
+      <button class="modal-close" onclick="closeModalForce()">닫기</button>
+    </div>
   </div>
 
   <!-- 토스트 -->
