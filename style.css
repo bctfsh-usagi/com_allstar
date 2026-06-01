@@ -6004,3 +6004,147 @@ body {
     top: calc(50% + 138px) !important;
   }
 }
+
+
+/* ===================================================================
+   COLLECTION FIX: layout / id mismatch stabilization
+   - HTML과 JS id/class 연결
+   - 필터 버튼 겹침 방지
+   - 카드 상세 모달 표시 보정
+   =================================================================== */
+#collection-screen {
+  display: flex !important;
+  flex-direction: column !important;
+  padding: 0 18px max(28px, env(safe-area-inset-bottom)) !important;
+  overflow: hidden !important;
+}
+
+#collection-screen .collection-header {
+  flex: 0 0 auto !important;
+  padding-top: max(44px, calc(env(safe-area-inset-top) + 28px)) !important;
+  padding-bottom: 12px !important;
+  padding-left: 56px !important;
+  padding-right: 8px !important;
+}
+
+#collection-screen .back-btn {
+  top: max(18px, calc(env(safe-area-inset-top) + 10px)) !important;
+  left: 16px !important;
+  width: 38px !important;
+  height: 38px !important;
+  z-index: 40 !important;
+}
+
+#collection-screen .collection-header .title {
+  font-family: var(--ad-font-display, 'Cinzel', serif) !important;
+  font-size: clamp(25px, 7vw, 36px) !important;
+  line-height: 1.05 !important;
+  letter-spacing: .5px !important;
+  white-space: nowrap !important;
+}
+
+#collection-screen .collection-header .sub {
+  margin-top: 8px !important;
+  font-size: 12px !important;
+}
+
+#collection-screen .col-stats {
+  display: flex !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  gap: 7px !important;
+  margin-top: 10px !important;
+}
+
+#collection-screen .col-stats .chip {
+  min-width: 72px !important;
+  height: 30px !important;
+  padding: 0 9px !important;
+  font-size: 12px !important;
+}
+
+#collection-screen .col-filter {
+  display: flex !important;
+  justify-content: center !important;
+  flex-wrap: nowrap !important;
+  gap: 7px !important;
+  padding: 9px 0 0 !important;
+}
+
+#collection-screen .filter-btn {
+  min-width: 52px !important;
+  height: 34px !important;
+  padding: 0 12px !important;
+  font-size: 13px !important;
+}
+
+#collection-screen .collection-grid {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 14px !important;
+  padding: 6px 0 28px !important;
+}
+
+#collection-screen .col-card {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  aspect-ratio: 2 / 3 !important;
+}
+
+#collection-screen .modal-overlay {
+  flex-direction: column !important;
+}
+
+#card-modal .modal-card {
+  width: min(76vw, 280px) !important;
+  aspect-ratio: auto !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  overflow: visible !important;
+}
+
+#card-modal .modal-art {
+  width: min(64vw, 240px) !important;
+  aspect-ratio: 2 / 3 !important;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  border: 3px solid #d4a747 !important;
+  box-shadow: 0 0 40px rgba(255, 174, 0, 0.55) !important;
+}
+
+#card-modal .modal-art .card-art,
+#card-modal .modal-art .card-art img,
+#card-modal .modal-art .concept-art {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+#card-modal .modal-art .card-art img {
+  object-fit: cover !important;
+}
+
+#card-modal .modal-close {
+  margin-top: 16px !important;
+}
+
+@media (max-width: 390px) {
+  #collection-screen {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+  #collection-screen .collection-header {
+    padding-left: 52px !important;
+  }
+  #collection-screen .collection-header .title {
+    font-size: clamp(23px, 6.8vw, 32px) !important;
+  }
+  #collection-screen .collection-grid {
+    gap: 12px !important;
+  }
+}
