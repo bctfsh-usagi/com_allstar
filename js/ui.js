@@ -285,17 +285,27 @@ function renderCollection(){
 }
 
 function openCardModal(card){
-  $('modal-card-art').innerHTML = makeArt(card);
-  $('modal-name').textContent = card.name;
-  $('modal-ip').textContent = card.ip;
-  $('modal-stars').textContent = '★'.repeat(card.stars);
-  $('modal-attr').textContent = `속성: ${ATTR_KR[card.attr]} ${ATTR_EMOJI[card.attr]}`;
   const count = state.inventory[card.id] || 0;
-  $('modal-owned').textContent = `보유 ×${count}`;
-  $('card-modal').classList.add('show');
+  const modal = $('card-modal');
+  const content = $('modal-card-content');
+
+  content.innerHTML = `
+    <div class="modal-art">${makeArt(card)}</div>
+    <div class="modal-info">
+      <div class="name">${card.name}</div>
+      <div class="ip">${card.ip}</div>
+      <div class="stars-big">${'★'.repeat(card.stars)}</div>
+      <div class="attr-info">속성: ${ATTR_KR[card.attr]} ${ATTR_EMOJI[card.attr]}</div>
+      <div class="owned">보유 ×${count}</div>
+    </div>
+  `;
+
+  modal.classList.add('show');
 }
-function closeModal(e){ if(e.target.classList.contains('modal-overlay')) closeModalForce(); }
-function closeModalForce(){ $('card-modal').classList.remove('show'); }
+function closeCardModal(){ $('card-modal').classList.remove('show'); }
+function closeModal(e){ if(e.target.classList.contains('modal-overlay')) closeCardModal(); }
+function closeModalForce(){ closeCardModal(); }
+function filterCollection(f){ setFilter(String(f)); }
 
 // ===== 배틀 진입 =====
 let selectedCard = null;
